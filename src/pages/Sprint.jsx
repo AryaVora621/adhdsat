@@ -782,7 +782,7 @@ export default function Sprint({ user, setUser }) {
           animation: 'milestoneIn 0.25s ease-out',
           backdropFilter: 'blur(8px)'
         }}>
-          <span style={{ color: 'var(--success)', fontSize: '1rem' }}>✓</span>
+          <CheckCircle2 size={16} color="var(--success)" />
           <span style={{ color: 'var(--success)', fontWeight: '700', fontSize: '0.9rem' }}>{milestone}</span>
         </div>
       )}
