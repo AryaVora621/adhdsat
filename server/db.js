@@ -66,9 +66,24 @@ const initDb = () => {
       completed_at TEXT,
       FOREIGN KEY(user_id) REFERENCES users(id)
     );
+
+    CREATE TABLE IF NOT EXISTS review_cards (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      question_id TEXT NOT NULL,
+      next_review_at TEXT NOT NULL,
+      interval_days REAL DEFAULT 1,
+      ease_factor REAL DEFAULT 2.5,
+      rep_count INTEGER DEFAULT 0,
+      last_reviewed_at TEXT,
+      UNIQUE(user_id, question_id),
+      FOREIGN KEY(user_id) REFERENCES users(id),
+      FOREIGN KEY(question_id) REFERENCES questions(id)
+    );
   `);
 
   const userCols = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);
+  if (!userCols.includes('study_plan')) db.exec("ALTER TABLE users ADD COLUMN study_plan TEXT DEFAULT NULL");
   if (!userCols.includes('baseline_english')) db.exec("ALTER TABLE users ADD COLUMN baseline_english INTEGER DEFAULT 0");
   if (!userCols.includes('baseline_math')) db.exec("ALTER TABLE users ADD COLUMN baseline_math INTEGER DEFAULT 0");
   if (!userCols.includes('weak_areas')) db.exec("ALTER TABLE users ADD COLUMN weak_areas TEXT DEFAULT '[]'");

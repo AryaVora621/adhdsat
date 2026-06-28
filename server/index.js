@@ -270,75 +270,153 @@ app.get('/api/progress', (req, res) => {
   });
 });
 
-// --- Review Errors ---
+// --- Review Errors (SM-2 Spaced Repetition) ---
 
-app.get('/api/review/next', (req, res) => {
-  const { userId } = req.query;
-  if (!userId) return res.status(400).json({ error: 'userId required' });
-
-  // Find questions answered wrong, excluding those answered correctly most recently
+// Ensure a review card exists for every wrong answer the user has made
+function syncReviewCards(userId) {
   const wrongIds = db.prepare(`
     SELECT DISTINCT ua.question_id
     FROM user_answers ua
     WHERE ua.user_id = ? AND ua.is_correct = 0
   `).all(userId).map(r => r.question_id);
 
-  if (wrongIds.length === 0) return res.json(null);
-
-  // Exclude questions where the user's MOST RECENT answer was correct
-  const toExclude = wrongIds.filter(qid => {
-    const latest = db.prepare(`
-      SELECT is_correct FROM user_answers
-      WHERE user_id = ? AND question_id = ?
-      ORDER BY created_at DESC LIMIT 1
-    `).get(userId, qid);
-    return latest && latest.is_correct === 1;
+  const now = new Date().toISOString();
+  const insertCard = db.prepare(`
+    INSERT OR IGNORE INTO review_cards (id, user_id, question_id, next_review_at, interval_days, ease_factor, rep_count)
+    VALUES (?, ?, ?, ?, 1, 2.5, 0)
+  `);
+  const txn = db.transaction(() => {
+    for (const qid of wrongIds) {
+      insertCard.run(crypto.randomUUID(), userId, qid, now);
+    }
   });
+  txn();
+}
 
-  const eligible = wrongIds.filter(id => !toExclude.includes(id));
-  if (eligible.length === 0) return res.json(null);
+// SM-2 algorithm: given quality (0=wrong, 1=correct), update the card
+function sm2Update(card, quality) {
+  // quality: 0 = wrong (reset), 1 = correct (advance)
+  const q = quality === 1 ? 4 : 1; // map to 0-5 scale
+  let { ease_factor, interval_days, rep_count } = card;
 
-  // Pick the one with most wrong attempts that was most recently attempted
-  const ranked = db.prepare(`
-    SELECT ua.question_id,
-           COUNT(*) as wrong_count,
-           MAX(ua.created_at) as last_attempt
-    FROM user_answers ua
-    WHERE ua.user_id = ? AND ua.is_correct = 0
-      AND ua.question_id IN (${eligible.map(() => '?').join(',')})
-    GROUP BY ua.question_id
-    ORDER BY wrong_count DESC, last_attempt DESC
+  if (q < 3) {
+    // Reset: start over from interval 1
+    rep_count = 0;
+    interval_days = 1;
+  } else {
+    rep_count += 1;
+    if (rep_count === 1) interval_days = 1;
+    else if (rep_count === 2) interval_days = 6;
+    else interval_days = Math.round(interval_days * ease_factor);
+    ease_factor = Math.max(1.3, ease_factor + 0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
+  }
+
+  const next = new Date(Date.now() + interval_days * 86400000).toISOString();
+  return { ease_factor, interval_days, rep_count, next_review_at: next };
+}
+
+app.get('/api/review/next', (req, res) => {
+  const { userId } = req.query;
+  if (!userId) return res.status(400).json({ error: 'userId required' });
+
+  syncReviewCards(userId);
+
+  const now = new Date().toISOString();
+
+  // First: find a due card (next_review_at <= now)
+  let card = db.prepare(`
+    SELECT rc.*, q.id as q_id FROM review_cards rc
+    JOIN questions q ON rc.question_id = q.id
+    WHERE rc.user_id = ? AND rc.next_review_at <= ?
+    ORDER BY rc.next_review_at ASC
     LIMIT 1
-  `).get(userId, ...eligible);
+  `).get(userId, now);
 
-  if (!ranked) return res.json(null);
+  // Fallback: if no card is due yet, return the one due soonest
+  if (!card) {
+    card = db.prepare(`
+      SELECT rc.*, q.id as q_id FROM review_cards rc
+      JOIN questions q ON rc.question_id = q.id
+      WHERE rc.user_id = ?
+      ORDER BY rc.next_review_at ASC
+      LIMIT 1
+    `).get(userId);
+  }
 
-  const q = db.prepare('SELECT * FROM questions WHERE id = ?').get(ranked.question_id);
+  if (!card) return res.json(null);
+
+  const q = db.prepare('SELECT * FROM questions WHERE id = ?').get(card.question_id);
   if (!q) return res.json(null);
   q.choices = JSON.parse(q.choices || '[]');
   q.tags = JSON.parse(q.tags || '[]');
+
+  // Include SM-2 metadata so frontend can show "Next review in N days"
+  q._sm2 = {
+    card_id: card.id,
+    interval_days: card.interval_days,
+    rep_count: card.rep_count,
+    next_review_at: card.next_review_at,
+  };
   res.json(q);
+});
+
+app.post('/api/review/answer', (req, res) => {
+  const { userId, questionId, isCorrect } = req.body;
+  if (!userId || !questionId) return res.status(400).json({ error: 'userId and questionId required' });
+
+  syncReviewCards(userId);
+
+  const card = db.prepare('SELECT * FROM review_cards WHERE user_id = ? AND question_id = ?').get(userId, questionId);
+  if (!card) return res.status(404).json({ error: 'Card not found' });
+
+  const quality = isCorrect ? 1 : 0;
+  const updated = sm2Update(card, quality);
+
+  db.prepare(`
+    UPDATE review_cards
+    SET ease_factor = ?, interval_days = ?, rep_count = ?, next_review_at = ?, last_reviewed_at = ?
+    WHERE id = ?
+  `).run(updated.ease_factor, updated.interval_days, updated.rep_count, updated.next_review_at, new Date().toISOString(), card.id);
+
+  // If answered correctly twice in a row (rep_count >= 2 and correct), remove from active review
+  const updatedCard = db.prepare('SELECT * FROM review_cards WHERE id = ?').get(card.id);
+  res.json({ success: true, next_review_at: updatedCard.next_review_at, interval_days: updatedCard.interval_days });
 });
 
 app.get('/api/review/count', (req, res) => {
   const { userId } = req.query;
   if (!userId) return res.status(400).json({ error: 'userId required' });
 
-  const wrong = db.prepare(`
-    SELECT DISTINCT ua.question_id
-    FROM user_answers ua
-    WHERE ua.user_id = ? AND ua.is_correct = 0
-  `).all(userId).map(r => r.question_id);
+  syncReviewCards(userId);
 
-  let reviewable = 0;
-  for (const qid of wrong) {
-    const latest = db.prepare(`
-      SELECT is_correct FROM user_answers WHERE user_id = ? AND question_id = ?
-      ORDER BY created_at DESC LIMIT 1
-    `).get(userId, qid);
-    if (!latest || latest.is_correct === 0) reviewable++;
-  }
-  res.json({ count: reviewable });
+  const now = new Date().toISOString();
+  const due = db.prepare(`
+    SELECT COUNT(*) as cnt FROM review_cards
+    WHERE user_id = ? AND next_review_at <= ?
+  `).get(userId, now).cnt;
+
+  // Also count upcoming (not yet due)
+  const total = db.prepare(`
+    SELECT COUNT(*) as cnt FROM review_cards WHERE user_id = ?
+  `).get(userId).cnt;
+
+  res.json({ count: due, total });
+});
+
+// --- Study Plan ---
+
+app.get('/api/study-plan/:userId', (req, res) => {
+  const user = db.prepare('SELECT study_plan FROM users WHERE id = ?').get(req.params.userId);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  res.json(user.study_plan ? JSON.parse(user.study_plan) : null);
+});
+
+app.put('/api/study-plan/:userId', (req, res) => {
+  const { target_score, test_date } = req.body;
+  if (!target_score || !test_date) return res.status(400).json({ error: 'target_score and test_date required' });
+  const plan = JSON.stringify({ target_score, test_date });
+  db.prepare('UPDATE users SET study_plan = ? WHERE id = ?').run(plan, req.params.userId);
+  res.json({ target_score, test_date });
 });
 
 // --- Gemini Endpoints ---

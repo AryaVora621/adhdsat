@@ -19,6 +19,7 @@ export default function ReviewSprint({ user, setUser }) {
   const [deepDiveText, setDeepDiveText] = useState('');
   const [deepDiveLoading, setDeepDiveLoading] = useState(false);
   const [showDeepDive, setShowDeepDive] = useState(false);
+  const [sm2Result, setSm2Result] = useState(null);
 
   const timeStartRef = useRef(Date.now());
   const navigate = useNavigate();
@@ -48,6 +49,7 @@ export default function ReviewSprint({ user, setUser }) {
     setHintsUsed(0);
     setDeepDiveText('');
     setShowDeepDive(false);
+    setSm2Result(null);
     timeStartRef.current = Date.now();
     try {
       const res = await fetch(`/api/review/next?userId=${user.id}`);
@@ -93,6 +95,16 @@ export default function ReviewSprint({ user, setUser }) {
           sprint_id: sprintId
         })
       });
+      // Update SM-2 card scheduling
+      const sm2Res = await fetch('/api/review/answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, questionId: question.id, isCorrect: correct })
+      });
+      const sm2Data = await sm2Res.json();
+      if (sm2Data.interval_days !== undefined) {
+        setSm2Result({ interval_days: sm2Data.interval_days, next_review_at: sm2Data.next_review_at });
+      }
       const userRes = await fetch(`/api/users/${user.id}/xp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -272,9 +284,18 @@ export default function ReviewSprint({ user, setUser }) {
         <div>
           {question.explanation && (
             <div style={{ backgroundColor: 'var(--bg-card)', padding: '20px', borderRadius: '12px', marginBottom: '14px', borderLeft: `4px solid ${isCorrect ? 'var(--success)' : 'var(--primary)'}` }}>
-              <h3 style={{ fontSize: '0.9rem', marginBottom: '8px', color: isCorrect ? 'var(--success)' : 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {isCorrect ? 'Correct! +25 XP bonus' : 'Explanation'}
-              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <h3 style={{ fontSize: '0.9rem', color: isCorrect ? 'var(--success)' : 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {isCorrect ? 'Correct! +25 XP' : 'Explanation'}
+                </h3>
+                {sm2Result && (
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', backgroundColor: '#0f0f1a', padding: '3px 8px', borderRadius: '10px', border: '1px solid #2a2a46' }}>
+                    {isCorrect
+                      ? `Next review in ${sm2Result.interval_days}d`
+                      : `Will repeat soon`}
+                  </span>
+                )}
+              </div>
               <p style={{ lineHeight: 1.65, color: 'var(--text-primary)', fontSize: '0.95rem' }}><MathText>{question.explanation}</MathText></p>
             </div>
           )}

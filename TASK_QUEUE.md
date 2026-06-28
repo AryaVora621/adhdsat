@@ -2,19 +2,21 @@
 
 ## Done
 - [x] Schema migrations (idempotent ALTER TABLE)
-- [x] Question bank (80 Qs, 10/domain, server/ingest.js)
+- [x] Question bank (246 Qs, 30+/domain, AI-generated via Gemini)
 - [x] User identity (UUID, localStorage, /api/users upsert)
 - [x] Onboarding wizard (3-step: scores, weak areas, confirm)
-- [x] Backend endpoints (13 routes in server/index.js)
-- [x] Adaptive difficulty (Gemini Flash + rule-based fallback)
+- [x] Backend endpoints (15 routes including review endpoints)
+- [x] Adaptive difficulty (Gemini 2.5 Flash + rule-based fallback)
 - [x] Sprint rewrite (real sprint_id, timer, SSE Deep Dive)
 - [x] Dashboard (8 domain cards, predicted score, sprint history)
 - [x] Profile page (/profile, editable name, XP/level/streak)
 - [x] Sidebar (nav links, XP bar, streak)
-- [x] Browser verification (all flows confirmed working)
-- [x] Git commit
+- [x] KaTeX math rendering (MathText component)
+- [x] Review Errors mode (/review, 5 questions, +25 XP bonus)
+- [x] Question bank expansion script (server/generate-questions.js)
 
-## Open
-- [ ] Phase 2: Spaced repetition review mode
-- [ ] Phase 2: Ingest full 500+ question dataset
-- [ ] Phase 2: Math rendering (LaTeX/KaTeX)
+## Open (Future Phases)
+- [ ] SM-2 spaced repetition algorithm (currently: most-wrong-first)
+- [ ] Leaderboards / friend challenges
+- [ ] Custom study plans (date-based sprint goals)
+- [ ] Push notifications / streak reminders

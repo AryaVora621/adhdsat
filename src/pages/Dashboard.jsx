@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlayCircle, BookOpen, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { PlayCircle, BookOpen, TrendingUp, TrendingDown, Minus, Target, Calendar } from 'lucide-react';
 
 const DOMAINS = [
   { name: 'Algebra', section: 'Math' },
@@ -32,6 +32,105 @@ function DomainCard({ name, stats }) {
           {trend === 'flat' && <Minus size={14} color="var(--text-secondary)" />}
           {stats?.count > 0 && <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>{stats.count}q</div>}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function StudyPlanWidget({ user, navigate }) {
+  const [plan, setPlan] = useState(null);
+  const [editing, setEditing] = useState(false);
+  const [targetScore, setTargetScore] = useState(1400);
+  const [testDate, setTestDate] = useState('');
+
+  useEffect(() => {
+    fetch(`/api/study-plan/${user.id}`)
+      .then(r => r.json())
+      .then(data => { if (data) { setPlan(data); setTargetScore(data.target_score); setTestDate(data.test_date); } })
+      .catch(() => {});
+  }, [user.id]);
+
+  const save = async () => {
+    if (!testDate) return;
+    const res = await fetch(`/api/study-plan/${user.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target_score: targetScore, test_date: testDate })
+    });
+    setPlan(await res.json());
+    setEditing(false);
+  };
+
+  if (editing || !plan) {
+    return (
+      <div style={{ backgroundColor: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid #2a2a46', marginBottom: '28px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+          <Target size={20} color="var(--primary)" />
+          <h2 style={{ fontSize: '1rem' }}>Set Your Study Plan</h2>
+          {editing && <button onClick={() => setEditing(false)} style={{ marginLeft: 'auto', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Cancel</button>}
+        </div>
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Target Score</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <input type="range" min={800} max={1600} step={10} value={targetScore} onChange={e => setTargetScore(Number(e.target.value))}
+                style={{ width: '160px', accentColor: 'var(--primary)' }} />
+              <span style={{ fontWeight: 'bold', color: 'var(--primary)', minWidth: '40px' }}>{targetScore}</span>
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Test Date</div>
+            <input type="date" value={testDate} onChange={e => setTestDate(e.target.value)} min={new Date().toISOString().split('T')[0]}
+              style={{ padding: '8px 12px', backgroundColor: 'var(--bg-main)', border: '1px solid #2a2a46', borderRadius: '8px', color: 'white', fontSize: '0.9rem', colorScheme: 'dark' }} />
+          </div>
+          <button className="primary" onClick={save} disabled={!testDate}
+            style={{ padding: '8px 20px', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
+            Save Plan
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Compute plan stats
+  const daysLeft = Math.max(0, Math.round((new Date(plan.test_date) - Date.now()) / 86400000));
+  const currentTotal = (user.baseline_english || 0) + (user.baseline_math || 0);
+  const gap = Math.max(0, plan.target_score - currentTotal);
+  const sprintsPerDay = daysLeft > 0 ? Math.ceil(gap / (daysLeft * 50)) : 0;
+  const pct = currentTotal >= plan.target_score ? 100 : Math.round((currentTotal / plan.target_score) * 100);
+
+  return (
+    <div style={{ backgroundColor: 'var(--bg-card)', padding: '22px 28px', borderRadius: '16px', border: '1px solid #2a2a46', marginBottom: '28px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+        <Target size={18} color="var(--primary)" />
+        <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>Study Plan</span>
+        <button onClick={() => setEditing(true)} style={{ marginLeft: 'auto', fontSize: '0.75rem', color: 'var(--text-secondary)', padding: '3px 8px' }}>Edit</button>
+      </div>
+      <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', marginBottom: '14px' }}>
+        <div>
+          <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '2px' }}>Target</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--primary)' }}>{plan.target_score}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '2px' }}>Days Left</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: daysLeft < 14 ? 'var(--error)' : daysLeft < 30 ? 'var(--xp-gold)' : 'var(--success)' }}>{daysLeft}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '2px' }}>Gap</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: gap === 0 ? 'var(--success)' : 'var(--xp-gold)' }}>{gap > 0 ? `+${gap}` : 'At target'}</div>
+        </div>
+        {daysLeft > 0 && gap > 0 && (
+          <div>
+            <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '2px' }}>Sprints/Day</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{sprintsPerDay}</div>
+          </div>
+        )}
+      </div>
+      <div style={{ height: '5px', backgroundColor: '#0f0f1a', borderRadius: '3px', overflow: 'hidden' }}>
+        <div style={{ width: `${Math.min(pct, 100)}%`, height: '100%', backgroundColor: 'var(--primary)', transition: 'width 0.5s ease' }} />
+      </div>
+      <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '5px' }}>
+        {currentTotal} / {plan.target_score} (baseline) -- {daysLeft > 0 ? `test on ${new Date(plan.test_date).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'})}` : 'Test date passed'}
       </div>
     </div>
   );
@@ -69,6 +168,9 @@ export default function Dashboard({ user }) {
           : `${progress.totalAnswered} questions answered total.`
         }
       </p>
+
+      {/* Study plan */}
+      <StudyPlanWidget user={user} navigate={navigate} />
 
       {/* CTA row */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '40px' }}>
