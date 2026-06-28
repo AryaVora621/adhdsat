@@ -101,7 +101,7 @@ export default function Profile({ user, setUser }) {
           {[
             { label: 'Baseline R&W', value: user.baseline_english || '--' },
             { label: 'Baseline Math', value: user.baseline_math || '--' },
-            { label: 'Predicted Range', value: progress?.predictedScore?.range || (progress?.totalAnswered < 20 ? '20+ Qs needed' : '--') }
+            { label: 'Predicted Range', value: progress?.predictedScore?.range || (progress?.totalAnswered < 10 ? '10+ Qs needed' : '--') }
           ].map(item => (
             <div key={item.label} style={{ textAlign: 'center', backgroundColor: 'var(--bg-main)', borderRadius: '10px', padding: '14px' }}>
               <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--primary)' }}>{item.value}</div>
