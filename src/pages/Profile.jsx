@@ -342,6 +342,20 @@ export default function Profile({ user, setUser }) {
         </div>
       )}
 
+      {/* Export Data */}
+      <div style={{ ...sectionStyle, marginTop: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <div style={labelStyle}>Export Data</div>
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '-6px' }}>
+            Download your full question history as CSV for tutors or personal tracking.
+          </p>
+        </div>
+        <a href={`/api/users/${user.id}/export`} download="adhdsat-history.csv"
+          style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px', fontSize: '0.85rem', border: '1px solid #2a2a46', borderRadius: '10px', color: 'var(--primary)', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
+          <Upload size={14} /> Export CSV
+        </a>
+      </div>
+
       {/* Reset Profile */}
       <div style={{ ...sectionStyle, borderColor: 'rgba(255,82,82,0.2)', marginTop: '32px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

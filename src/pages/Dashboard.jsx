@@ -173,6 +173,69 @@ function StudyPlanWidget({ user, navigate }) {
   );
 }
 
+function SprintSparkline({ sprints }) {
+  const W = 560, H = 80, PAD = 16;
+  const data = [...sprints].reverse().map(s => ({
+    pct: s.questions_attempted > 0 ? Math.round(s.questions_correct / s.questions_attempted * 100) : 0,
+    xp: s.xp_earned,
+    date: new Date(s.completed_at),
+    count: s.questions_attempted,
+  }));
+
+  const n = data.length;
+  const minY = Math.min(...data.map(d => d.pct));
+  const maxY = Math.max(...data.map(d => d.pct));
+  const yRange = Math.max(maxY - minY, 20);
+
+  const x = (i) => PAD + (i / (n - 1)) * (W - PAD * 2);
+  const y = (pct) => H - PAD - ((pct - minY) / yRange) * (H - PAD * 2);
+
+  const linePath = data.map((d, i) => `${i === 0 ? 'M' : 'L'} ${x(i)} ${y(d.pct)}`).join(' ');
+  const areaPath = `${linePath} L ${x(n-1)} ${H} L ${x(0)} ${H} Z`;
+
+  const trend = data.length >= 2 ? data[data.length - 1].pct - data[0].pct : 0;
+  const trendColor = trend > 5 ? 'var(--success)' : trend < -5 ? 'var(--error)' : 'var(--text-secondary)';
+  const trendLabel = trend > 5 ? `+${trend}% improving` : trend < -5 ? `${trend}% declining` : 'holding steady';
+
+  return (
+    <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '20px 24px', border: '1px solid #2a2a46', marginBottom: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+        <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Accuracy Trend</span>
+        <span style={{ fontSize: '0.82rem', color: trendColor, fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          {trend > 5 ? <TrendingUp size={14} /> : trend < -5 ? <TrendingDown size={14} /> : <Minus size={14} />}
+          {trendLabel}
+        </span>
+      </div>
+      <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ overflow: 'visible' }}>
+        {/* Gridlines at 50% and 75% if in range */}
+        {[50, 75].filter(v => v >= minY - 5 && v <= maxY + 5).map(v => (
+          <line key={v} x1={PAD} x2={W - PAD} y1={y(v)} y2={y(v)} stroke="#2a2a46" strokeWidth="1" strokeDasharray="4 4" />
+        ))}
+        {/* Area fill */}
+        <path d={areaPath} fill="rgba(0,212,255,0.05)" />
+        {/* Line */}
+        <path d={linePath} fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+        {/* Points */}
+        {data.map((d, i) => {
+          const dotColor = d.pct >= 70 ? 'var(--success)' : d.pct >= 50 ? 'var(--xp-gold)' : 'var(--error)';
+          return (
+            <g key={i}>
+              <circle cx={x(i)} cy={y(d.pct)} r={4} fill={dotColor} stroke="var(--bg-card)" strokeWidth="2" />
+              {(i === 0 || i === n - 1) && (
+                <text x={x(i)} y={y(d.pct) - 10} textAnchor="middle" fontSize="10" fill={dotColor} fontWeight="600">{d.pct}%</text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+        <span>{data[0]?.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+        <span>{data[data.length - 1]?.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard({ user }) {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(null);
@@ -315,27 +378,31 @@ export default function Dashboard({ user }) {
         ))}
       </div>
 
-      {/* Sprint history */}
-      {progress?.recentSprints?.length > 0 && (
+      {/* Sprint history with sparkline */}
+      {progress?.recentSprints?.length > 1 && (
         <>
-          <h2 style={{ fontSize: '1rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px' }}>Recent Sprints</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {progress.recentSprints.map(s => {
-              const pct = s.questions_attempted > 0 ? Math.round(s.questions_correct / s.questions_attempted * 100) : 0;
-              return (
-                <div key={s.id} style={{ backgroundColor: 'var(--bg-card)', borderRadius: '10px', padding: '12px 20px', display: 'flex', alignItems: 'center', border: '1px solid #2a2a46' }}>
-                  <div style={{ flex: 1, color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
-                    {new Date(s.completed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-                  </div>
-                  <div style={{ display: 'flex', gap: '20px', fontSize: '0.88rem', alignItems: 'center' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>{s.questions_attempted} Qs</span>
-                    <span style={{ color: pct >= 70 ? 'var(--success)' : pct >= 50 ? 'var(--xp-gold)' : 'var(--error)', fontWeight: '600' }}>{pct}%</span>
-                    <span style={{ color: 'var(--xp-gold)' }}>+{s.xp_earned} XP</span>
-                  </div>
+          <h2 style={{ fontSize: '1rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px' }}>Sprint History</h2>
+          <SprintSparkline sprints={progress.recentSprints} />
+        </>
+      )}
+      {progress?.recentSprints?.length === 1 && (
+        <>
+          <h2 style={{ fontSize: '1rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px' }}>Sprint History</h2>
+          {progress.recentSprints.map(s => {
+            const pct = s.questions_attempted > 0 ? Math.round(s.questions_correct / s.questions_attempted * 100) : 0;
+            return (
+              <div key={s.id} style={{ backgroundColor: 'var(--bg-card)', borderRadius: '10px', padding: '12px 20px', display: 'flex', alignItems: 'center', border: '1px solid #2a2a46' }}>
+                <div style={{ flex: 1, color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
+                  {new Date(s.completed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                 </div>
-              );
-            })}
-          </div>
+                <div style={{ display: 'flex', gap: '20px', fontSize: '0.88rem', alignItems: 'center' }}>
+                  <span style={{ color: 'var(--text-secondary)' }}>{s.questions_attempted} Qs</span>
+                  <span style={{ color: pct >= 70 ? 'var(--success)' : pct >= 50 ? 'var(--xp-gold)' : 'var(--error)', fontWeight: '600' }}>{pct}%</span>
+                  <span style={{ color: 'var(--xp-gold)' }}>+{s.xp_earned} XP</span>
+                </div>
+              </div>
+            );
+          })}
         </>
       )}
 

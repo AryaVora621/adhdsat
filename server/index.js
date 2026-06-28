@@ -630,6 +630,37 @@ app.post('/api/users/:id/reset', (req, res) => {
   }
 });
 
+// --- CSV Export ---
+app.get('/api/users/:id/export', (req, res) => {
+  const id = req.params.id;
+  const rows = db.prepare(`
+    SELECT
+      ua.created_at as date,
+      q.section,
+      q.domain,
+      q.difficulty,
+      ua.is_correct,
+      ua.time_spent_seconds,
+      ua.hints_used,
+      s.sprint_type
+    FROM user_answers ua
+    JOIN questions q ON ua.question_id = q.id
+    LEFT JOIN sprints s ON ua.sprint_id = s.id
+    WHERE ua.user_id = ?
+    ORDER BY ua.created_at ASC
+  `).all(id);
+
+  const header = 'date,section,domain,difficulty,correct,time_seconds,hints_used,sprint_type';
+  const lines = rows.map(r =>
+    [r.date, r.section, r.domain, r.difficulty, r.is_correct ? 'yes' : 'no', r.time_spent_seconds, r.hints_used, r.sprint_type || 'adaptive'].join(',')
+  );
+  const csv = [header, ...lines].join('\n');
+
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename="adhdsat-history.csv"');
+  res.send(csv);
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`[ADHDSat] Server running on port ${PORT}`);
