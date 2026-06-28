@@ -27,7 +27,7 @@ function WrongAnswerCard({ item }) {
           </div>
           {item.explanation && (
             <div style={{ fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text-secondary)', borderTop: '1px solid #2a2a46', paddingTop: '10px' }}>
-              {item.explanation}
+              <MathText>{item.explanation}</MathText>
             </div>
           )}
         </div>
