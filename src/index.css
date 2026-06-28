@@ -1,0 +1,89 @@
+:root {
+  --bg-main: #0f0f1a;
+  --bg-card: #1a1a2e;
+  --bg-sidebar: #16162a;
+  --primary: #00d4ff;
+  --success: #00e676;
+  --error: #ff5252;
+  --xp-gold: #ffd740;
+  --text-primary: #e8e8e8;
+  --text-secondary: #8888aa;
+  
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: var(--text-primary);
+  background-color: var(--bg-main);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-height: 100vh;
+  min-width: 100vw;
+  overflow-x: hidden;
+}
+
+#root {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+h1, h2, h3, h4, p {
+  margin: 0;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 0.25s, background-color 0.2s, transform 0.1s;
+}
+button:hover {
+  background-color: #2a2a46;
+  border-color: var(--primary);
+}
+button:active {
+  transform: scale(0.98);
+}
+button.primary {
+  background-color: var(--primary);
+  color: #000;
+}
+button.primary:hover {
+  background-color: #00b5d9;
+}
+
+/* Animations */
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.animate-pop {
+  animation: pop 0.3s ease-in-out;
+}
+
+/* Reduce Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
