@@ -70,7 +70,7 @@ function Confetti() {
   );
 }
 
-function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, navigate, onSprintAgain, wrongAnswers }) {
+function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, navigate, onSprintAgain, wrongAnswers, isTestMode, testTimeUsed }) {
   const [breakdown, setBreakdown] = useState(null);
   const [isPersonalBest, setIsPersonalBest] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -100,14 +100,21 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
     <div style={{ padding: 'clamp(16px, 5vw, 48px)', maxWidth: '600px', margin: '0 auto', width: '100%', textAlign: 'center' }}>
       {showConfetti && <Confetti />}
       <Trophy size={48} color="var(--xp-gold)" style={{ marginBottom: '24px' }} />
-      <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>Sprint Complete!</h1>
+      <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>{isTestMode ? 'Test Complete!' : 'Sprint Complete!'}</h1>
+      {isTestMode && (
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(255,215,64,0.08)', border: '1px solid rgba(255,215,64,0.3)', borderRadius: '20px', padding: '5px 14px', marginBottom: '8px' }}>
+          <span style={{ color: 'var(--xp-gold)', fontWeight: '600', fontSize: '0.8rem' }}>Practice Test Simulation</span>
+        </div>
+      )}
       {isPersonalBest && (
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(255,215,64,0.1)', border: '1px solid rgba(255,215,64,0.5)', borderRadius: '20px', padding: '6px 16px', marginBottom: '12px' }}>
           <Trophy size={14} color="var(--xp-gold)" />
           <span style={{ color: 'var(--xp-gold)', fontWeight: '700', fontSize: '0.85rem' }}>New Personal Best!</span>
         </div>
       )}
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>{SPRINT_LENGTH} questions finished</p>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>
+        {SPRINT_LENGTH} questions{testTimeUsed ? ` · ${Math.floor(testTimeUsed / 60)}:${String(testTimeUsed % 60).padStart(2, '0')} used` : ' finished'}
+      </p>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '20px' }}>
         {[
@@ -563,6 +570,8 @@ export default function Sprint({ user, setUser }) {
         navigate={navigate}
         onSprintAgain={handleSprintAgain}
         wrongAnswers={wrongAnswers}
+        isTestMode={isTestMode}
+        testTimeUsed={isTestMode && sprintStartRef.current ? Math.floor((Date.now() - sprintStartRef.current) / 1000) : 0}
       />
     );
   }
@@ -882,10 +891,12 @@ export default function Sprint({ user, setUser }) {
         </div>
       ) : (
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={() => setHintsUsed(h => Math.min(h + 1, 2))} disabled={hintsUsed >= 2}
-            style={{ flex: 1, padding: '13px', fontSize: '0.9rem', color: hintsUsed >= 2 ? 'var(--text-secondary)' : 'var(--xp-gold)', borderColor: hintsUsed >= 2 ? '#2a2a46' : 'rgba(255,215,64,0.3)' }}>
-            Hint ({2 - hintsUsed} left)
-          </button>
+          {!isTestMode && (
+            <button onClick={() => setHintsUsed(h => Math.min(h + 1, 2))} disabled={hintsUsed >= 2}
+              style={{ flex: 1, padding: '13px', fontSize: '0.9rem', color: hintsUsed >= 2 ? 'var(--text-secondary)' : 'var(--xp-gold)', borderColor: hintsUsed >= 2 ? '#2a2a46' : 'rgba(255,215,64,0.3)' }}>
+              Hint ({2 - hintsUsed} left)
+            </button>
+          )}
           <button className="primary" onClick={() => handleAnswerSubmit()}
             disabled={!selectedChoice && question.is_grid_in === 0}
             style={{ flex: 2, padding: '13px', fontSize: '1rem' }}>
