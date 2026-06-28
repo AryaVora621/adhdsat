@@ -80,7 +80,8 @@ export default function ReviewSprint({ user, setUser }) {
       if (choice?.is_correct) correct = true;
     }
     const timeSpent = Math.round((Date.now() - timeStartRef.current) / 1000);
-    const xpGained = correct ? 25 : 5; // Bonus XP for getting review right
+    const diffXp = { easy: 20, medium: 25, hard: 35 };
+    const xpGained = correct ? (diffXp[question?.difficulty] || 25) : 5;
     setIsAnswered(true);
     setStats(prev => ({ attempted: prev.attempted + 1, correct: prev.correct + (correct ? 1 : 0), xp: prev.xp + xpGained }));
     try {

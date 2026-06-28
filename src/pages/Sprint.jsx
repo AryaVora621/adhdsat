@@ -186,6 +186,8 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
   );
 }
 
+const DIFF_XP = { easy: 15, medium: 20, hard: 30 };
+
 export default function Sprint({ user, setUser }) {
   const [sprintMode, setSprintModeState] = useState(() => sessionStorage.getItem('lastSprintMode') || null);
   const setSprintMode = (mode) => {
@@ -392,7 +394,7 @@ export default function Sprint({ user, setUser }) {
       if (ch?.is_correct) correct = true;
     }
 
-    const xpGained = correct ? 20 : 5;
+    const xpGained = correct ? (DIFF_XP[question.difficulty] || 20) : 5;
 
     setIsAnswered(true);
     setStats(prev => ({
@@ -455,8 +457,8 @@ export default function Sprint({ user, setUser }) {
           wrongAnswers: currentWrong.slice(-20)
         }));
       } catch { /* storage full, skip */ }
-      // Pre-fetch next question while user reads explanation
-      if (questionNum < sprintLengthRef.current - 1) prefetchNextQuestion();
+      // Pre-fetch next question while user reads explanation (not needed after last Q)
+      if (questionNum < sprintLengthRef.current) prefetchNextQuestion();
     } catch (err) {
       console.error(err);
     }
@@ -888,8 +890,13 @@ export default function Sprint({ user, setUser }) {
         <div>
           {question.explanation && (
             <div style={{ backgroundColor: 'var(--bg-card)', padding: '20px', borderRadius: '12px', marginBottom: '14px', borderLeft: `4px solid ${isCorrect ? 'var(--success)' : 'var(--primary)'}` }}>
-              <h3 style={{ fontSize: '0.9rem', marginBottom: '8px', color: isCorrect ? 'var(--success)' : 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <h3 style={{ fontSize: '0.9rem', marginBottom: '8px', color: isCorrect ? 'var(--success)' : 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 {isCorrect ? 'Correct!' : 'Explanation'}
+                {isCorrect && (
+                  <span style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--xp-gold)', backgroundColor: 'rgba(255,215,64,0.12)', padding: '2px 8px', borderRadius: '10px', letterSpacing: '0.5px' }}>
+                    +{DIFF_XP[question?.difficulty] || 20} XP
+                  </span>
+                )}
               </h3>
               <p style={{ lineHeight: 1.65, color: 'var(--text-primary)', fontSize: '0.95rem' }}><MathText>{question.explanation}</MathText></p>
             </div>
