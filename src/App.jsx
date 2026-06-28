@@ -1,5 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Component } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+
+class ErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(error) { return { error }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', padding: '32px', textAlign: 'center', gap: '16px' }}>
+          <div style={{ fontSize: '2rem' }}>⚡</div>
+          <h2 style={{ color: 'var(--primary)', margin: 0 }}>Something went wrong</h2>
+          <p style={{ color: 'var(--text-secondary)', maxWidth: '400px', lineHeight: 1.5 }}>
+            ADHDSat hit an unexpected error. Your progress is saved.
+          </p>
+          <button className="primary" onClick={() => { this.setState({ error: null }); window.location.href = '/'; }}
+            style={{ padding: '12px 28px' }}>
+            Back to Dashboard
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 import Sidebar from './components/Sidebar';
 import BottomNav from './components/BottomNav';
 import Dashboard from './pages/Dashboard';
@@ -94,8 +117,10 @@ function AppInner() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppInner />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppInner />
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
