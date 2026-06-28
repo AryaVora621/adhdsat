@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Sprint from './pages/Sprint';
 import Onboarding from './pages/Onboarding';
 import Profile from './pages/Profile';
+import ReviewSprint from './pages/ReviewSprint';
 import './index.css';
 
 function AppInner() {
@@ -54,6 +55,7 @@ function AppInner() {
           <Route path="/" element={user?.onboarding_completed ? <Dashboard user={user} /> : <Navigate to="/onboarding" />} />
           <Route path="/sprint" element={user?.onboarding_completed ? <Sprint user={user} setUser={setUser} /> : <Navigate to="/onboarding" />} />
           <Route path="/profile" element={user?.onboarding_completed ? <Profile user={user} setUser={setUser} /> : <Navigate to="/onboarding" />} />
+          <Route path="/review" element={user?.onboarding_completed ? <ReviewSprint user={user} setUser={setUser} /> : <Navigate to="/onboarding" />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

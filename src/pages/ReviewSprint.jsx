@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, XCircle, ChevronRight, AlertCircle, Zap } from 'lucide-react';
+import { CheckCircle2, XCircle, ChevronRight, AlertCircle, Zap, BookOpen } from 'lucide-react';
 import MathText from '../components/MathText';
 
-export default function Sprint({ user, setUser }) {
+const REVIEW_LENGTH = 5;
+
+export default function ReviewSprint({ user, setUser }) {
   const [sprintId, setSprintId] = useState(null);
   const [question, setQuestion] = useState(null);
   const [loading, setLoading] = useState(true);
   const [questionNum, setQuestionNum] = useState(1);
   const [stats, setStats] = useState({ attempted: 0, correct: 0, xp: 0 });
+  const [noErrors, setNoErrors] = useState(false);
 
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -19,25 +22,23 @@ export default function Sprint({ user, setUser }) {
 
   const timeStartRef = useRef(Date.now());
   const navigate = useNavigate();
-  const SPRINT_LENGTH = 10;
 
   useEffect(() => {
-    const startSprint = async () => {
+    const startReview = async () => {
       try {
         const res = await fetch('/api/sprints', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user.id, sprint_type: 'adaptive' })
+          body: JSON.stringify({ userId: user.id, sprint_type: 'review' })
         });
         const data = await res.json();
         setSprintId(data.id);
         await fetchNextQuestion();
-      } catch (err) {
-        console.error(err);
+      } catch {
         setLoading(false);
       }
     };
-    startSprint();
+    startReview();
   }, []);
 
   const fetchNextQuestion = async () => {
@@ -49,12 +50,17 @@ export default function Sprint({ user, setUser }) {
     setShowDeepDive(false);
     timeStartRef.current = Date.now();
     try {
-      const res = await fetch(`/api/questions/next?userId=${user.id}`);
-      if (!res.ok) throw new Error('No questions');
+      const res = await fetch(`/api/review/next?userId=${user.id}`);
+      if (!res.ok) throw new Error('fetch failed');
       const q = await res.json();
+      if (!q) {
+        setNoErrors(true);
+        setLoading(false);
+        return;
+      }
       setQuestion(q);
-    } catch (err) {
-      console.error(err);
+    } catch {
+      setNoErrors(true);
     } finally {
       setLoading(false);
     }
@@ -62,7 +68,6 @@ export default function Sprint({ user, setUser }) {
 
   const handleAnswerSubmit = async () => {
     if (!selectedChoice && question.is_grid_in === 0) return;
-
     let correct = false;
     if (question.is_grid_in) {
       correct = parseFloat(selectedChoice) === question.grid_in_answer;
@@ -70,17 +75,10 @@ export default function Sprint({ user, setUser }) {
       const choice = question.choices.find(c => c.label === selectedChoice);
       if (choice?.is_correct) correct = true;
     }
-
     const timeSpent = Math.round((Date.now() - timeStartRef.current) / 1000);
-    const xpGained = correct ? 20 : 5;
-
+    const xpGained = correct ? 25 : 5; // Bonus XP for getting review right
     setIsAnswered(true);
-    setStats(prev => ({
-      attempted: prev.attempted + 1,
-      correct: prev.correct + (correct ? 1 : 0),
-      xp: prev.xp + xpGained
-    }));
-
+    setStats(prev => ({ attempted: prev.attempted + 1, correct: prev.correct + (correct ? 1 : 0), xp: prev.xp + xpGained }));
     try {
       await fetch('/api/answers', {
         method: 'POST',
@@ -95,16 +93,13 @@ export default function Sprint({ user, setUser }) {
           sprint_id: sprintId
         })
       });
-
       const userRes = await fetch(`/api/users/${user.id}/xp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ xp_gained: xpGained })
       });
       setUser(await userRes.json());
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleDeepDive = async () => {
@@ -112,18 +107,12 @@ export default function Sprint({ user, setUser }) {
     setShowDeepDive(true);
     setDeepDiveText('');
     try {
-      const correctAnswer = question.choices.find(c => c.is_correct)?.text
-        || question.grid_in_answer?.toString()
-        || 'Unknown';
+      const correctAnswer = question.choices.find(c => c.is_correct)?.text || question.grid_in_answer?.toString() || 'Unknown';
       const selectedText = question.choices.find(c => c.label === selectedChoice)?.text || selectedChoice;
       const res = await fetch('/api/explain', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          questionText: question.question_text,
-          selectedChoice: `${selectedChoice}: ${selectedText}`,
-          correctAnswer
-        })
+        body: JSON.stringify({ questionText: question.question_text, selectedChoice: `${selectedChoice}: ${selectedText}`, correctAnswer })
       });
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -134,10 +123,7 @@ export default function Sprint({ user, setUser }) {
         for (const line of lines) {
           const data = line.slice(6);
           if (data === '[DONE]') break;
-          try {
-            const parsed = JSON.parse(data);
-            if (parsed.text) setDeepDiveText(prev => prev + parsed.text);
-          } catch {}
+          try { const p = JSON.parse(data); if (p.text) setDeepDiveText(prev => prev + p.text); } catch {}
         }
       }
     } catch {
@@ -148,17 +134,12 @@ export default function Sprint({ user, setUser }) {
   };
 
   const handleNext = async () => {
-    const finalStats = { ...stats };
-    if (questionNum >= SPRINT_LENGTH) {
+    if (questionNum >= REVIEW_LENGTH) {
       try {
         await fetch(`/api/sprints/${sprintId}/finish`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            questions_attempted: finalStats.attempted,
-            questions_correct: finalStats.correct,
-            xp_earned: finalStats.xp
-          })
+          body: JSON.stringify({ questions_attempted: stats.attempted, questions_correct: stats.correct, xp_earned: stats.xp })
         });
       } catch {}
       navigate('/');
@@ -172,15 +153,23 @@ export default function Sprint({ user, setUser }) {
     return (
       <div style={{ padding: '48px', display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--text-secondary)' }}>
         <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid var(--primary)', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
-        Loading question {questionNum}...
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        Loading review question {questionNum}...
       </div>
     );
   }
-  if (!question) {
+
+  if (noErrors || !question) {
     return (
-      <div style={{ padding: '48px' }}>
-        <h2 style={{ marginBottom: '12px' }}>No questions available</h2>
-        <p style={{ color: 'var(--text-secondary)' }}>Run <code style={{ backgroundColor: '#2a2a46', padding: '2px 6px', borderRadius: '4px' }}>node server/ingest.js</code> to load the question bank.</p>
+      <div style={{ padding: '48px', maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
+        <BookOpen size={48} color="var(--xp-gold)" style={{ marginBottom: '20px' }} />
+        <h2 style={{ marginBottom: '12px' }}>No errors to review!</h2>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', lineHeight: 1.6 }}>
+          You haven't answered any questions incorrectly yet, or you've already mastered your previous mistakes. Keep practicing with sprints!
+        </p>
+        <button className="primary" onClick={() => navigate('/sprint')} style={{ padding: '12px 32px', fontSize: '1rem' }}>
+          Start a Sprint
+        </button>
       </div>
     );
   }
@@ -193,20 +182,22 @@ export default function Sprint({ user, setUser }) {
     <div style={{ padding: '48px', maxWidth: '800px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column' }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '32px' }}>
+        <BookOpen size={18} color="var(--xp-gold)" />
+        <span style={{ color: 'var(--xp-gold)', fontWeight: '600', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Review Mode</span>
+        <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginLeft: 'auto' }}>Q{questionNum} / {REVIEW_LENGTH}</span>
+      </div>
+
       {/* Progress bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
-        <div style={{ display: 'flex', gap: '4px', flex: 1 }}>
-          {Array.from({ length: SPRINT_LENGTH }).map((_, i) => (
-            <div key={i} style={{
-              flex: 1, height: '5px', borderRadius: '3px',
-              backgroundColor: i < questionNum - 1 ? 'var(--primary)' : i === questionNum - 1 ? 'rgba(0,212,255,0.4)' : '#2a2a46',
-              transition: 'background-color 0.3s'
-            }} />
-          ))}
-        </div>
-        <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', whiteSpace: 'nowrap', minWidth: '60px', textAlign: 'right' }}>
-          Q{questionNum} / {SPRINT_LENGTH}
-        </div>
+      <div style={{ display: 'flex', gap: '4px', marginBottom: '32px' }}>
+        {Array.from({ length: REVIEW_LENGTH }).map((_, i) => (
+          <div key={i} style={{
+            flex: 1, height: '5px', borderRadius: '3px',
+            backgroundColor: i < questionNum - 1 ? 'var(--xp-gold)' : i === questionNum - 1 ? 'rgba(255,215,64,0.4)' : '#2a2a46',
+            transition: 'background-color 0.3s'
+          }} />
+        ))}
       </div>
 
       {/* Domain header */}
@@ -218,7 +209,7 @@ export default function Sprint({ user, setUser }) {
         <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>{question.difficulty}</span>
       </div>
 
-      {/* Question content */}
+      {/* Question */}
       <div style={{ display: 'flex', gap: '32px', marginBottom: '40px' }}>
         {question.passage_text && (
           <div style={{ flex: 1, borderRight: '1px solid #2a2a46', paddingRight: '32px', fontSize: '0.95rem', lineHeight: 1.75, color: 'var(--text-secondary)' }}>
@@ -276,18 +267,17 @@ export default function Sprint({ user, setUser }) {
         )}
       </div>
 
-      {/* Post-answer panel */}
+      {/* Post-answer */}
       {isAnswered ? (
         <div>
           {question.explanation && (
             <div style={{ backgroundColor: 'var(--bg-card)', padding: '20px', borderRadius: '12px', marginBottom: '14px', borderLeft: `4px solid ${isCorrect ? 'var(--success)' : 'var(--primary)'}` }}>
               <h3 style={{ fontSize: '0.9rem', marginBottom: '8px', color: isCorrect ? 'var(--success)' : 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {isCorrect ? 'Correct!' : 'Explanation'}
+                {isCorrect ? 'Correct! +25 XP bonus' : 'Explanation'}
               </h3>
               <p style={{ lineHeight: 1.65, color: 'var(--text-primary)', fontSize: '0.95rem' }}><MathText>{question.explanation}</MathText></p>
             </div>
           )}
-
           {!isCorrect && (
             <div style={{ marginBottom: '14px' }}>
               {!showDeepDive ? (
@@ -307,10 +297,9 @@ export default function Sprint({ user, setUser }) {
               )}
             </div>
           )}
-
           <button className="primary animate-pop" onClick={handleNext}
             style={{ width: '100%', padding: '15px', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-            {questionNum < SPRINT_LENGTH ? 'Next Question' : 'Complete Sprint'} <ChevronRight size={18} />
+            {questionNum < REVIEW_LENGTH ? 'Next Review' : 'Finish Review'} <ChevronRight size={18} />
           </button>
         </div>
       ) : (

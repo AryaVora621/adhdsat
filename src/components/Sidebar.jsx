@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Flame, Star, LayoutDashboard, Zap, User } from 'lucide-react';
+import { Flame, Star, LayoutDashboard, Zap, User, BookOpen } from 'lucide-react';
 
 export default function Sidebar({ user }) {
   const level = Math.floor(user.total_xp / 500) + 1;
@@ -30,6 +30,7 @@ export default function Sidebar({ user }) {
       <nav style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
         <NavLink to="/" end style={navLinkStyle}><LayoutDashboard size={16} /> Dashboard</NavLink>
         <NavLink to="/sprint" style={navLinkStyle}><Zap size={16} /> Sprint</NavLink>
+        <NavLink to="/review" style={navLinkStyle}><BookOpen size={16} /> Review</NavLink>
         <NavLink to="/profile" style={navLinkStyle}><User size={16} /> Profile</NavLink>
       </nav>
 

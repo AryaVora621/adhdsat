@@ -17,7 +17,7 @@ export async function getAdaptiveCriteria(userProfile) {
   const client = getClient();
   if (!client) return null;
   try {
-    const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = client.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const prompt = `You are an SAT prep coach. A student is targeting a 1500-1550 SAT score.
 
 Domain accuracy from last 30 questions (0-1 scale, null means no data yet):
@@ -50,7 +50,7 @@ export async function* streamExplanation(ctx) {
     yield "Explanation streaming requires a Gemini API key. Please check your .env file.";
     return;
   }
-  const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  const model = client.getGenerativeModel({ model: 'gemini-2.5-flash' });
   const prompt = `You are an SAT tutor helping a student who answered incorrectly.
 
 Question: ${ctx.questionText}
@@ -70,7 +70,7 @@ export async function analyzeScoreReport(base64Image, mimeType) {
   const client = getClient();
   if (!client) return null;
   try {
-    const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = client.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const result = await model.generateContent([
       {
         inlineData: { data: base64Image, mimeType: mimeType || 'image/jpeg' }

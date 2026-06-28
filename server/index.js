@@ -270,6 +270,77 @@ app.get('/api/progress', (req, res) => {
   });
 });
 
+// --- Review Errors ---
+
+app.get('/api/review/next', (req, res) => {
+  const { userId } = req.query;
+  if (!userId) return res.status(400).json({ error: 'userId required' });
+
+  // Find questions answered wrong, excluding those answered correctly most recently
+  const wrongIds = db.prepare(`
+    SELECT DISTINCT ua.question_id
+    FROM user_answers ua
+    WHERE ua.user_id = ? AND ua.is_correct = 0
+  `).all(userId).map(r => r.question_id);
+
+  if (wrongIds.length === 0) return res.json(null);
+
+  // Exclude questions where the user's MOST RECENT answer was correct
+  const toExclude = wrongIds.filter(qid => {
+    const latest = db.prepare(`
+      SELECT is_correct FROM user_answers
+      WHERE user_id = ? AND question_id = ?
+      ORDER BY created_at DESC LIMIT 1
+    `).get(userId, qid);
+    return latest && latest.is_correct === 1;
+  });
+
+  const eligible = wrongIds.filter(id => !toExclude.includes(id));
+  if (eligible.length === 0) return res.json(null);
+
+  // Pick the one with most wrong attempts that was most recently attempted
+  const ranked = db.prepare(`
+    SELECT ua.question_id,
+           COUNT(*) as wrong_count,
+           MAX(ua.created_at) as last_attempt
+    FROM user_answers ua
+    WHERE ua.user_id = ? AND ua.is_correct = 0
+      AND ua.question_id IN (${eligible.map(() => '?').join(',')})
+    GROUP BY ua.question_id
+    ORDER BY wrong_count DESC, last_attempt DESC
+    LIMIT 1
+  `).get(userId, ...eligible);
+
+  if (!ranked) return res.json(null);
+
+  const q = db.prepare('SELECT * FROM questions WHERE id = ?').get(ranked.question_id);
+  if (!q) return res.json(null);
+  q.choices = JSON.parse(q.choices || '[]');
+  q.tags = JSON.parse(q.tags || '[]');
+  res.json(q);
+});
+
+app.get('/api/review/count', (req, res) => {
+  const { userId } = req.query;
+  if (!userId) return res.status(400).json({ error: 'userId required' });
+
+  const wrong = db.prepare(`
+    SELECT DISTINCT ua.question_id
+    FROM user_answers ua
+    WHERE ua.user_id = ? AND ua.is_correct = 0
+  `).all(userId).map(r => r.question_id);
+
+  let reviewable = 0;
+  for (const qid of wrong) {
+    const latest = db.prepare(`
+      SELECT is_correct FROM user_answers WHERE user_id = ? AND question_id = ?
+      ORDER BY created_at DESC LIMIT 1
+    `).get(userId, qid);
+    if (!latest || latest.is_correct === 0) reviewable++;
+  }
+  res.json({ count: reviewable });
+});
+
 // --- Gemini Endpoints ---
 
 app.post('/api/explain', async (req, res) => {

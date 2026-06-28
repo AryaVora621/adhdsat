@@ -41,12 +41,17 @@ export default function Dashboard({ user }) {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [reviewCount, setReviewCount] = useState(0);
 
   useEffect(() => {
     fetch(`/api/progress?userId=${user.id}`)
       .then(r => r.json())
       .then(data => { setProgress(data); setLoading(false); })
       .catch(() => setLoading(false));
+    fetch(`/api/review/count?userId=${user.id}`)
+      .then(r => r.json())
+      .then(data => setReviewCount(data.count || 0))
+      .catch(() => {});
   }, [user.id]);
 
   const greetingName = user.display_name && user.display_name !== 'Learner' ? user.display_name : null;
@@ -81,15 +86,28 @@ export default function Dashboard({ user }) {
           <button className="primary" style={{ width: '100%', padding: '10px', fontSize: '0.95rem' }}>Let's Go!</button>
         </div>
 
-        <div style={{ backgroundColor: 'var(--bg-card)', padding: '28px', borderRadius: '16px', border: '1px solid #2a2a46', opacity: 0.5 }}>
+        <div onClick={() => reviewCount > 0 && navigate('/review')}
+          style={{ backgroundColor: 'var(--bg-card)', padding: '28px', borderRadius: '16px', border: '1px solid #2a2a46', opacity: reviewCount > 0 ? 1 : 0.5, cursor: reviewCount > 0 ? 'pointer' : 'default', transition: 'all 0.2s' }}
+          onMouseOver={e => { if (reviewCount > 0) { e.currentTarget.style.borderColor = 'var(--xp-gold)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}}
+          onMouseOut={e => { e.currentTarget.style.borderColor = '#2a2a46'; e.currentTarget.style.transform = 'translateY(0)'; }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
             <BookOpen size={30} color="var(--xp-gold)" />
             <h2 style={{ fontSize: '1.2rem' }}>Review Errors</h2>
+            {reviewCount > 0 && (
+              <span style={{ marginLeft: 'auto', backgroundColor: 'rgba(255,215,64,0.15)', color: 'var(--xp-gold)', borderRadius: '20px', padding: '2px 10px', fontSize: '0.78rem', fontWeight: '600', border: '1px solid rgba(255,215,64,0.3)' }}>
+                {reviewCount} queued
+              </span>
+            )}
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginBottom: '20px', lineHeight: 1.5 }}>
-            Spaced repetition review coming in Phase 2.
+            {reviewCount > 0
+              ? `Revisit ${reviewCount} question${reviewCount !== 1 ? 's' : ''} you answered wrong. +25 XP for each mastered.`
+              : 'Answer some questions incorrectly and they will appear here for spaced review.'}
           </p>
-          <button disabled style={{ width: '100%', padding: '10px', fontSize: '0.95rem' }}>Coming Soon</button>
+          <button disabled={reviewCount === 0} onClick={e => { e.stopPropagation(); if (reviewCount > 0) navigate('/review'); }}
+            style={{ width: '100%', padding: '10px', fontSize: '0.95rem', backgroundColor: reviewCount > 0 ? 'rgba(255,215,64,0.1)' : undefined, color: reviewCount > 0 ? 'var(--xp-gold)' : undefined, borderColor: reviewCount > 0 ? 'rgba(255,215,64,0.4)' : undefined }}>
+            {reviewCount > 0 ? 'Review Now' : 'No errors yet'}
+          </button>
         </div>
       </div>
 
