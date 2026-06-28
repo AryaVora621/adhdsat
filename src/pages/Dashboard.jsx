@@ -91,7 +91,6 @@ function StudyPlanWidget({ user, navigate }) {
   }, [user.id]);
 
   const save = async () => {
-    if (!testDate) return;
     const res = await fetch(`/api/study-plan/${user.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -123,7 +122,7 @@ function StudyPlanWidget({ user, navigate }) {
             <input type="date" value={testDate} onChange={e => setTestDate(e.target.value)} min={new Date().toISOString().split('T')[0]}
               style={{ padding: '8px 12px', backgroundColor: 'var(--bg-main)', border: '1px solid #2a2a46', borderRadius: '8px', color: 'white', fontSize: '0.9rem', colorScheme: 'dark' }} />
           </div>
-          <button className="primary" onClick={save} disabled={!testDate}
+          <button className="primary" onClick={save}
             style={{ padding: '8px 20px', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
             Save Plan
           </button>

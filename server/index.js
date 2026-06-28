@@ -269,18 +269,41 @@ app.get('/api/progress', (req, res) => {
   if (totalAnswered >= 10) {
     const mathDomains = ['Algebra', 'Advanced Math', 'Problem Solving & Data Analysis', 'Geometry & Trig'];
     const engDomains = ['Information & Ideas', 'Craft & Structure', 'Expression of Ideas', 'Standard English Conventions'];
-    const avgAcc = (domains) => {
-      const accs = domains.map(d => domainStats[d].accuracy).filter(a => a !== null);
-      return accs.length ? accs.reduce((a, b) => a + b, 0) / accs.length : 0.5;
+    // Difficulty-weighted score: hard correct = 2pts, medium = 1.5pts, easy = 1pt
+    const DIFF_WEIGHT = { easy: 1, medium: 1.5, hard: 2 };
+    const weightedAcc = (domains) => {
+      const rows = db.prepare(`
+        SELECT ua.is_correct, q.difficulty
+        FROM user_answers ua JOIN questions q ON ua.question_id = q.id
+        WHERE ua.user_id = ? AND q.domain IN (${domains.map(() => '?').join(',')})
+        ORDER BY ua.created_at DESC LIMIT 60
+      `).all(userId, ...domains);
+      if (rows.length < 3) return null;
+      let earned = 0, possible = 0;
+      for (const r of rows) {
+        const w = DIFF_WEIGHT[r.difficulty] || 1.5;
+        possible += w;
+        if (r.is_correct) earned += w;
+      }
+      return possible > 0 ? earned / possible : null;
     };
-    const mathScore = Math.round(200 + avgAcc(mathDomains) * 600);
-    const engScore = Math.round(200 + avgAcc(engDomains) * 600);
-    predictedScore = {
-      math: mathScore,
-      english: engScore,
-      total: mathScore + engScore,
-      range: `${mathScore + engScore - 30}-${mathScore + engScore + 30}`
-    };
+    const mathAcc = weightedAcc(mathDomains);
+    const engAcc = weightedAcc(engDomains);
+    // Score curve: accounts for the fact that SAT scoring is roughly linear
+    // but clamp to realistic bounds
+    const toScore = (acc) => acc === null ? null : Math.min(800, Math.max(200, Math.round(200 + acc * 620)));
+    const mathScore = toScore(mathAcc);
+    const engScore = toScore(engAcc);
+    if (mathScore !== null || engScore !== null) {
+      const mS = mathScore || 400;
+      const eS = engScore || 400;
+      predictedScore = {
+        math: mathScore,
+        english: engScore,
+        total: mS + eS,
+        range: `${mS + eS - 40}–${mS + eS + 40}`
+      };
+    }
   }
 
   const recentSprints = db.prepare(`
@@ -468,10 +491,12 @@ app.get('/api/study-plan/:userId', (req, res) => {
 
 app.put('/api/study-plan/:userId', (req, res) => {
   const { target_score, test_date } = req.body;
-  if (!target_score || !test_date) return res.status(400).json({ error: 'target_score and test_date required' });
-  const plan = JSON.stringify({ target_score, test_date });
+  if (!target_score) return res.status(400).json({ error: 'target_score required' });
+  const existing = db.prepare('SELECT study_plan FROM users WHERE id = ?').get(req.params.userId);
+  const prev = existing?.study_plan ? JSON.parse(existing.study_plan) : {};
+  const plan = JSON.stringify({ ...prev, target_score, ...(test_date ? { test_date } : {}) });
   db.prepare('UPDATE users SET study_plan = ? WHERE id = ?').run(plan, req.params.userId);
-  res.json({ target_score, test_date });
+  res.json(JSON.parse(plan));
 });
 
 // --- AI Insights ---

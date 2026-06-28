@@ -12,6 +12,7 @@ export default function ReviewSprint({ user, setUser }) {
   const [questionNum, setQuestionNum] = useState(1);
   const [stats, setStats] = useState({ attempted: 0, correct: 0, xp: 0 });
   const [noErrors, setNoErrors] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
 
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -121,15 +122,15 @@ export default function ReviewSprint({ user, setUser }) {
         await fetch(`/api/sprints/${sprintId}/finish`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ questions_attempted: stats.attempted, questions_correct: stats.correct, xp_earned: stats.xp })
+          body: JSON.stringify({ questions_attempted: stats.attempted + 1, questions_correct: stats.correct + (isAnswered && question && (question.is_grid_in ? parseFloat(selectedChoice) === question.grid_in_answer : question.choices?.find(c => c.label === selectedChoice)?.is_correct) ? 1 : 0), xp_earned: stats.xp })
         });
       } catch {}
-      navigate('/');
+      setShowSummary(true);
     } else {
       setQuestionNum(n => n + 1);
       await fetchNextQuestion();
     }
-  }, [questionNum, sprintId, stats, navigate]);
+  }, [questionNum, sprintId, stats, isAnswered, question, selectedChoice, navigate]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -189,6 +190,51 @@ export default function ReviewSprint({ user, setUser }) {
         <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid var(--primary)', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         Loading review question {questionNum}...
+      </div>
+    );
+  }
+
+  if (showSummary) {
+    const finalCorrect = stats.correct;
+    const finalAttempted = stats.attempted;
+    const accuracy = finalAttempted > 0 ? Math.round((finalCorrect / finalAttempted) * 100) : 0;
+    const grade = accuracy >= 80 ? 'A' : accuracy >= 60 ? 'B' : accuracy >= 40 ? 'C' : 'D';
+    const gradeColor = accuracy >= 80 ? 'var(--success)' : accuracy >= 60 ? 'var(--xp-gold)' : 'var(--error)';
+    return (
+      <div style={{ padding: 'clamp(16px, 5vw, 48px)', maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
+        <BookOpen size={48} color="var(--xp-gold)" style={{ marginBottom: '20px' }} />
+        <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>Review Complete!</h1>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(255,215,64,0.12)', border: '1px solid rgba(255,215,64,0.3)', borderRadius: '20px', padding: '4px 14px', marginBottom: '24px' }}>
+          <span style={{ color: 'var(--xp-gold)', fontWeight: '600', fontSize: '0.8rem' }}>Spaced Repetition</span>
+        </div>
+        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginBottom: '32px' }}>
+          <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #2a2a46', borderRadius: '16px', padding: '20px 28px' }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: gradeColor }}>{grade}</div>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '4px' }}>Grade</div>
+          </div>
+          <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #2a2a46', borderRadius: '16px', padding: '20px 28px' }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--primary)' }}>{accuracy}%</div>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '4px' }}>Accuracy</div>
+          </div>
+          <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #2a2a46', borderRadius: '16px', padding: '20px 28px' }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--xp-gold)' }}>+{stats.xp}</div>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '4px' }}>XP Earned</div>
+          </div>
+        </div>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '28px', lineHeight: 1.6, fontSize: '0.9rem' }}>
+          {accuracy >= 80
+            ? 'Great work! Cards you got right are scheduled further out. Keep it up.'
+            : accuracy >= 60
+            ? 'Solid effort. Cards you missed will come back sooner for more practice.'
+            : 'These concepts need more work. Cards are scheduled to return shortly.'}
+        </p>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <button className="primary" onClick={() => navigate('/')} style={{ padding: '12px 28px' }}>Back to Dashboard</button>
+          <button onClick={() => { setShowSummary(false); setQuestionNum(1); setStats({ attempted: 0, correct: 0, xp: 0 }); fetchNextQuestion(); }}
+            style={{ padding: '12px 28px', backgroundColor: 'transparent', border: '1px solid #2a2a46', borderRadius: '10px', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.9rem' }}>
+            Review More
+          </button>
+        </div>
       </div>
     );
   }
