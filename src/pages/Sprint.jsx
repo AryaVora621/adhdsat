@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, XCircle, ChevronRight, AlertCircle, Zap } from 'lucide-react';
+import { CheckCircle2, XCircle, ChevronRight, AlertCircle, Zap, Trophy } from 'lucide-react';
 import MathText from '../components/MathText';
 
 export default function Sprint({ user, setUser }) {
@@ -9,6 +9,8 @@ export default function Sprint({ user, setUser }) {
   const [loading, setLoading] = useState(true);
   const [questionNum, setQuestionNum] = useState(1);
   const [stats, setStats] = useState({ attempted: 0, correct: 0, xp: 0 });
+  const [showSummary, setShowSummary] = useState(false);
+  const [finalStats, setFinalStats] = useState(null);
 
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -17,9 +19,26 @@ export default function Sprint({ user, setUser }) {
   const [deepDiveLoading, setDeepDiveLoading] = useState(false);
   const [showDeepDive, setShowDeepDive] = useState(false);
 
+  // Live timer
+  const [elapsed, setElapsed] = useState(0);
+  const timerRef = useRef(null);
   const timeStartRef = useRef(Date.now());
   const navigate = useNavigate();
   const SPRINT_LENGTH = 10;
+
+  // Start per-question timer
+  const startTimer = () => {
+    clearInterval(timerRef.current);
+    setElapsed(0);
+    timeStartRef.current = Date.now();
+    timerRef.current = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - timeStartRef.current) / 1000));
+    }, 1000);
+  };
+
+  const stopTimer = () => clearInterval(timerRef.current);
+
+  useEffect(() => () => clearInterval(timerRef.current), []);
 
   useEffect(() => {
     const startSprint = async () => {
@@ -47,12 +66,12 @@ export default function Sprint({ user, setUser }) {
     setHintsUsed(0);
     setDeepDiveText('');
     setShowDeepDive(false);
-    timeStartRef.current = Date.now();
     try {
       const res = await fetch(`/api/questions/next?userId=${user.id}`);
       if (!res.ok) throw new Error('No questions');
       const q = await res.json();
       setQuestion(q);
+      startTimer();
     } catch (err) {
       console.error(err);
     } finally {
@@ -60,18 +79,22 @@ export default function Sprint({ user, setUser }) {
     }
   };
 
-  const handleAnswerSubmit = async () => {
-    if (!selectedChoice && question.is_grid_in === 0) return;
+  const handleAnswerSubmit = useCallback(async (choiceOverride) => {
+    const choice = choiceOverride ?? selectedChoice;
+    if (!choice && question?.is_grid_in === 0) return;
+    if (isAnswered) return;
+
+    stopTimer();
+    const timeSpent = Math.round((Date.now() - timeStartRef.current) / 1000);
 
     let correct = false;
     if (question.is_grid_in) {
-      correct = parseFloat(selectedChoice) === question.grid_in_answer;
+      correct = parseFloat(choice) === question.grid_in_answer;
     } else {
-      const choice = question.choices.find(c => c.label === selectedChoice);
-      if (choice?.is_correct) correct = true;
+      const ch = question.choices.find(c => c.label === choice);
+      if (ch?.is_correct) correct = true;
     }
 
-    const timeSpent = Math.round((Date.now() - timeStartRef.current) / 1000);
     const xpGained = correct ? 20 : 5;
 
     setIsAnswered(true);
@@ -88,14 +111,13 @@ export default function Sprint({ user, setUser }) {
         body: JSON.stringify({
           user_id: user.id,
           question_id: question.id,
-          selected_choice: selectedChoice,
+          selected_choice: choice,
           is_correct: correct ? 1 : 0,
           hints_used: hintsUsed,
           time_spent_seconds: timeSpent,
           sprint_id: sprintId
         })
       });
-
       const userRes = await fetch(`/api/users/${user.id}/xp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -105,7 +127,60 @@ export default function Sprint({ user, setUser }) {
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [selectedChoice, question, isAnswered, hintsUsed, sprintId, user.id]);
+
+  const handleNext = useCallback(async () => {
+    const current = stats;
+    if (questionNum >= SPRINT_LENGTH) {
+      try {
+        await fetch(`/api/sprints/${sprintId}/finish`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            questions_attempted: current.attempted,
+            questions_correct: current.correct,
+            xp_earned: current.xp
+          })
+        });
+      } catch {}
+      setFinalStats(current);
+      setShowSummary(true);
+    } else {
+      setQuestionNum(n => n + 1);
+      await fetchNextQuestion();
+    }
+  }, [questionNum, sprintId, stats]);
+
+  // Keyboard shortcuts: 1-4 pick choice, Enter submits / advances
+  useEffect(() => {
+    const onKey = (e) => {
+      if (!question || loading || showSummary) return;
+      if (e.target.tagName === 'INPUT') return;
+
+      if (!isAnswered) {
+        if (['1','2','3','4'].includes(e.key) && !question.is_grid_in) {
+          const labels = ['A','B','C','D'];
+          const label = labels[parseInt(e.key) - 1];
+          if (label && question.choices.find(c => c.label === label)) {
+            setSelectedChoice(label);
+          }
+        }
+        if (e.key === 'Enter') {
+          handleAnswerSubmit();
+        }
+        if (e.key === 'h' || e.key === 'H') {
+          if (hintsUsed < 2) setHintsUsed(h => h + 1);
+        }
+      } else {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleNext();
+        }
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [question, isAnswered, loading, showSummary, selectedChoice, hintsUsed, handleAnswerSubmit, handleNext]);
 
   const handleDeepDive = async () => {
     setDeepDiveLoading(true);
@@ -147,26 +222,51 @@ export default function Sprint({ user, setUser }) {
     }
   };
 
-  const handleNext = async () => {
-    const finalStats = { ...stats };
-    if (questionNum >= SPRINT_LENGTH) {
-      try {
-        await fetch(`/api/sprints/${sprintId}/finish`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            questions_attempted: finalStats.attempted,
-            questions_correct: finalStats.correct,
-            xp_earned: finalStats.xp
-          })
-        });
-      } catch {}
-      navigate('/');
-    } else {
-      setQuestionNum(n => n + 1);
-      await fetchNextQuestion();
-    }
-  };
+  // Sprint summary screen
+  if (showSummary && finalStats) {
+    const accuracy = finalStats.attempted > 0 ? Math.round((finalStats.correct / finalStats.attempted) * 100) : 0;
+    const grade = accuracy >= 90 ? { label: 'Excellent', color: 'var(--success)' }
+      : accuracy >= 70 ? { label: 'Good', color: 'var(--primary)' }
+      : accuracy >= 50 ? { label: 'Keep Going', color: 'var(--xp-gold)' }
+      : { label: 'Needs Work', color: 'var(--error)' };
+
+    return (
+      <div style={{ padding: '48px', maxWidth: '600px', margin: '0 auto', width: '100%', textAlign: 'center' }}>
+        <Trophy size={48} color="var(--xp-gold)" style={{ marginBottom: '24px' }} />
+        <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>Sprint Complete!</h1>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '40px' }}>{SPRINT_LENGTH} questions finished</p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '40px' }}>
+          {[
+            { label: 'Correct', value: `${finalStats.correct}/${finalStats.attempted}` },
+            { label: 'Accuracy', value: `${accuracy}%`, color: grade.color },
+            { label: 'XP Earned', value: `+${finalStats.xp}`, color: 'var(--xp-gold)' }
+          ].map(stat => (
+            <div key={stat.label} style={{ backgroundColor: 'var(--bg-card)', padding: '20px', borderRadius: '14px', border: '1px solid #2a2a46' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>{stat.label}</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 'bold', color: stat.color || 'var(--text-primary)' }}>{stat.value}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px 24px', borderRadius: '14px', border: `2px solid ${grade.color}`, marginBottom: '32px' }}>
+          <span style={{ fontSize: '1.1rem', fontWeight: '700', color: grade.color }}>{grade.label}</span>
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button onClick={() => navigate('/review')}
+            style={{ flex: 1, padding: '14px', fontSize: '0.95rem', borderColor: 'rgba(255,215,64,0.3)', color: 'var(--xp-gold)' }}>
+            Review Errors
+          </button>
+          <button className="primary" onClick={() => navigate('/')}
+            style={{ flex: 2, padding: '14px', fontSize: '1rem' }}>
+            Back to Dashboard
+          </button>
+        </div>
+        <p style={{ marginTop: '12px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Press Enter to go to Dashboard</p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -189,11 +289,14 @@ export default function Sprint({ user, setUser }) {
     ? parseFloat(selectedChoice) === question.grid_in_answer
     : question.choices.find(c => c.label === selectedChoice)?.is_correct;
 
+  const timerColor = elapsed < 60 ? 'var(--text-secondary)' : elapsed < 120 ? 'var(--xp-gold)' : 'var(--error)';
+  const timerStr = `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, '0')}`;
+
   return (
     <div style={{ padding: '48px', maxWidth: '800px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column' }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
-      {/* Progress bar */}
+      {/* Progress bar + timer */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
         <div style={{ display: 'flex', gap: '4px', flex: 1 }}>
           {Array.from({ length: SPRINT_LENGTH }).map((_, i) => (
@@ -204,8 +307,13 @@ export default function Sprint({ user, setUser }) {
             }} />
           ))}
         </div>
-        <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', whiteSpace: 'nowrap', minWidth: '60px', textAlign: 'right' }}>
-          Q{questionNum} / {SPRINT_LENGTH}
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', minWidth: '100px', justifyContent: 'flex-end' }}>
+          <span style={{ color: timerColor, fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums', fontWeight: isAnswered ? 'normal' : '500' }}>
+            {timerStr}
+          </span>
+          <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
+            Q{questionNum}/{SPRINT_LENGTH}
+          </div>
         </div>
       </div>
 
@@ -216,6 +324,9 @@ export default function Sprint({ user, setUser }) {
         <span style={{ fontSize: '0.75rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px' }}>{question.domain}</span>
         <span style={{ color: '#2a2a46' }}>|</span>
         <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>{question.difficulty}</span>
+        {!isAnswered && (
+          <span style={{ marginLeft: 'auto', fontSize: '0.65rem', color: '#2a2a46' }}>1-4 to pick, Enter to submit</span>
+        )}
       </div>
 
       {/* Question content */}
@@ -253,7 +364,7 @@ export default function Sprint({ user, setUser }) {
             style={{ padding: '16px', fontSize: '1.2rem', borderRadius: '10px', border: '2px solid #2a2a46', backgroundColor: 'var(--bg-main)', color: 'white', maxWidth: '260px', outline: 'none' }}
             placeholder="Enter your answer" />
         ) : (
-          question.choices.map(c => {
+          question.choices.map((c, idx) => {
             let bgColor = 'var(--bg-card)', borderColor = '#2a2a46', textColor = 'var(--text-primary)';
             if (isAnswered) {
               if (c.is_correct) { bgColor = 'rgba(0,230,118,0.08)'; borderColor = 'var(--success)'; }
@@ -312,6 +423,7 @@ export default function Sprint({ user, setUser }) {
             style={{ width: '100%', padding: '15px', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
             {questionNum < SPRINT_LENGTH ? 'Next Question' : 'Complete Sprint'} <ChevronRight size={18} />
           </button>
+          <p style={{ textAlign: 'center', marginTop: '8px', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Press Enter to continue</p>
         </div>
       ) : (
         <div style={{ display: 'flex', gap: '10px' }}>
@@ -319,7 +431,7 @@ export default function Sprint({ user, setUser }) {
             style={{ flex: 1, padding: '13px', fontSize: '0.9rem', color: hintsUsed >= 2 ? 'var(--text-secondary)' : 'var(--xp-gold)', borderColor: hintsUsed >= 2 ? '#2a2a46' : 'rgba(255,215,64,0.3)' }}>
             Hint ({2 - hintsUsed} left)
           </button>
-          <button className="primary" onClick={handleAnswerSubmit}
+          <button className="primary" onClick={() => handleAnswerSubmit()}
             disabled={!selectedChoice && question.is_grid_in === 0}
             style={{ flex: 2, padding: '13px', fontSize: '1rem' }}>
             Check Answer
