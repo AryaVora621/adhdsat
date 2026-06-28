@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, ChevronRight, ChevronLeft, Zap } from 'lucide-react';
 
@@ -17,6 +17,12 @@ export default function Onboarding({ user, setUser }) {
   const [testDate, setTestDate] = useState('');
   const fileInputRef = useRef();
   const navigate = useNavigate();
+
+  // Keep targetScore above baseline when scores change
+  useEffect(() => {
+    const baseline = englishScore + mathScore;
+    if (targetScore <= baseline) setTargetScore(Math.min(1600, baseline + 40));
+  }, [englishScore, mathScore]);
 
   const toggleDomain = (domain) => {
     setWeakAreas(prev => prev.includes(domain) ? prev.filter(d => d !== domain) : [...prev, domain]);
@@ -63,15 +69,13 @@ export default function Onboarding({ user, setUser }) {
       });
       const updated = await res.json();
       setUser(updated);
-      // Save study plan if test date was provided
-      if (testDate) {
-        await fetch(`/api/study-plan/${user.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ target_score: targetScore, test_date: testDate })
-        }).catch(() => {});
-      }
-      navigate('/sprint');
+      // Always save target score; include test date if provided
+      await fetch(`/api/study-plan/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target_score: targetScore, ...(testDate ? { test_date: testDate } : {}) })
+      }).catch(() => {});
+      navigate('/sprint', { state: { mode: 'adaptive' } });
     } catch (err) {
       console.error(err);
       setSubmitting(false);
