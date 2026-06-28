@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, XCircle, ChevronRight, AlertCircle, Zap, Trophy } from 'lucide-react';
+import { CheckCircle2, XCircle, ChevronRight, AlertCircle, Zap, Trophy, Calculator, BookOpen, Shuffle } from 'lucide-react';
 import MathText from '../components/MathText';
 
-function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, navigate, user, setShowSummary, setFinalStats, setStats, setQuestionNum, setQuestion, setLoading, setSprintId, fetchNextQuestion }) {
+function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, navigate, onSprintAgain }) {
   const [breakdown, setBreakdown] = useState(null);
 
   useEffect(() => {
@@ -15,15 +15,6 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
   }, [sprintId]);
 
   const domainColor = (acc) => acc >= 70 ? 'var(--success)' : acc >= 50 ? 'var(--xp-gold)' : 'var(--error)';
-
-  const handleSprintAgain = async () => {
-    setShowSummary(false); setFinalStats(null);
-    setStats({ attempted: 0, correct: 0, xp: 0 }); setQuestionNum(1);
-    setQuestion(null); setLoading(true);
-    const res = await fetch('/api/sprints', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, sprint_type: 'adaptive' }) });
-    const data = await res.json(); setSprintId(data.id);
-    fetchNextQuestion();
-  };
 
   return (
     <div style={{ padding: '48px', maxWidth: '600px', margin: '0 auto', width: '100%', textAlign: 'center' }}>
@@ -76,7 +67,7 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
           style={{ flex: 1, padding: '14px', fontSize: '0.9rem', borderColor: 'rgba(255,215,64,0.3)', color: 'var(--xp-gold)' }}>
           Review Errors
         </button>
-        <button className="primary" onClick={handleSprintAgain}
+        <button className="primary" onClick={onSprintAgain}
           style={{ flex: 2, padding: '14px', fontSize: '1rem' }}>
           Sprint Again
         </button>
@@ -90,9 +81,11 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
 }
 
 export default function Sprint({ user, setUser }) {
+  const [sprintMode, setSprintMode] = useState(null); // null = mode picker, 'math'|'english'|'adaptive'
+  const sprintModeRef = useRef(null);
   const [sprintId, setSprintId] = useState(null);
   const [question, setQuestion] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [questionNum, setQuestionNum] = useState(1);
   const [stats, setStats] = useState({ attempted: 0, correct: 0, xp: 0 });
   const [showSummary, setShowSummary] = useState(false);
@@ -126,24 +119,24 @@ export default function Sprint({ user, setUser }) {
 
   useEffect(() => () => clearInterval(timerRef.current), []);
 
-  useEffect(() => {
-    const startSprint = async () => {
-      try {
-        const res = await fetch('/api/sprints', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user.id, sprint_type: 'adaptive' })
-        });
-        const data = await res.json();
-        setSprintId(data.id);
-        await fetchNextQuestion();
-      } catch (err) {
-        console.error(err);
-        setLoading(false);
-      }
-    };
-    startSprint();
-  }, []);
+  const startSprint = async (mode) => {
+    sprintModeRef.current = mode;
+    setSprintMode(mode);
+    setLoading(true);
+    try {
+      const res = await fetch('/api/sprints', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, sprint_type: mode })
+      });
+      const data = await res.json();
+      setSprintId(data.id);
+      await fetchNextQuestion();
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
+  };
 
   const fetchNextQuestion = async () => {
     setLoading(true);
@@ -153,7 +146,9 @@ export default function Sprint({ user, setUser }) {
     setDeepDiveText('');
     setShowDeepDive(false);
     try {
-      const res = await fetch(`/api/questions/next?userId=${user.id}`);
+      const mode = sprintModeRef.current;
+      const sectionParam = mode && mode !== 'adaptive' ? `&section=${mode}` : '';
+      const res = await fetch(`/api/questions/next?userId=${user.id}${sectionParam}`);
       if (!res.ok) throw new Error('No questions');
       const q = await res.json();
       setQuestion(q);
@@ -316,6 +311,12 @@ export default function Sprint({ user, setUser }) {
       : accuracy >= 50 ? { label: 'Keep Going', color: 'var(--xp-gold)' }
       : { label: 'Needs Work', color: 'var(--error)' };
 
+    const handleSprintAgain = () => {
+      setShowSummary(false); setFinalStats(null);
+      setStats({ attempted: 0, correct: 0, xp: 0 }); setQuestionNum(1);
+      setQuestion(null); setLoading(false); setSprintId(null);
+      setSprintMode(null); sprintModeRef.current = null;
+    };
     return (
       <SummaryScreen
         finalStats={finalStats}
@@ -324,19 +325,42 @@ export default function Sprint({ user, setUser }) {
         grade={grade}
         SPRINT_LENGTH={SPRINT_LENGTH}
         navigate={navigate}
-        user={user}
-        setShowSummary={setShowSummary}
-        setFinalStats={setFinalStats}
-        setStats={setStats}
-        setQuestionNum={setQuestionNum}
-        setQuestion={setQuestion}
-        setLoading={setLoading}
-        setSprintId={setSprintId}
-        fetchNextQuestion={fetchNextQuestion}
+        onSprintAgain={handleSprintAgain}
       />
     );
   }
 
+  // Mode picker - shown before sprint starts
+  if (sprintMode === null) {
+    const modes = [
+      { key: 'adaptive', label: 'Adaptive', sub: 'AI picks based on your weaknesses', icon: <Shuffle size={28} /> },
+      { key: 'math', label: 'Math', sub: 'Algebra, Advanced Math, Geometry...', icon: <Calculator size={28} /> },
+      { key: 'english', label: 'English', sub: 'Reading, Writing & Language...', icon: <BookOpen size={28} /> },
+    ];
+    return (
+      <div style={{ padding: '48px', maxWidth: '600px', margin: '0 auto', width: '100%' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>Choose Sprint Mode</h1>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '40px' }}>Pick your focus for this 10-question sprint</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {modes.map(m => (
+            <button key={m.key} onClick={() => startSprint(m.key)}
+              style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '20px 24px', backgroundColor: 'var(--bg-card)', border: '1px solid #2a2a46', borderRadius: '16px', textAlign: 'left', cursor: 'pointer', transition: 'border-color 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = '#2a2a46'}>
+              <span style={{ color: 'var(--primary)' }}>{m.icon}</span>
+              <div>
+                <div style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '3px' }}>{m.label}</div>
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{m.sub}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+        <button onClick={() => navigate('/')} style={{ marginTop: '20px', padding: '10px 16px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+          Back to Dashboard
+        </button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -389,8 +413,11 @@ export default function Sprint({ user, setUser }) {
 
       {/* Domain header */}
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>{question.section}</span>
-        <span style={{ color: '#2a2a46' }}>|</span>
+        {sprintMode !== 'adaptive' && (
+          <span style={{ fontSize: '0.7rem', padding: '3px 9px', borderRadius: '10px', backgroundColor: sprintMode === 'math' ? 'rgba(0,212,255,0.1)' : 'rgba(255,215,64,0.1)', color: sprintMode === 'math' ? 'var(--primary)' : 'var(--xp-gold)', border: `1px solid ${sprintMode === 'math' ? 'rgba(0,212,255,0.3)' : 'rgba(255,215,64,0.3)'}`, textTransform: 'uppercase', letterSpacing: '1px' }}>
+            {sprintMode}
+          </span>
+        )}
         <span style={{ fontSize: '0.75rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px' }}>{question.domain}</span>
         <span style={{ color: '#2a2a46' }}>|</span>
         <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>{question.difficulty}</span>

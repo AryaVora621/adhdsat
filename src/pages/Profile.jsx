@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Check, Edit2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Check, Edit2, Upload, RotateCcw, AlertTriangle } from 'lucide-react';
 
 const MATH_DOMAINS = ['Algebra', 'Advanced Math', 'Problem Solving & Data Analysis', 'Geometry & Trig'];
 const ENG_DOMAINS = ['Information & Ideas', 'Craft & Structure', 'Expression of Ideas', 'Standard English Conventions'];
@@ -12,6 +12,18 @@ export default function Profile({ user, setUser }) {
   const [progress, setProgress] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
+  // Score editing
+  const [editingScores, setEditingScores] = useState(false);
+  const [engInput, setEngInput] = useState(user.baseline_english || 0);
+  const [mathInput, setMathInput] = useState(user.baseline_math || 0);
+  const [scoreMsg, setScoreMsg] = useState('');
+  // Score report upload
+  const [uploading, setUploading] = useState(false);
+  const [uploadMsg, setUploadMsg] = useState('');
+  const fileInputRef = useRef();
+  // Reset
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     fetch(`/api/progress?userId=${user.id}`)
@@ -44,6 +56,80 @@ export default function Profile({ user, setUser }) {
       setSaveMsg('Saved!');
       setTimeout(() => setSaveMsg(''), 2000);
     } catch {}
+  };
+
+  const saveScores = async () => {
+    try {
+      const res = await fetch(`/api/users/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ baseline_english: engInput, baseline_math: mathInput })
+      });
+      setUser(await res.json());
+      setEditingScores(false);
+      setScoreMsg('Scores updated!');
+      setTimeout(() => setScoreMsg(''), 2000);
+    } catch {}
+  };
+
+  const handleScoreReport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    setUploadMsg('Analyzing with AI...');
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64 = reader.result.split(',')[1];
+      try {
+        const res = await fetch('/api/analyze-report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: base64, mimeType: file.type })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.english_score) setEngInput(data.english_score);
+          if (data.math_score) setMathInput(data.math_score);
+          if (data.weak_areas?.length) setWeakAreas(data.weak_areas);
+          // Auto-save what was extracted
+          const saveRes = await fetch(`/api/users/${user.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              baseline_english: data.english_score || engInput,
+              baseline_math: data.math_score || mathInput,
+              weak_areas: data.weak_areas?.length ? data.weak_areas : weakAreas
+            })
+          });
+          setUser(await saveRes.json());
+          setUploadMsg(`Extracted: R&W ${data.english_score || '?'}, Math ${data.math_score || '?'}. Weak areas updated.`);
+          setEditingScores(true);
+        } else {
+          setUploadMsg('Could not parse report. Fill in scores manually.');
+        }
+      } catch {
+        setUploadMsg('Analysis failed. Fill in scores manually.');
+      }
+      setUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleReset = async () => {
+    setResetting(true);
+    try {
+      const res = await fetch(`/api/users/${user.id}/reset`, { method: 'POST' });
+      const updated = await res.json();
+      setUser(updated);
+      setWeakAreas([]);
+      setEngInput(0);
+      setMathInput(0);
+      setShowResetConfirm(false);
+      setProgress(null);
+      // Reload progress
+      fetch(`/api/progress?userId=${user.id}`).then(r => r.json()).then(setProgress).catch(() => {});
+    } catch {}
+    setResetting(false);
   };
 
   const toggleDomain = (domain) => {
@@ -96,19 +182,60 @@ export default function Profile({ user, setUser }) {
 
       {/* Scores */}
       <div style={sectionStyle}>
-        <div style={labelStyle}>Scores</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-          {[
-            { label: 'Baseline R&W', value: user.baseline_english || '--' },
-            { label: 'Baseline Math', value: user.baseline_math || '--' },
-            { label: 'Predicted Range', value: progress?.predictedScore?.range || (progress?.totalAnswered < 10 ? '10+ Qs needed' : '--') }
-          ].map(item => (
-            <div key={item.label} style={{ textAlign: 'center', backgroundColor: 'var(--bg-main)', borderRadius: '10px', padding: '14px' }}>
-              <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--primary)' }}>{item.value}</div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: 1.3 }}>{item.label}</div>
-            </div>
-          ))}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+          <div style={labelStyle}>Baseline Scores</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {scoreMsg && <span style={{ color: 'var(--success)', fontSize: '0.82rem' }}>{scoreMsg}</span>}
+            <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.8rem', color: uploading ? 'var(--text-secondary)' : 'var(--primary)', borderColor: 'rgba(0,212,255,0.3)' }}>
+              <Upload size={13} /> {uploading ? 'Analyzing...' : 'Upload Report'}
+            </button>
+            <input type="file" ref={fileInputRef} accept="image/*,.pdf" style={{ display: 'none' }} onChange={handleScoreReport} />
+            <button onClick={() => setEditingScores(e => !e)}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              <Edit2 size={13} /> Edit
+            </button>
+          </div>
         </div>
+        {uploadMsg && (
+          <div style={{ fontSize: '0.82rem', color: uploadMsg.includes('Extracted') ? 'var(--success)' : 'var(--xp-gold)', marginBottom: '12px', padding: '10px 14px', backgroundColor: 'var(--bg-main)', borderRadius: '8px' }}>
+            {uploadMsg}
+          </div>
+        )}
+        {editingScores ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {[
+              { label: 'Reading & Writing', val: engInput, set: setEngInput },
+              { label: 'Math', val: mathInput, set: setMathInput }
+            ].map(({ label, val, set }) => (
+              <div key={label}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.82rem' }}>
+                  <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
+                  <span style={{ color: 'var(--primary)', fontWeight: '700' }}>{val}</span>
+                </div>
+                <input type="range" min="200" max="800" step="10" value={val} onChange={e => set(Number(e.target.value))}
+                  style={{ width: '100%', accentColor: 'var(--primary)' }} />
+              </div>
+            ))}
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button className="primary" onClick={saveScores} style={{ flex: 1, padding: '9px', fontSize: '0.9rem' }}>Save Scores</button>
+              <button onClick={() => setEditingScores(false)} style={{ padding: '9px 14px', fontSize: '0.9rem' }}>Cancel</button>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+            {[
+              { label: 'Baseline R&W', value: user.baseline_english || '--' },
+              { label: 'Baseline Math', value: user.baseline_math || '--' },
+              { label: 'Predicted Range', value: progress?.predictedScore?.range || (progress?.totalAnswered < 10 ? '10+ Qs needed' : '--') }
+            ].map(item => (
+              <div key={item.label} style={{ textAlign: 'center', backgroundColor: 'var(--bg-main)', borderRadius: '10px', padding: '14px' }}>
+                <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--primary)' }}>{item.value}</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: 1.3 }}>{item.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* XP & Level */}
@@ -214,6 +341,33 @@ export default function Profile({ user, setUser }) {
           </table>
         </div>
       )}
+
+      {/* Reset Profile */}
+      <div style={{ ...sectionStyle, borderColor: 'rgba(255,82,82,0.2)', marginTop: '32px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ ...labelStyle, color: 'var(--error)' }}>Danger Zone</div>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '-6px' }}>
+              Erase all progress, XP, answers, and streaks. Cannot be undone.
+            </p>
+          </div>
+          {!showResetConfirm ? (
+            <button onClick={() => setShowResetConfirm(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px', fontSize: '0.85rem', borderColor: 'rgba(255,82,82,0.4)', color: 'var(--error)', flexShrink: 0 }}>
+              <RotateCcw size={14} /> Reset Profile
+            </button>
+          ) : (
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Sure?</span>
+              <button onClick={handleReset} disabled={resetting}
+                style={{ padding: '8px 16px', fontSize: '0.85rem', backgroundColor: 'rgba(255,82,82,0.15)', border: '1px solid var(--error)', borderRadius: '8px', color: 'var(--error)' }}>
+                {resetting ? 'Resetting...' : 'Yes, Reset'}
+              </button>
+              <button onClick={() => setShowResetConfirm(false)} style={{ padding: '8px 14px', fontSize: '0.85rem' }}>Cancel</button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

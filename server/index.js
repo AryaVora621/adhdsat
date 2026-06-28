@@ -12,10 +12,9 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-const DOMAINS = [
-  'Algebra', 'Advanced Math', 'Problem Solving & Data Analysis', 'Geometry & Trig',
-  'Information & Ideas', 'Craft & Structure', 'Expression of Ideas', 'Standard English Conventions'
-];
+const MATH_DOMAINS = ['Algebra', 'Advanced Math', 'Problem Solving & Data Analysis', 'Geometry & Trig'];
+const ENG_DOMAINS = ['Information & Ideas', 'Craft & Structure', 'Expression of Ideas', 'Standard English Conventions'];
+const DOMAINS = [...MATH_DOMAINS, ...ENG_DOMAINS];
 
 // --- Users ---
 
@@ -105,8 +104,11 @@ app.get('/api/questions', (req, res) => {
 });
 
 app.get('/api/questions/next', async (req, res) => {
-  const { userId } = req.query;
+  const { userId, section } = req.query;
   if (!userId) return res.status(400).json({ error: 'userId required' });
+
+  // Determine which domains are in scope for this sprint
+  const allowedDomains = section === 'math' ? MATH_DOMAINS : section === 'english' ? ENG_DOMAINS : DOMAINS;
 
   const seen = db.prepare('SELECT question_id FROM user_answers WHERE user_id = ? ORDER BY created_at DESC LIMIT 50').all(userId).map(r => r.question_id);
 
@@ -128,17 +130,21 @@ app.get('/api/questions/next', async (req, res) => {
   }
 
   const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
-  const weakAreas = JSON.parse(user?.weak_areas || '[]');
+  const allWeakAreas = JSON.parse(user?.weak_areas || '[]');
+  // Only consider weak areas within the allowed section
+  const weakAreas = allWeakAreas.filter(d => allowedDomains.includes(d));
 
   let criteria = null;
   try {
     criteria = await getAdaptiveCriteria({ domainAccuracy, weakAreas });
   } catch {}
 
-  if (!criteria) {
-    let targetDomain = weakAreas[0] || DOMAINS[0];
+  // Validate that Gemini's pick is within the allowed section; if not, fall through to rule-based
+  if (!criteria || !allowedDomains.includes(criteria.domain)) {
+    let targetDomain = weakAreas[0] || allowedDomains[0];
     let lowestAcc = Infinity;
     for (const [d, acc] of Object.entries(domainAccuracy)) {
+      if (!allowedDomains.includes(d)) continue;
       if (acc !== null && acc < lowestAcc) { lowestAcc = acc; targetDomain = d; }
     }
     criteria = { domain: targetDomain, difficulty: 'medium' };
@@ -154,10 +160,12 @@ app.get('/api/questions/next', async (req, res) => {
       `SELECT * FROM questions WHERE domain = ? AND id NOT IN (${placeholders}) ORDER BY RANDOM() LIMIT 1`
     ).get(criteria.domain, ...seen);
   }
+  // Fallback: any question from the allowed section not recently seen
   if (!question) {
+    const domainClause = allowedDomains.map(() => '?').join(',');
     question = db.prepare(
-      `SELECT * FROM questions WHERE id NOT IN (${placeholders}) ORDER BY RANDOM() LIMIT 1`
-    ).get(...seen);
+      `SELECT * FROM questions WHERE domain IN (${domainClause}) AND id NOT IN (${placeholders}) ORDER BY RANDOM() LIMIT 1`
+    ).get(...allowedDomains, ...seen);
   }
   if (!question) {
     question = db.prepare('SELECT * FROM questions ORDER BY RANDOM() LIMIT 1').get();
@@ -472,6 +480,26 @@ app.post('/api/analyze-report', async (req, res) => {
   const result = await analyzeScoreReport(image, mimeType);
   if (!result) return res.status(422).json({ error: 'Could not parse score report' });
   res.json(result);
+});
+
+// --- Reset Profile ---
+app.post('/api/users/:id/reset', (req, res) => {
+  const id = req.params.id;
+  try {
+    db.prepare('DELETE FROM user_answers WHERE user_id = ?').run(id);
+    db.prepare('DELETE FROM sprints WHERE user_id = ?').run(id);
+    db.prepare('DELETE FROM review_cards WHERE user_id = ?').run(id);
+    db.prepare(`UPDATE users SET
+      total_xp = 0, current_level = 1, current_streak = 0, longest_streak = 0,
+      baseline_english = 0, baseline_math = 0, weak_areas = '[]',
+      onboarding_completed = 0, study_plan = NULL, last_active_date = NULL
+    WHERE id = ?`).run(id);
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+    user.weak_areas = JSON.parse(user.weak_areas || '[]');
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 const PORT = process.env.PORT || 3001;
