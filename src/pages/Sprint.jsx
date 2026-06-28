@@ -36,8 +36,43 @@ function WrongAnswerCard({ item }) {
   );
 }
 
+function Confetti() {
+  const pieces = Array.from({ length: 40 }, (_, i) => ({
+    id: i,
+    color: ['#00d4ff', '#00e676', '#ffd740', '#ff5252', '#e040fb'][i % 5],
+    left: Math.random() * 100,
+    delay: Math.random() * 0.6,
+    duration: 1.2 + Math.random() * 0.8,
+    size: 6 + Math.random() * 6,
+    rotate: Math.random() * 360,
+  }));
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'hidden', zIndex: 9998 }}>
+      <style>{`
+        @keyframes confettiFall {
+          0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+          80%  { opacity: 1; }
+          100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+      `}</style>
+      {pieces.map(p => (
+        <div key={p.id} style={{
+          position: 'absolute', top: '-20px', left: `${p.left}%`,
+          width: `${p.size}px`, height: `${p.size}px`,
+          backgroundColor: p.color, borderRadius: p.id % 3 === 0 ? '50%' : '2px',
+          animation: `confettiFall ${p.duration}s ${p.delay}s ease-in forwards`,
+          transform: `rotate(${p.rotate}deg)`,
+          opacity: 0,
+        }} />
+      ))}
+    </div>
+  );
+}
+
 function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, navigate, onSprintAgain, wrongAnswers }) {
   const [breakdown, setBreakdown] = useState(null);
+  const [isPersonalBest, setIsPersonalBest] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
     if (!sprintId) return;
@@ -47,12 +82,30 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
       .catch(() => {});
   }, [sprintId]);
 
+  useEffect(() => {
+    if (!accuracy || finalStats.attempted < 3) return;
+    const prev = parseFloat(localStorage.getItem('bestSprintAccuracy') || '0');
+    if (accuracy > prev) {
+      localStorage.setItem('bestSprintAccuracy', String(accuracy));
+      setIsPersonalBest(true);
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3500);
+    }
+  }, [accuracy]);
+
   const domainColor = (acc) => acc >= 70 ? 'var(--success)' : acc >= 50 ? 'var(--xp-gold)' : 'var(--error)';
 
   return (
     <div style={{ padding: '48px', maxWidth: '600px', margin: '0 auto', width: '100%', textAlign: 'center' }}>
+      {showConfetti && <Confetti />}
       <Trophy size={48} color="var(--xp-gold)" style={{ marginBottom: '24px' }} />
       <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>Sprint Complete!</h1>
+      {isPersonalBest && (
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(255,215,64,0.1)', border: '1px solid rgba(255,215,64,0.5)', borderRadius: '20px', padding: '6px 16px', marginBottom: '12px' }}>
+          <Trophy size={14} color="var(--xp-gold)" />
+          <span style={{ color: 'var(--xp-gold)', fontWeight: '700', fontSize: '0.85rem' }}>New Personal Best!</span>
+        </div>
+      )}
       <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>{SPRINT_LENGTH} questions finished</p>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '20px' }}>
