@@ -928,6 +928,11 @@ export default function Sprint({ user, setUser }) {
           </button>
         </div>
       )}
+      {!isAnswered && !question.is_grid_in && (
+        <p style={{ textAlign: 'center', marginTop: '10px', fontSize: '0.65rem', color: '#3a3a56', letterSpacing: '0.5px' }}>
+          1-4 to select · Enter to check{!isTestMode ? ' · H for hint' : ''}
+        </p>
+      )}
     </div>
   );
 }
