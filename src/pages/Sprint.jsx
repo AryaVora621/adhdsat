@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { CheckCircle2, XCircle, ChevronRight, AlertCircle, Zap, Trophy, Calculator, BookOpen, Shuffle } from 'lucide-react';
+import { CheckCircle2, XCircle, ChevronRight, ChevronLeft, AlertCircle, Zap, Trophy, Calculator, BookOpen, Shuffle } from 'lucide-react';
 import MathText from '../components/MathText';
 
 function WrongAnswerCard({ item }) {
@@ -822,7 +822,7 @@ export default function Sprint({ user, setUser }) {
           <button onClick={() => { setSprintMode(null); setSprintModeState(null); sessionStorage.removeItem('lastSprintMode'); setSprintId(null); setQuestion(null); setLoading(false); sprintStartRef.current = null; }}
             style={{ marginLeft: 'auto', fontSize: '0.68rem', color: 'var(--text-secondary)', padding: '2px 8px', borderRadius: '6px', border: '1px solid #2a2a46', backgroundColor: 'transparent', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}
             title="Change sprint mode">
-            ← mode
+            <ChevronLeft size={11} style={{ verticalAlign: 'middle' }} /> mode
           </button>
         )}
         {!isAnswered && questionNum > 1 && <span style={{ marginLeft: 'auto' }} />}
