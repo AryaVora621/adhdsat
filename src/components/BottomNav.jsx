@@ -7,9 +7,9 @@ export default function BottomNav({ userId }) {
 
   useEffect(() => {
     if (!userId) return;
-    fetch(`/api/review-queue/${userId}`)
+    fetch(`/api/review/count?userId=${userId}`)
       .then(r => r.json())
-      .then(data => setReviewCount(data?.length || 0))
+      .then(data => setReviewCount(data?.count || 0))
       .catch(() => {});
   }, [userId]);
 
