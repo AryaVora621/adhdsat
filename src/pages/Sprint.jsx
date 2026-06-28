@@ -820,9 +820,7 @@ export default function Sprint({ user, setUser }) {
             ← mode
           </button>
         )}
-        {!isAnswered && questionNum > 1 && (
-          <span style={{ marginLeft: 'auto', fontSize: '0.65rem', color: '#2a2a46', flexShrink: 0 }}>1-4 pick, Enter submit</span>
-        )}
+        {!isAnswered && questionNum > 1 && <span style={{ marginLeft: 'auto' }} />}
       </div>
 
       {/* Question content */}
@@ -856,8 +854,10 @@ export default function Sprint({ user, setUser }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '32px' }}>
         {question.is_grid_in ? (
           <input type="number" value={selectedChoice || ''} onChange={e => setSelectedChoice(e.target.value)}
-            disabled={isAnswered}
+            disabled={isAnswered} autoFocus
             style={{ padding: '16px', fontSize: '1.2rem', borderRadius: '10px', border: '2px solid #2a2a46', backgroundColor: 'var(--bg-main)', color: 'white', maxWidth: '260px', outline: 'none' }}
+            onFocus={e => e.target.style.borderColor = 'var(--primary)'}
+            onBlur={e => e.target.style.borderColor = '#2a2a46'}
             placeholder="Enter your answer" />
         ) : (
           question.choices.map((c, idx) => {
