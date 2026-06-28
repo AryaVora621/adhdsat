@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlayCircle, BookOpen, TrendingUp, TrendingDown, Minus, Target, Calendar } from 'lucide-react';
+import { PlayCircle, BookOpen, TrendingUp, TrendingDown, Minus, Target, Calendar, Zap, Calculator, AlertCircle, Shuffle } from 'lucide-react';
 
 const DOMAINS = [
   { name: 'Algebra', section: 'Math' },
@@ -141,6 +141,7 @@ export default function Dashboard({ user }) {
   const [progress, setProgress] = useState(null);
   const [loading, setLoading] = useState(true);
   const [reviewCount, setReviewCount] = useState(0);
+  const [insights, setInsights] = useState(null);
 
   useEffect(() => {
     fetch(`/api/progress?userId=${user.id}`)
@@ -150,6 +151,10 @@ export default function Dashboard({ user }) {
     fetch(`/api/review/count?userId=${user.id}`)
       .then(r => r.json())
       .then(data => setReviewCount(data.count || 0))
+      .catch(() => {});
+    fetch(`/api/insights/${user.id}`)
+      .then(r => r.json())
+      .then(setInsights)
       .catch(() => {});
   }, [user.id]);
 
@@ -172,45 +177,73 @@ export default function Dashboard({ user }) {
       {/* Study plan */}
       <StudyPlanWidget user={user} navigate={navigate} />
 
-      {/* CTA row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '40px' }}>
-        <div onClick={() => navigate('/sprint')}
-          style={{ backgroundColor: 'var(--bg-card)', padding: '28px', borderRadius: '16px', border: '1px solid #2a2a46', cursor: 'pointer', transition: 'all 0.2s' }}
-          onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
-          onMouseOut={e => { e.currentTarget.style.borderColor = '#2a2a46'; e.currentTarget.style.transform = 'translateY(0)'; }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-            <PlayCircle size={30} color="var(--primary)" />
-            <h2 style={{ fontSize: '1.2rem' }}>Start Sprint</h2>
+      {/* AI Insights panel */}
+      {insights && (insights.insights?.length > 0 || insights.aiInsight) && (
+        <div style={{ backgroundColor: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.18)', borderRadius: '16px', padding: '18px 24px', marginBottom: '28px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+            <Zap size={16} color="var(--primary)" />
+            <span style={{ fontSize: '0.72rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Today's Focus</span>
           </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginBottom: '20px', lineHeight: 1.5 }}>
-            10 adaptive questions targeting your weakest domains.
-          </p>
-          <button className="primary" style={{ width: '100%', padding: '10px', fontSize: '0.95rem' }}>Let's Go!</button>
-        </div>
-
-        <div onClick={() => reviewCount > 0 && navigate('/review')}
-          style={{ backgroundColor: 'var(--bg-card)', padding: '28px', borderRadius: '16px', border: '1px solid #2a2a46', opacity: reviewCount > 0 ? 1 : 0.5, cursor: reviewCount > 0 ? 'pointer' : 'default', transition: 'all 0.2s' }}
-          onMouseOver={e => { if (reviewCount > 0) { e.currentTarget.style.borderColor = 'var(--xp-gold)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}}
-          onMouseOut={e => { e.currentTarget.style.borderColor = '#2a2a46'; e.currentTarget.style.transform = 'translateY(0)'; }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-            <BookOpen size={30} color="var(--xp-gold)" />
-            <h2 style={{ fontSize: '1.2rem' }}>Review Errors</h2>
-            {reviewCount > 0 && (
-              <span style={{ marginLeft: 'auto', backgroundColor: 'rgba(255,215,64,0.15)', color: 'var(--xp-gold)', borderRadius: '20px', padding: '2px 10px', fontSize: '0.78rem', fontWeight: '600', border: '1px solid rgba(255,215,64,0.3)' }}>
-                {reviewCount} queued
-              </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {insights.aiInsight && (
+              <p style={{ fontSize: '0.95rem', lineHeight: 1.6, color: 'var(--text-primary)', margin: 0 }}>{insights.aiInsight}</p>
             )}
+            {insights.insights?.map((ins, i) => (
+              <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                <span style={{ marginTop: '3px', flexShrink: 0 }}>
+                  {ins.type === 'review' ? <BookOpen size={13} color="var(--xp-gold)" /> :
+                   ins.type === 'urgency' ? <AlertCircle size={13} color="var(--error)" /> :
+                   <TrendingUp size={13} color="var(--success)" />}
+                </span>
+                <p style={{ fontSize: '0.88rem', lineHeight: 1.55, color: 'var(--text-secondary)', margin: 0 }}>{ins.text}</p>
+              </div>
+            ))}
           </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginBottom: '20px', lineHeight: 1.5 }}>
-            {reviewCount > 0
-              ? `Revisit ${reviewCount} question${reviewCount !== 1 ? 's' : ''} you answered wrong. +25 XP for each mastered.`
-              : 'Answer some questions incorrectly and they will appear here for spaced review.'}
-          </p>
-          <button disabled={reviewCount === 0} onClick={e => { e.stopPropagation(); if (reviewCount > 0) navigate('/review'); }}
-            style={{ width: '100%', padding: '10px', fontSize: '0.95rem', backgroundColor: reviewCount > 0 ? 'rgba(255,215,64,0.1)' : undefined, color: reviewCount > 0 ? 'var(--xp-gold)' : undefined, borderColor: reviewCount > 0 ? 'rgba(255,215,64,0.4)' : undefined }}>
-            {reviewCount > 0 ? 'Review Now' : 'No errors yet'}
-          </button>
         </div>
+      )}
+
+      {/* Sprint modes */}
+      <div style={{ marginBottom: '14px' }}>
+        <h2 style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>Start a Sprint</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '12px' }}>
+          {[
+            { mode: 'adaptive', label: 'Adaptive', sub: 'AI targets your weaknesses', icon: <Shuffle size={20} />, color: 'var(--primary)' },
+            { mode: 'math', label: 'Math', sub: 'Algebra, Geometry & more', icon: <Calculator size={20} />, color: 'var(--primary)' },
+            { mode: 'english', label: 'English', sub: 'Reading, Writing & Language', icon: <BookOpen size={20} />, color: 'var(--xp-gold)' },
+          ].map(m => (
+            <button key={m.mode}
+              onClick={() => navigate('/sprint', { state: { mode: m.mode } })}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '6px', padding: '16px 18px', backgroundColor: 'var(--bg-card)', border: '1px solid #2a2a46', borderRadius: '14px', cursor: 'pointer', transition: 'border-color 0.15s, transform 0.15s', textAlign: 'left' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = m.color; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a46'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+              <span style={{ color: m.color }}>{m.icon}</span>
+              <div style={{ fontWeight: '700', fontSize: '0.95rem' }}>{m.label}</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.3 }}>{m.sub}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Review Errors CTA */}
+      <div onClick={() => reviewCount > 0 && navigate('/review')}
+        style={{ backgroundColor: 'var(--bg-card)', padding: '18px 24px', borderRadius: '14px', border: '1px solid #2a2a46', marginBottom: '36px', display: 'flex', alignItems: 'center', gap: '16px', opacity: reviewCount > 0 ? 1 : 0.5, cursor: reviewCount > 0 ? 'pointer' : 'default', transition: 'border-color 0.15s' }}
+        onMouseEnter={e => { if (reviewCount > 0) e.currentTarget.style.borderColor = 'var(--xp-gold)'; }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a46'; }}>
+        <BookOpen size={24} color="var(--xp-gold)" />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: '600', marginBottom: '2px' }}>Review Errors</div>
+          <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+            {reviewCount > 0
+              ? `${reviewCount} question${reviewCount !== 1 ? 's' : ''} queued — +25 XP each when mastered`
+              : 'Answer some questions incorrectly to build your review queue'}
+          </div>
+        </div>
+        {reviewCount > 0 && (
+          <button onClick={e => { e.stopPropagation(); navigate('/review'); }}
+            style={{ padding: '8px 18px', fontSize: '0.85rem', backgroundColor: 'rgba(255,215,64,0.1)', color: 'var(--xp-gold)', border: '1px solid rgba(255,215,64,0.4)', borderRadius: '8px', whiteSpace: 'nowrap' }}>
+            Review Now
+          </button>
+        )}
       </div>
 
       {/* Predicted score */}

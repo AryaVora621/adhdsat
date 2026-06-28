@@ -84,7 +84,7 @@ export default function Profile({ user, setUser }) {
         const res = await fetch('/api/analyze-report', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image: base64, mimeType: file.type })
+          body: JSON.stringify({ image: base64, mimeType: file.type, userId: user.id })
         });
         if (res.ok) {
           const data = await res.json();

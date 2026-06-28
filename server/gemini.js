@@ -18,15 +18,33 @@ export async function getAdaptiveCriteria(userProfile) {
   if (!client) return null;
   try {
     const model = client.getGenerativeModel({ model: 'gemini-2.5-flash' });
-    const prompt = `You are an SAT prep coach. A student is targeting a 1500-1550 SAT score.
 
-Domain accuracy from last 30 questions (0-1 scale, null means no data yet):
+    const targetScore = userProfile.targetScore || 1400;
+    const baseline = userProfile.baseline || { english: 0, math: 0 };
+    const baselineTotal = (baseline.english || 0) + (baseline.math || 0);
+    const gap = targetScore - baselineTotal;
+
+    const subscoredSection = userProfile.subscores
+      ? `\nPer-domain priority from uploaded score report (higher = more urgent to improve):\n${JSON.stringify(userProfile.subscores, null, 2)}`
+      : '';
+
+    const prompt = `You are an SAT prep coach helping a student improve their score.
+
+Student baseline: R&W ${baseline.english || '?'}, Math ${baseline.math || '?'} (total ${baselineTotal || '?'})
+Target score: ${targetScore} (gap: ${gap > 0 ? `+${gap} points needed` : 'already at target'})
+
+Domain accuracy from last 30 questions (0.0-1.0 scale, null = no data yet):
 ${JSON.stringify(userProfile.domainAccuracy, null, 2)}
 
-Weak areas flagged at onboarding: ${JSON.stringify(userProfile.weakAreas)}
+Weak areas flagged by student: ${JSON.stringify(userProfile.weakAreas)}${subscoredSection}
 
-Return ONLY valid JSON with no markdown: {"domain": "<one of the 8 SAT domains>", "difficulty": "<easy|medium|hard>"}
-Pick the domain with the most room for improvement. Alternate between weak domains rather than drilling one repeatedly.
+Pick ONE domain to practice next and an appropriate difficulty level.
+- Prioritize domains with the largest gap between current performance and needed performance
+- If subscores are provided, heavily weight high-priority domains
+- Vary difficulty: start medium, go hard when accuracy > 75%, easy when accuracy < 40%
+- Don't drill the same domain more than 3 questions in a row
+
+Return ONLY valid JSON with no markdown: {"domain": "<domain>", "difficulty": "<easy|medium|hard>"}
 Valid domains: ${DOMAINS.join(', ')}`;
 
     const result = await Promise.race([
@@ -75,9 +93,22 @@ export async function analyzeScoreReport(base64Image, mimeType) {
       {
         inlineData: { data: base64Image, mimeType: mimeType || 'image/jpeg' }
       },
-      `This is an SAT score report image. Extract the scores and return ONLY valid JSON with no markdown:
-{"english_score": <number 200-800>, "math_score": <number 200-800>, "weak_areas": [<array of domain names from: Algebra, Advanced Math, Problem Solving & Data Analysis, Geometry & Trig, Information & Ideas, Craft & Structure, Expression of Ideas, Standard English Conventions>]}
-If you cannot confidently read a value, use 0 for scores and [] for weak_areas.`
+      `This is an SAT score report image. Extract the scores and analyze which domains the student is weakest in.
+
+Return ONLY valid JSON with no markdown:
+{
+  "english_score": <number 200-800>,
+  "math_score": <number 200-800>,
+  "weak_areas": [<domain names, ordered from weakest to strongest>],
+  "subscores": {
+    "<domain>": <priority 1-5 where 5 = most urgent to improve>
+  }
+}
+
+Valid domain names: Algebra, Advanced Math, Problem Solving & Data Analysis, Geometry & Trig, Information & Ideas, Craft & Structure, Expression of Ideas, Standard English Conventions
+
+For subscores: examine any subscores, cross-test scores, or performance indicators visible. If subscores aren't explicitly shown, infer from the overall section scores and any performance bands shown.
+If you cannot confidently read a value, use 0 for scores, [] for weak_areas, and {} for subscores.`
     ]);
     const text = result.response.text().trim().replace(/```json|```/g, '');
     return JSON.parse(text);

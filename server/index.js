@@ -131,12 +131,15 @@ app.get('/api/questions/next', async (req, res) => {
 
   const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
   const allWeakAreas = JSON.parse(user?.weak_areas || '[]');
-  // Only consider weak areas within the allowed section
   const weakAreas = allWeakAreas.filter(d => allowedDomains.includes(d));
+  const subscores = user?.subscores ? JSON.parse(user.subscores) : null;
+  const studyPlan = user?.study_plan ? JSON.parse(user.study_plan) : null;
+  const targetScore = studyPlan?.target_score || null;
+  const baseline = { english: user?.baseline_english || 0, math: user?.baseline_math || 0 };
 
   let criteria = null;
   try {
-    criteria = await getAdaptiveCriteria({ domainAccuracy, weakAreas });
+    criteria = await getAdaptiveCriteria({ domainAccuracy, weakAreas, subscores, targetScore, baseline });
   } catch {}
 
   // Validate that Gemini's pick is within the allowed section; if not, fall through to rule-based
@@ -455,6 +458,111 @@ app.put('/api/study-plan/:userId', (req, res) => {
   res.json({ target_score, test_date });
 });
 
+// --- AI Insights ---
+
+app.get('/api/insights/:userId', async (req, res) => {
+  const userId = req.params.userId;
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  const totalAnswered = db.prepare('SELECT COUNT(*) as cnt FROM user_answers WHERE user_id = ?').get(userId).cnt;
+
+  // Per-domain accuracy from last 30 answers
+  const recent = db.prepare(`
+    SELECT q.domain, ua.is_correct FROM user_answers ua
+    JOIN questions q ON ua.question_id = q.id
+    WHERE ua.user_id = ? ORDER BY ua.created_at DESC LIMIT 30
+  `).all(userId);
+
+  const domainStats = {};
+  for (const row of recent) {
+    if (!domainStats[row.domain]) domainStats[row.domain] = { correct: 0, total: 0 };
+    domainStats[row.domain].total++;
+    if (row.is_correct) domainStats[row.domain].correct++;
+  }
+
+  const domainAccuracy = {};
+  for (const [d, s] of Object.entries(domainStats)) {
+    domainAccuracy[d] = s.total > 0 ? Math.round(s.correct / s.total * 100) : null;
+  }
+
+  const weakAreas = JSON.parse(user.weak_areas || '[]');
+  const subscores = user.subscores ? JSON.parse(user.subscores) : null;
+  const studyPlan = user.study_plan ? JSON.parse(user.study_plan) : null;
+  const dueReviews = db.prepare(`SELECT COUNT(*) as cnt FROM review_cards WHERE user_id = ? AND next_review_at <= ?`).get(userId, new Date().toISOString()).cnt;
+
+  // Rule-based insights that always work (no Gemini needed)
+  const insights = [];
+
+  if (dueReviews > 0) {
+    insights.push({ type: 'review', priority: 1, text: `${dueReviews} card${dueReviews > 1 ? 's' : ''} due for review — complete these first to lock in the concepts.` });
+  }
+
+  // Find weakest domain with data
+  let weakestDomain = null, weakestAcc = Infinity;
+  for (const [d, acc] of Object.entries(domainAccuracy)) {
+    if (acc !== null && acc < weakestAcc) { weakestAcc = acc; weakestDomain = d; }
+  }
+
+  if (weakestDomain && weakestAcc < 70) {
+    insights.push({ type: 'focus', priority: 2, text: `Your accuracy in ${weakestDomain} is ${weakestAcc}%. Try a Math or English sprint focused here.`, domain: weakestDomain });
+  }
+
+  if (studyPlan) {
+    const daysLeft = Math.max(0, Math.round((new Date(studyPlan.test_date) - Date.now()) / 86400000));
+    const gap = studyPlan.target_score - ((user.baseline_english || 0) + (user.baseline_math || 0));
+    if (daysLeft <= 14 && daysLeft > 0) {
+      insights.push({ type: 'urgency', priority: 1, text: `${daysLeft} days until your test. Focus on ${weakestDomain || weakAreas[0] || 'your weakest areas'} and do at least 2 sprints today.` });
+    } else if (gap > 200 && totalAnswered < 20) {
+      insights.push({ type: 'ramp', priority: 3, text: `You're targeting a ${gap}-point improvement. Complete at least 3 sprints today to build momentum.` });
+    }
+  }
+
+  if (totalAnswered === 0) {
+    insights.push({ type: 'start', priority: 0, text: 'Welcome! Start your first sprint to get a baseline and unlock personalized insights.' });
+  } else if (totalAnswered < 10) {
+    insights.push({ type: 'start', priority: 3, text: `You've answered ${totalAnswered} questions. Do ${10 - totalAnswered} more to unlock your predicted score.` });
+  }
+
+  if (weakAreas.length > 0 && Object.keys(domainAccuracy).length === 0) {
+    insights.push({ type: 'focus', priority: 2, text: `You flagged ${weakAreas.slice(0, 2).join(' and ')} as weak areas. Start with an Adaptive sprint to build your baseline there.` });
+  }
+
+  // Try AI insight if Gemini is available and we have enough data
+  let aiInsight = null;
+  const geminiClient = process.env.GEMINI_API_KEY;
+  if (geminiClient && totalAnswered >= 5) {
+    try {
+      const { GoogleGenerativeAI } = await import('@google/generative-ai');
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+      const prompt = `You are a concise SAT prep coach. Give a single motivating, specific insight for this student in 1-2 sentences max.
+
+Domain accuracy (last 30 Qs): ${JSON.stringify(domainAccuracy)}
+Weak areas: ${JSON.stringify(weakAreas)}
+${subscores ? `Score report priorities: ${JSON.stringify(subscores)}` : ''}
+${studyPlan ? `Target: ${studyPlan.target_score}, test in ${Math.round((new Date(studyPlan.test_date) - Date.now()) / 86400000)} days` : ''}
+Total questions answered: ${totalAnswered}
+Due review cards: ${dueReviews}
+
+Return ONLY the insight text, no JSON, no labels.`;
+      const result = await Promise.race([
+        model.generateContent(prompt),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000))
+      ]);
+      aiInsight = result.response.text().trim();
+    } catch {}
+  }
+
+  res.json({
+    insights: insights.sort((a, b) => a.priority - b.priority),
+    aiInsight,
+    domainAccuracy,
+    dueReviews,
+    totalAnswered
+  });
+});
+
 // --- Gemini Endpoints ---
 
 app.post('/api/explain', async (req, res) => {
@@ -475,10 +583,18 @@ app.post('/api/explain', async (req, res) => {
 });
 
 app.post('/api/analyze-report', async (req, res) => {
-  const { image, mimeType } = req.body;
+  const { image, mimeType, userId } = req.body;
   if (!image) return res.status(400).json({ error: 'image (base64) required' });
   const result = await analyzeScoreReport(image, mimeType);
   if (!result) return res.status(422).json({ error: 'Could not parse score report' });
+
+  // Persist subscores to user profile so adaptive AI can use them
+  if (userId && result.subscores && Object.keys(result.subscores).length > 0) {
+    try {
+      db.prepare('UPDATE users SET subscores = ? WHERE id = ?').run(JSON.stringify(result.subscores), userId);
+    } catch {}
+  }
+
   res.json(result);
 });
 
@@ -492,7 +608,7 @@ app.post('/api/users/:id/reset', (req, res) => {
     db.prepare(`UPDATE users SET
       total_xp = 0, current_level = 1, current_streak = 0, longest_streak = 0,
       baseline_english = 0, baseline_math = 0, weak_areas = '[]',
-      onboarding_completed = 0, study_plan = NULL, last_active_date = NULL
+      onboarding_completed = 0, study_plan = NULL, last_active_date = NULL, subscores = NULL
     WHERE id = ?`).run(id);
     const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
     user.weak_areas = JSON.parse(user.weak_areas || '[]');

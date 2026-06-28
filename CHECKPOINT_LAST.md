@@ -1,48 +1,43 @@
-# Checkpoint - ADHDSat COMPLETE
+# Checkpoint - ADHDSat Phase 4
 
-## All Features Shipped
+## Completed This Session
 
-### Core Study Loop
-- Adaptive Sprint: Gemini 2.5 Flash selects domain+difficulty from user history; rule-based fallback
-- Per-question live timer (gray/gold/red), keyboard shortcuts (1-4, Enter, H)
-- Sprint summary: accuracy, XP, grade, per-domain breakdown with accuracy bars + time
+### Sprint Mode Selection
+- Mode picker screen before each sprint: Adaptive / Math / English
+- Section badge shown during sprint (MATH / ENGLISH pill)
+- `/api/questions/next?section=math|english` filters to correct domains
+- "Sprint Again" resets to mode picker (user can switch modes)
 
-### Question Bank
-- 532 questions across all 8 SAT domains (spec target: 500+)
-- Generator: `node server/generate-questions.js [domain] [count]` -- 4x retry with backoff
+### Profile Enhancements
+- Editable baseline scores via sliders (R&W + Math 200-800)
+- "Upload Score Report" button -- Gemini Vision extracts scores + weak areas, auto-saves
+- Danger Zone: Reset Profile button with confirmation (clears all progress, XP, streaks)
+- `POST /api/users/:id/reset` endpoint
 
-### Review Mode (SM-2 Spaced Repetition)
-- Wrong answers scheduled via SM-2 algorithm (ease_factor, interval_days)
-- "Next review in Nd" badge after each answer
-- Keyboard shortcuts match Sprint (1-4/Enter)
+## Still Open / Next Priority
 
-### AI Features
-- Gemini 2.5 Flash: adaptive difficulty, Deep Dive explanations (SSE streaming)
-- Score report upload: Gemini Vision auto-fills onboarding baseline
-- All Gemini calls have rule-based fallback
+### Score Report Fine-Tuning (deeper AI integration)
+- Score report upload works but adaptive question selection doesn't specifically weight
+  the per-subdomain subscores that Gemini extracts -- just weak_areas array
+- Could add a `subscores` JSON field to users table to store per-subdomain breakdowns
+- Then pass subscores to `getAdaptiveCriteria` for finer-grained targeting
 
-### Study Plan
-- Target score (slider) + test date picker
-- Shows: days left (color-coded), score gap, sprints/day needed, progress bar
+### English-Specific Sprint Improvements
+- Reading passages are sparse for English-heavy sprints -- could expand passage questions
+- Some English questions may not have `passage_text` even where one is expected
 
-### Gamification
-- XP/levels (500 XP per level), level-up toast animation
-- Day streak + best streak tracking
-- +25 XP bonus for review correct answers
+### Onboarding Re-entry
+- After "Reset Profile", user lands on Profile page with reset data but doesn't get
+  redirected through onboarding again. Could redirect to /onboarding if !onboarding_completed
 
-### Dashboard
-- Study Plan widget, 8-domain performance grid with trend arrows
-- Predicted score range (unlocks after 10 questions answered)
-- Sprint History table
+### Question Bank Quality
+- 532 questions but coverage across difficulty levels is uneven
+- Could run more generation passes for 'easy' and 'hard' in underrepresented domains
 
-### Profile
-- Editable display name
-- Scores, XP progress bar, domain accuracy bars
-- Focus area multi-select, sprint history
-
-## Server
-- 19 REST endpoints
-- Running on port 3001: `node server/index.js &`
+## Server Status
+- Backend: `node server/index.js` on port 3001
+- Frontend: `npx vite --port 5173`
+- 20 REST endpoints
 
 ## Human Decisions Needed
-None -- project is complete and verified.
+None -- waiting on user direction for next phase.

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { CheckCircle2, XCircle, ChevronRight, AlertCircle, Zap, Trophy, Calculator, BookOpen, Shuffle } from 'lucide-react';
 import MathText from '../components/MathText';
 
@@ -103,7 +103,16 @@ export default function Sprint({ user, setUser }) {
   const timerRef = useRef(null);
   const timeStartRef = useRef(Date.now());
   const navigate = useNavigate();
+  const location = useLocation();
   const SPRINT_LENGTH = 10;
+
+  // If navigated from Dashboard with a pre-selected mode, auto-start
+  useEffect(() => {
+    const preMode = location.state?.mode;
+    if (preMode && sprintMode === null) {
+      startSprint(preMode);
+    }
+  }, []);
 
   // Start per-question timer
   const startTimer = () => {

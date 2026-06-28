@@ -88,6 +88,7 @@ const initDb = () => {
   if (!userCols.includes('baseline_math')) db.exec("ALTER TABLE users ADD COLUMN baseline_math INTEGER DEFAULT 0");
   if (!userCols.includes('weak_areas')) db.exec("ALTER TABLE users ADD COLUMN weak_areas TEXT DEFAULT '[]'");
   if (!userCols.includes('onboarding_completed')) db.exec("ALTER TABLE users ADD COLUMN onboarding_completed INTEGER DEFAULT 0");
+  if (!userCols.includes('subscores')) db.exec("ALTER TABLE users ADD COLUMN subscores TEXT DEFAULT NULL");
 
   const qCols = db.prepare("PRAGMA table_info(questions)").all().map(c => c.name);
   if (!qCols.includes('source')) db.exec("ALTER TABLE questions ADD COLUMN source TEXT DEFAULT 'ingest'");
