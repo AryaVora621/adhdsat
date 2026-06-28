@@ -37,6 +37,7 @@ function WrongAnswerCard({ item }) {
 }
 
 function Confetti() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
   const pieces = Array.from({ length: 40 }, (_, i) => ({
     id: i,
     color: ['#00d4ff', '#00e676', '#ffd740', '#ff5252', '#e040fb'][i % 5],
@@ -371,13 +372,23 @@ export default function Sprint({ user, setUser }) {
       });
       setUser(await userRes.json());
 
-      // Autosave recovery state (using functional update pattern via ref to avoid stale closure)
+      // Autosave recovery state including wrong answers for post-sprint review
       const nextStats = { attempted: stats.attempted + 1, correct: stats.correct + (correct ? 1 : 0), xp: stats.xp + xpGained };
-      sessionStorage.setItem('activeSprint', JSON.stringify({
-        sprintId, mode: sprintModeRef.current,
-        questionNum: questionNum + 1, stats: nextStats,
-        sprintLength: sprintLengthRef.current
-      }));
+      const currentWrong = !correct ? [...wrongAnswers, {
+        id: question.id, text: question.question_text, domain: question.domain,
+        selectedChoice: choice, selectedText: question.choices?.find(c => c.label === choice)?.text || choice,
+        correctLabel: question.choices?.find(c => c.is_correct)?.label || '',
+        correctAnswer: question.is_grid_in ? String(question.grid_in_answer) : question.choices?.find(c => c.is_correct)?.text || '',
+        explanation: question.explanation || ''
+      }] : wrongAnswers;
+      try {
+        sessionStorage.setItem('activeSprint', JSON.stringify({
+          sprintId, mode: sprintModeRef.current,
+          questionNum: questionNum + 1, stats: nextStats,
+          sprintLength: sprintLengthRef.current,
+          wrongAnswers: currentWrong.slice(-20)
+        }));
+      } catch { /* storage full, skip */ }
     } catch (err) {
       console.error(err);
     }
@@ -529,6 +540,7 @@ export default function Sprint({ user, setUser }) {
               setSprintId(s.sprintId);
               setQuestionNum(s.questionNum);
               setStats(s.stats || { attempted: 0, correct: 0, xp: 0 });
+              if (s.wrongAnswers?.length) setWrongAnswers(s.wrongAnswers);
               sprintLengthRef.current = s.sprintLength || 10;
               setSprintLength(s.sprintLength || 10);
               sprintStartRef.current = Date.now();
@@ -628,6 +640,9 @@ export default function Sprint({ user, setUser }) {
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes milestoneIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes milestoneOut { from { opacity: 1; } to { opacity: 0; } }
+        @media (prefers-reduced-motion: reduce) {
+          * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+        }
       `}</style>
 
       {/* Milestone toast */}
