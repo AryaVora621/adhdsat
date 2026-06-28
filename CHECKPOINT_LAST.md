@@ -1,27 +1,25 @@
-# Checkpoint - ADHDSat Phase 2 Complete
+# Checkpoint - ADHDSat Phase 3 Complete
 
-## Completed
-Phase 1 (2026-06-28 morning):
-- All 10 original build goals implemented and verified
+## Completed This Session
 
-Phase 2 (2026-06-28):
-- KaTeX math rendering: MathText component auto-upgrades x^2 → x², √, fractions
-- Review Errors: /review route, 5-question sessions from wrong answers, +25 XP bonus
-- Question bank: 80 → 246 questions (30+ per domain, AI-generated via Gemini)
-- Gemini model updated: gemini-2.0-flash → gemini-2.5-flash
-- server/generate-questions.js: reusable expansion script with JSON rescue
-- Dashboard Review card live with error count badge
-- Sidebar added Review link
+Phase 3 (2026-06-28):
+- SM-2 spaced repetition: review_cards table, ease_factor, interval scheduling
+- ReviewSprint calls /api/review/answer after each answer; shows "Next review in Nd" badge
+- Study Plan widget on Dashboard: target score slider, test date, days left, gap, sprints/day
+- /api/study-plan GET+PUT endpoints, stored as users.study_plan JSON column
+- Sprint keyboard shortcuts: 1-4 pick A/B/C/D, Enter submit/advance, H hint
+- Live per-question timer: gray < 1min, gold < 2min, red >= 2min, freezes on answer
+- Sprint summary screen after Q10: correct/accuracy/XP stats, grade label, nav buttons
 
 ## Current State
-All features working and browser-verified:
-- Onboarding (3-step), Sprint (adaptive), Review (spaced), Dashboard, Profile
-- Math typeset in all question contexts
-- 246 questions across 8 domains (30-35 each)
+All 18 original + extension features implemented and browser-verified.
 
-## Next Action (if needed)
-- Run `node server/generate-questions.js [domain] [count]` to add more questions
-- Future: better spaced repetition algorithm (SM-2), leaderboards, multiplayer
+- Onboarding (3-step), Sprint (adaptive, keyboard, timer, summary)
+- Review (SM-2 spaced), Dashboard (study plan, domain cards), Profile
+- 246 questions, KaTeX math, Gemini AI explanations
+
+## Server
+Running on port 3001. Restart: `node server/index.js &`
 
 ## Human Decisions Needed
-None - project is in a fully functional, polished state.
+None - project is in a complete, polished state.
