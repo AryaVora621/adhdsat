@@ -97,7 +97,7 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
   const domainColor = (acc) => acc >= 70 ? 'var(--success)' : acc >= 50 ? 'var(--xp-gold)' : 'var(--error)';
 
   return (
-    <div style={{ padding: '48px', maxWidth: '600px', margin: '0 auto', width: '100%', textAlign: 'center' }}>
+    <div style={{ padding: 'clamp(16px, 5vw, 48px)', maxWidth: '600px', margin: '0 auto', width: '100%', textAlign: 'center' }}>
       {showConfetti && <Confetti />}
       <Trophy size={48} color="var(--xp-gold)" style={{ marginBottom: '24px' }} />
       <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>Sprint Complete!</h1>
@@ -524,7 +524,7 @@ export default function Sprint({ user, setUser }) {
   // Resume prompt: shown when there's a saved sprint from a previous session
   if (resumePrompt) {
     return (
-      <div style={{ padding: '48px', maxWidth: '480px', margin: '0 auto', width: '100%' }}>
+      <div style={{ padding: 'clamp(16px, 5vw, 48px)', maxWidth: '480px', margin: '0 auto', width: '100%' }}>
         <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '32px', border: '1px solid rgba(0,212,255,0.3)', textAlign: 'center' }}>
           <Zap size={36} color="var(--primary)" style={{ marginBottom: '16px' }} />
           <h2 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '8px' }}>Unfinished Sprint</h2>
@@ -571,7 +571,7 @@ export default function Sprint({ user, setUser }) {
       { key: 'english', label: 'English', sub: 'Reading, Writing & Language...', icon: <BookOpen size={28} /> },
     ];
     return (
-      <div style={{ padding: '48px', maxWidth: '600px', margin: '0 auto', width: '100%' }}>
+      <div style={{ padding: 'clamp(16px, 5vw, 48px)', maxWidth: '600px', margin: '0 auto', width: '100%' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>Choose Sprint Mode</h1>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>Pick your focus and length</p>
 
@@ -612,7 +612,7 @@ export default function Sprint({ user, setUser }) {
 
   if (loading) {
     return (
-      <div style={{ padding: '48px', display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--text-secondary)' }}>
+      <div style={{ padding: 'clamp(16px, 5vw, 48px)', display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--text-secondary)' }}>
         <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid var(--primary)', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
         Loading question {questionNum}...
       </div>
@@ -620,7 +620,7 @@ export default function Sprint({ user, setUser }) {
   }
   if (!question) {
     return (
-      <div style={{ padding: '48px' }}>
+      <div style={{ padding: 'clamp(16px, 5vw, 48px)' }}>
         <h2 style={{ marginBottom: '12px' }}>No questions available</h2>
         <p style={{ color: 'var(--text-secondary)' }}>Run <code style={{ backgroundColor: '#2a2a46', padding: '2px 6px', borderRadius: '4px' }}>node server/ingest.js</code> to load the question bank.</p>
       </div>
@@ -635,7 +635,7 @@ export default function Sprint({ user, setUser }) {
   const timerStr = `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, '0')}`;
 
   return (
-    <div style={{ padding: '48px', maxWidth: '800px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ padding: 'clamp(16px, 5vw, 48px)', maxWidth: '800px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes milestoneIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
@@ -682,35 +682,35 @@ export default function Sprint({ user, setUser }) {
       </div>
 
       {/* Domain header */}
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', minWidth: 0 }}>
         {sprintMode !== 'adaptive' && (
-          <span style={{ fontSize: '0.7rem', padding: '3px 9px', borderRadius: '10px', backgroundColor: sprintMode === 'math' ? 'rgba(0,212,255,0.1)' : 'rgba(255,215,64,0.1)', color: sprintMode === 'math' ? 'var(--primary)' : 'var(--xp-gold)', border: `1px solid ${sprintMode === 'math' ? 'rgba(0,212,255,0.3)' : 'rgba(255,215,64,0.3)'}`, textTransform: 'uppercase', letterSpacing: '1px' }}>
+          <span style={{ fontSize: '0.7rem', padding: '3px 9px', borderRadius: '10px', backgroundColor: sprintMode === 'math' ? 'rgba(0,212,255,0.1)' : 'rgba(255,215,64,0.1)', color: sprintMode === 'math' ? 'var(--primary)' : 'var(--xp-gold)', border: `1px solid ${sprintMode === 'math' ? 'rgba(0,212,255,0.3)' : 'rgba(255,215,64,0.3)'}`, textTransform: 'uppercase', letterSpacing: '1px', flexShrink: 0 }}>
             {sprintMode}
           </span>
         )}
-        <span style={{ fontSize: '0.75rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px' }}>{question.domain}</span>
-        <span style={{ color: '#2a2a46' }}>|</span>
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>{question.difficulty}</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px' }}>{question.domain}</span>
+        <span style={{ color: '#2a2a46', flexShrink: 0 }}>|</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', flexShrink: 0 }}>{question.difficulty}</span>
         {!isAnswered && questionNum === 1 && (
           <button onClick={() => { setSprintMode(null); setSprintModeState(null); sessionStorage.removeItem('lastSprintMode'); setSprintId(null); setQuestion(null); setLoading(false); sprintStartRef.current = null; }}
-            style={{ marginLeft: 'auto', fontSize: '0.68rem', color: 'var(--text-secondary)', padding: '2px 8px', borderRadius: '6px', border: '1px solid #2a2a46', backgroundColor: 'transparent', cursor: 'pointer' }}
+            style={{ marginLeft: 'auto', fontSize: '0.68rem', color: 'var(--text-secondary)', padding: '2px 8px', borderRadius: '6px', border: '1px solid #2a2a46', backgroundColor: 'transparent', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}
             title="Change sprint mode">
-            ← change mode
+            ← mode
           </button>
         )}
         {!isAnswered && questionNum > 1 && (
-          <span style={{ marginLeft: 'auto', fontSize: '0.65rem', color: '#2a2a46' }}>1-4 to pick, Enter to submit</span>
+          <span style={{ marginLeft: 'auto', fontSize: '0.65rem', color: '#2a2a46', flexShrink: 0 }}>1-4 pick, Enter submit</span>
         )}
       </div>
 
       {/* Question content */}
-      <div style={{ display: 'flex', gap: '32px', marginBottom: '40px' }}>
+      <div style={{ display: 'flex', flexDirection: window.innerWidth < 768 && question.passage_text ? 'column' : 'row', gap: '24px', marginBottom: '40px' }}>
         {question.passage_text && (
-          <div style={{ flex: 1, borderRight: '1px solid #2a2a46', paddingRight: '32px', fontSize: '0.95rem', lineHeight: 1.75, color: 'var(--text-secondary)' }}>
+          <div style={{ flex: 1, borderRight: window.innerWidth < 768 ? 'none' : '1px solid #2a2a46', borderBottom: window.innerWidth < 768 ? '1px solid #2a2a46' : 'none', paddingRight: window.innerWidth < 768 ? '0' : '32px', paddingBottom: window.innerWidth < 768 ? '16px' : '0', fontSize: '0.95rem', lineHeight: 1.75, color: 'var(--text-secondary)' }}>
             <MathText>{question.passage_text}</MathText>
           </div>
         )}
-        <div style={{ flex: question.passage_text ? 1 : 'none', width: question.passage_text ? 'auto' : '100%', fontSize: '1.1rem', lineHeight: 1.65 }}>
+        <div style={{ flex: question.passage_text ? 1 : 'none', width: question.passage_text ? 'auto' : '100%', fontSize: '1.1rem', lineHeight: 1.65, overflowX: 'auto', minWidth: 0 }}>
           <MathText>{question.question_text}</MathText>
         </div>
       </div>

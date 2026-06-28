@@ -13,6 +13,8 @@ export default function Onboarding({ user, setUser }) {
   const [uploading, setUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [targetScore, setTargetScore] = useState(1400);
+  const [testDate, setTestDate] = useState('');
   const fileInputRef = useRef();
   const navigate = useNavigate();
 
@@ -61,6 +63,14 @@ export default function Onboarding({ user, setUser }) {
       });
       const updated = await res.json();
       setUser(updated);
+      // Save study plan if test date was provided
+      if (testDate) {
+        await fetch(`/api/study-plan/${user.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target_score: targetScore, test_date: testDate })
+        }).catch(() => {});
+      }
       navigate('/sprint');
     } catch (err) {
       console.error(err);
@@ -74,7 +84,7 @@ export default function Onboarding({ user, setUser }) {
   };
 
   const cardStyle = {
-    backgroundColor: 'var(--bg-card)', borderRadius: '20px', padding: '48px',
+    backgroundColor: 'var(--bg-card)', borderRadius: '20px', padding: 'clamp(16px, 5vw, 48px)',
     border: '1px solid #2a2a46', width: '100%', maxWidth: '560px'
   };
 
@@ -183,31 +193,60 @@ export default function Onboarding({ user, setUser }) {
 
       {step === 3 && (
         <div style={cardStyle}>
-          <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
             <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🎯</div>
-            <h2 style={{ fontSize: '1.6rem', marginBottom: '8px' }}>Your Starting Point</h2>
-            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>ADHDSat will adapt every question to close your gap to 1500+.</p>
+            <h2 style={{ fontSize: '1.6rem', marginBottom: '8px' }}>Set Your Target</h2>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>ADHDSat will adapt every question to close your gap.</p>
           </div>
 
-          <div style={{ backgroundColor: 'var(--bg-main)', borderRadius: '14px', padding: '24px', marginBottom: '28px', border: '1px solid #2a2a46' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: weakAreas.length > 0 ? '20px' : '0' }}>
-              {[['R&W', englishScore], ['Math', mathScore], ['Total', englishScore + mathScore]].map(([label, val]) => (
+          {/* Baseline summary */}
+          <div style={{ backgroundColor: 'var(--bg-main)', borderRadius: '14px', padding: '20px', marginBottom: '20px', border: '1px solid #2a2a46' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: weakAreas.length > 0 ? '16px' : '0' }}>
+              {[['Baseline R&W', englishScore], ['Baseline Math', mathScore], ['Total', englishScore + mathScore]].map(([label, val]) => (
                 <div key={label} style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '2rem', fontWeight: 'bold', color: label === 'Total' ? 'var(--xp-gold)' : 'var(--primary)' }}>{val}</div>
-                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '2px' }}>{label}</div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 'bold', color: label === 'Total' ? 'var(--xp-gold)' : 'var(--primary)' }}>{val}</div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', marginTop: '2px' }}>{label}</div>
                 </div>
               ))}
             </div>
             {weakAreas.length > 0 && (
-              <div style={{ borderTop: '1px solid #2a2a46', paddingTop: '16px' }}>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Focus areas</div>
+              <div style={{ borderTop: '1px solid #2a2a46', paddingTop: '12px' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>Focus areas</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                   {weakAreas.map(a => (
-                    <span key={a} style={{ backgroundColor: 'rgba(0,212,255,0.1)', color: 'var(--primary)', padding: '4px 10px', borderRadius: '20px', fontSize: '0.78rem' }}>{a}</span>
+                    <span key={a} style={{ backgroundColor: 'rgba(0,212,255,0.1)', color: 'var(--primary)', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem' }}>{a}</span>
                   ))}
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Target score */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '10px', color: 'var(--text-secondary)', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+              Target Score
+            </label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <input type="range" min={englishScore + mathScore} max={1600} step={10} value={targetScore}
+                onChange={e => setTargetScore(Number(e.target.value))}
+                style={{ flex: 1, accentColor: 'var(--primary)', height: '4px' }} />
+              <span style={{ fontSize: '1.6rem', fontWeight: 'bold', color: 'var(--xp-gold)', minWidth: '56px', textAlign: 'right' }}>{targetScore}</span>
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+              Gap: +{targetScore - (englishScore + mathScore)} points
+            </div>
+          </div>
+
+          {/* Test date */}
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ display: 'block', marginBottom: '10px', color: 'var(--text-secondary)', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+              Test Date <span style={{ color: '#555', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
+            </label>
+            <input type="date" value={testDate} onChange={e => setTestDate(e.target.value)}
+              style={{ width: '100%', padding: '12px 14px', backgroundColor: 'var(--bg-main)', border: '1px solid #2a2a46', borderRadius: '10px', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none', boxSizing: 'border-box' }}
+              onFocus={e => e.target.style.borderColor = 'var(--primary)'}
+              onBlur={e => e.target.style.borderColor = '#2a2a46'}
+            />
           </div>
 
           <div style={{ display: 'flex', gap: '10px' }}>

@@ -236,7 +236,7 @@ function SprintSparkline({ sprints }) {
   );
 }
 
-export default function Dashboard({ user }) {
+export default function Dashboard({ user, isMobile }) {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -260,12 +260,14 @@ export default function Dashboard({ user }) {
 
   const greetingName = user.display_name && user.display_name !== 'Learner' ? user.display_name : null;
 
+  const pad = isMobile ? '20px 16px' : '48px';
+
   return (
-    <div style={{ padding: '48px', maxWidth: '920px', margin: '0 auto', width: '100%' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '6px' }}>
+    <div style={{ padding: pad, maxWidth: '920px', margin: '0 auto', width: '100%' }}>
+      <h1 style={{ fontSize: isMobile ? '1.5rem' : '2rem', marginBottom: '6px' }}>
         {greetingName ? `Welcome back, ${greetingName}!` : 'Ready to train?'}
       </h1>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '40px', fontSize: '0.95rem' }}>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: isMobile ? '24px' : '40px', fontSize: '0.95rem' }}>
         {loading
           ? 'Loading your progress...'
           : progress?.totalAnswered === 0
@@ -309,7 +311,7 @@ export default function Dashboard({ user }) {
       {/* Sprint modes */}
       <div style={{ marginBottom: '14px' }}>
         <h2 style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>Start a Sprint</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '12px', marginBottom: '12px' }}>
           {[
             { mode: 'adaptive', label: 'Adaptive', sub: 'AI targets your weaknesses', icon: <Shuffle size={20} />, color: 'var(--primary)' },
             { mode: 'math', label: 'Math', sub: 'Algebra, Geometry & more', icon: <Calculator size={20} />, color: 'var(--primary)' },
@@ -372,7 +374,7 @@ export default function Dashboard({ user }) {
 
       {/* Domain grid */}
       <h2 style={{ fontSize: '1rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px' }}>Domain Performance</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '40px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: '10px', marginBottom: '40px' }}>
         {DOMAINS.map(d => (
           <DomainCard key={d.name} name={d.name} stats={progress?.domainStats?.[d.name]} />
         ))}

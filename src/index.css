@@ -87,3 +87,12 @@ button.primary:hover {
     scroll-behavior: auto !important;
   }
 }
+
+/* Mobile layout overrides */
+@media (max-width: 767px) {
+  .mobile-pad { padding: 20px 16px !important; }
+  .domain-grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
+  .sprint-mode-cols { grid-template-columns: 1fr !important; }
+  .stat-3col { font-size: 1.2rem !important; }
+  h1 { font-size: 1.5rem !important; }
+}

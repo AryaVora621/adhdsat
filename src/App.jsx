@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
+import BottomNav from './components/BottomNav';
 import Dashboard from './pages/Dashboard';
 import Sprint from './pages/Sprint';
 import Onboarding from './pages/Onboarding';
@@ -9,6 +10,17 @@ import ReviewSprint from './pages/ReviewSprint';
 import LevelUpToast from './components/LevelUpToast';
 import './index.css';
 
+const useIsMobile = () => {
+  const [mobile, setMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const handler = (e) => setMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return mobile;
+};
+
 const getLevel = (xp) => Math.floor((xp || 0) / 500) + 1;
 
 function AppInner() {
@@ -16,6 +28,7 @@ function AppInner() {
   const [loading, setLoading] = useState(true);
   const [levelUpToast, setLevelUpToast] = useState(null);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const setUserWithLevelCheck = (newUser) => {
     setUser(prev => {
@@ -58,21 +71,22 @@ function AppInner() {
     );
   }
 
-  const showSidebar = user?.onboarding_completed;
+  const showNav = user?.onboarding_completed;
 
   return (
     <div style={{ display: 'flex', width: '100%', height: '100vh' }}>
-      <div style={{ flex: '1', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+      <div style={{ flex: '1', display: 'flex', flexDirection: 'column', overflowY: 'auto', paddingBottom: isMobile && showNav ? '64px' : 0 }}>
         <Routes>
           <Route path="/onboarding" element={<Onboarding user={user} setUser={setUserWithLevelCheck} />} />
-          <Route path="/" element={user?.onboarding_completed ? <Dashboard user={user} /> : <Navigate to="/onboarding" />} />
+          <Route path="/" element={user?.onboarding_completed ? <Dashboard user={user} isMobile={isMobile} /> : <Navigate to="/onboarding" />} />
           <Route path="/sprint" element={user?.onboarding_completed ? <Sprint user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
           <Route path="/profile" element={user?.onboarding_completed ? <Profile user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
           <Route path="/review" element={user?.onboarding_completed ? <ReviewSprint user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
-      {showSidebar && <Sidebar user={user} />}
+      {showNav && !isMobile && <Sidebar user={user} />}
+      {showNav && isMobile && <BottomNav />}
       {levelUpToast && <LevelUpToast level={levelUpToast} onDone={() => setLevelUpToast(null)} />}
     </div>
   );

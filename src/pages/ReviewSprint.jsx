@@ -185,7 +185,7 @@ export default function ReviewSprint({ user, setUser }) {
 
   if (loading) {
     return (
-      <div style={{ padding: '48px', display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--text-secondary)' }}>
+      <div style={{ padding: 'clamp(16px, 5vw, 48px)', display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--text-secondary)' }}>
         <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid var(--primary)', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         Loading review question {questionNum}...
@@ -195,7 +195,7 @@ export default function ReviewSprint({ user, setUser }) {
 
   if (noErrors || !question) {
     return (
-      <div style={{ padding: '48px', maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
+      <div style={{ padding: 'clamp(16px, 5vw, 48px)', maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
         <BookOpen size={48} color="var(--xp-gold)" style={{ marginBottom: '20px' }} />
         <h2 style={{ marginBottom: '12px' }}>No errors to review!</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', lineHeight: 1.6 }}>
@@ -213,7 +213,7 @@ export default function ReviewSprint({ user, setUser }) {
     : question.choices.find(c => c.label === selectedChoice)?.is_correct;
 
   return (
-    <div style={{ padding: '48px', maxWidth: '800px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ padding: 'clamp(16px, 5vw, 48px)', maxWidth: '800px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column' }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
       {/* Header */}
@@ -245,13 +245,13 @@ export default function ReviewSprint({ user, setUser }) {
       </div>
 
       {/* Question */}
-      <div style={{ display: 'flex', gap: '32px', marginBottom: '40px' }}>
+      <div style={{ display: 'flex', flexDirection: window.innerWidth < 768 && question.passage_text ? 'column' : 'row', gap: '24px', marginBottom: '40px' }}>
         {question.passage_text && (
-          <div style={{ flex: 1, borderRight: '1px solid #2a2a46', paddingRight: '32px', fontSize: '0.95rem', lineHeight: 1.75, color: 'var(--text-secondary)' }}>
+          <div style={{ flex: 1, borderRight: window.innerWidth < 768 ? 'none' : '1px solid #2a2a46', borderBottom: window.innerWidth < 768 ? '1px solid #2a2a46' : 'none', paddingRight: window.innerWidth < 768 ? '0' : '32px', paddingBottom: window.innerWidth < 768 ? '16px' : '0', fontSize: '0.95rem', lineHeight: 1.75, color: 'var(--text-secondary)' }}>
             <MathText>{question.passage_text}</MathText>
           </div>
         )}
-        <div style={{ flex: question.passage_text ? 1 : 'none', width: question.passage_text ? 'auto' : '100%', fontSize: '1.1rem', lineHeight: 1.65 }}>
+        <div style={{ flex: question.passage_text ? 1 : 'none', width: question.passage_text ? 'auto' : '100%', fontSize: '1.1rem', lineHeight: 1.65, overflowX: 'auto', minWidth: 0 }}>
           <MathText>{question.question_text}</MathText>
         </div>
       </div>

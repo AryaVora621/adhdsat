@@ -151,7 +151,7 @@ export default function Profile({ user, setUser }) {
   };
 
   return (
-    <div style={{ padding: '48px', maxWidth: '680px', margin: '0 auto', width: '100%' }}>
+    <div style={{ padding: 'clamp(16px, 5vw, 48px)', maxWidth: '680px', margin: '0 auto', width: '100%' }}>
       <h1 style={{ fontSize: '1.8rem', marginBottom: '32px' }}>Profile</h1>
 
       {/* Display name */}
