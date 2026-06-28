@@ -14,25 +14,28 @@ const DOMAINS = [
 ];
 
 function DomainCard({ name, stats }) {
-  const acc = stats?.accuracy;
-  const prior = stats?.priorAccuracy;
-  const color = acc === null ? '#2a2a46' : acc > 0.75 ? 'var(--success)' : acc > 0.5 ? 'var(--xp-gold)' : 'var(--error)';
-  const trend = acc !== null && prior !== null ? (acc > prior + 0.02 ? 'up' : acc < prior - 0.02 ? 'down' : 'flat') : null;
+  const acc = stats?.accuracy ?? null;
+  const prior = stats?.priorAccuracy ?? null;
+  const hasData = acc !== null && stats?.count > 0;
+  const color = !hasData ? '#2a2a46' : acc > 0.75 ? 'var(--success)' : acc > 0.5 ? 'var(--xp-gold)' : 'var(--error)';
+  const trend = hasData && prior !== null ? (acc > prior + 0.02 ? 'up' : acc < prior - 0.02 ? 'down' : 'flat') : null;
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '16px', border: `1px solid ${acc !== null ? color + '40' : '#2a2a46'}`, transition: 'border-color 0.3s' }}>
-      <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '10px', lineHeight: 1.3, minHeight: '32px' }}>{name}</div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-        <div style={{ fontSize: '1.6rem', fontWeight: 'bold', color: acc === null ? '#3a3a56' : color }}>
-          {acc === null ? '--' : `${Math.round(acc * 100)}%`}
+    <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '16px', border: `1px solid ${hasData ? color + '40' : '#2a2a46'}`, transition: 'border-color 0.3s' }}>
+      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '10px', lineHeight: 1.3, minHeight: '28px' }}>{name}</div>
+      {hasData ? (
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+          <div style={{ fontSize: '1.6rem', fontWeight: 'bold', color }}>{Math.round(acc * 100)}%</div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+            {trend === 'up' && <TrendingUp size={14} color="var(--success)" />}
+            {trend === 'down' && <TrendingDown size={14} color="var(--error)" />}
+            {trend === 'flat' && <Minus size={14} color="var(--text-secondary)" />}
+            <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>{stats.count}q</div>
+          </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
-          {trend === 'up' && <TrendingUp size={14} color="var(--success)" />}
-          {trend === 'down' && <TrendingDown size={14} color="var(--error)" />}
-          {trend === 'flat' && <Minus size={14} color="var(--text-secondary)" />}
-          {stats?.count > 0 && <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>{stats.count}q</div>}
-        </div>
-      </div>
+      ) : (
+        <div style={{ fontSize: '0.75rem', color: '#3a3a56', fontStyle: 'italic' }}>No data yet</div>
+      )}
     </div>
   );
 }

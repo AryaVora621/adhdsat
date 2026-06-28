@@ -661,6 +661,18 @@ app.get('/api/users/:id/export', (req, res) => {
   res.send(csv);
 });
 
+// --- Activity days (for streak calendar) ---
+app.get('/api/activity-days/:userId', (req, res) => {
+  const days = db.prepare(`
+    SELECT DISTINCT date(created_at) as day
+    FROM user_answers
+    WHERE user_id = ?
+      AND created_at >= date('now', '-7 days')
+    ORDER BY day
+  `).all(req.params.userId);
+  res.json(days.map(r => r.day));
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`[ADHDSat] Server running on port ${PORT}`);

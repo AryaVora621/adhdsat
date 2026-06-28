@@ -1,6 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Flame, Star, LayoutDashboard, Zap, User, BookOpen } from 'lucide-react';
+
+function WeekCalendar({ userId }) {
+  const [activeDays, setActiveDays] = useState(new Set());
+
+  useEffect(() => {
+    fetch(`/api/activity-days/${userId}`)
+      .then(r => r.json())
+      .then(days => setActiveDays(new Set(days)))
+      .catch(() => {});
+  }, [userId]);
+
+  const days = [];
+  const today = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    const label = d.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 1);
+    days.push({ key, label, active: activeDays.has(key) });
+  }
+
+  return (
+    <div style={{ backgroundColor: 'var(--bg-card)', padding: '12px 16px', borderRadius: '12px', border: '1px solid #2a2a46' }}>
+      <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px' }}>This Week</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        {days.map(d => (
+          <div key={d.key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+            <div style={{
+              width: '24px', height: '24px', borderRadius: '6px',
+              backgroundColor: d.active ? 'var(--primary)' : '#0f0f1a',
+              border: `1px solid ${d.active ? 'var(--primary)' : '#2a2a46'}`,
+              opacity: d.key === new Date().toISOString().slice(0, 10) && !d.active ? 0.5 : 1,
+            }} />
+            <span style={{ fontSize: '0.6rem', color: d.active ? 'var(--primary)' : 'var(--text-secondary)' }}>{d.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Sidebar({ user }) {
   const level = Math.floor(user.total_xp / 500) + 1;
@@ -70,6 +110,9 @@ export default function Sidebar({ user }) {
           </div>
         )}
       </div>
+
+      {/* 7-day activity calendar */}
+      <WeekCalendar userId={user.id} />
     </div>
   );
 }
