@@ -714,6 +714,19 @@ app.get('/api/activity-days/:userId', (req, res) => {
   res.json(days.map(r => r.day));
 });
 
+app.get('/api/today/:userId', (req, res) => {
+  const today = new Date().toISOString().slice(0, 10);
+  const sprints = db.prepare(`
+    SELECT COUNT(*) as cnt FROM sprints
+    WHERE user_id = ? AND completed_at >= ? AND sprint_type != 'review'
+  `).get(req.params.userId, today + 'T00:00:00.000Z').cnt;
+  const answers = db.prepare(`
+    SELECT COUNT(*) as cnt FROM user_answers
+    WHERE user_id = ? AND date(created_at) = date('now')
+  `).get(req.params.userId).cnt;
+  res.json({ sprints_today: sprints, answers_today: answers });
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`[ADHDSat] Server running on port ${PORT}`);

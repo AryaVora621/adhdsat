@@ -201,8 +201,9 @@ export default function Sprint({ user, setUser }) {
   const [showSummary, setShowSummary] = useState(false);
   const [finalStats, setFinalStats] = useState(null);
   const [wrongAnswers, setWrongAnswers] = useState([]);
-  const [sprintLength, setSprintLength] = useState(10);
-  const sprintLengthRef = useRef(10);
+  const savedLen = parseInt(sessionStorage.getItem('preferredSprintLength') || '10', 10);
+  const [sprintLength, setSprintLength] = useState(savedLen);
+  const sprintLengthRef = useRef(savedLen);
   const [resumePrompt, setResumePrompt] = useState(null);
   const [isTestMode, setIsTestMode] = useState(false);
   const isTestModeRef = useRef(false);
@@ -639,7 +640,7 @@ export default function Sprint({ user, setUser }) {
           <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px' }}>Sprint Length</div>
           <div style={{ display: 'flex', gap: '8px' }}>
             {[5, 10, 15, 20].map(n => (
-              <button key={n} onClick={() => { setSprintLength(n); sprintLengthRef.current = n; }}
+              <button key={n} onClick={() => { setSprintLength(n); sprintLengthRef.current = n; sessionStorage.setItem('preferredSprintLength', n); }}
                 style={{ padding: '8px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', border: `2px solid ${sprintLength === n ? 'var(--primary)' : '#2a2a46'}`, backgroundColor: sprintLength === n ? 'rgba(0,212,255,0.08)' : 'transparent', color: sprintLength === n ? 'var(--primary)' : 'var(--text-secondary)', transition: 'all 0.15s' }}>
                 {n}Q
               </button>

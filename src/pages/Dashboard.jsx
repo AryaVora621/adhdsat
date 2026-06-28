@@ -42,22 +42,32 @@ function DomainCard({ name, stats }) {
 
 function QuickStartCard({ navigate, user }) {
   const [starting, setStarting] = useState(false);
+  const [today, setToday] = useState(null);
+  const DAILY_GOAL = 3;
+
+  useEffect(() => {
+    fetch(`/api/today/${user.id}`)
+      .then(r => r.json())
+      .then(setToday)
+      .catch(() => {});
+  }, [user.id]);
 
   const handleStudyNow = async () => {
     setStarting(true);
     try {
-      const res = await fetch('/api/sprints', {
+      await fetch('/api/sprints', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id, sprint_type: 'adaptive' })
       });
-      const data = await res.json();
       navigate('/sprint', { state: { mode: 'adaptive' } });
-    } catch (err) {
-      console.error(err);
+    } catch {
       setStarting(false);
     }
   };
+
+  const done = today?.sprints_today || 0;
+  const allDone = done >= DAILY_GOAL;
 
   return (
     <div style={{
@@ -65,14 +75,34 @@ function QuickStartCard({ navigate, user }) {
       padding: '28px', borderRadius: '16px', border: '1px solid rgba(0,212,255,0.25)',
       textAlign: 'center', marginBottom: '28px'
     }}>
-      <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '600' }}>Let's Go!</div>
+      <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '600' }}>
+        {allDone ? 'Goal Reached!' : "Let's Go!"}
+      </div>
       <button className="primary" onClick={handleStudyNow} disabled={starting}
         style={{ padding: '16px 32px', fontSize: '1.15rem', width: '100%', fontWeight: '700', letterSpacing: '0.5px' }}>
-        {starting ? 'Starting...' : '⚡ Study Now'}
+        {starting ? 'Starting...' : allDone ? '⚡ Keep Going' : '⚡ Study Now'}
       </button>
-      <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '12px', lineHeight: 1.4 }}>
-        Jump into an adaptive sprint · We'll focus on your weakest areas
-      </p>
+      {today !== null && (
+        <div style={{ marginTop: '14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '6px' }}>
+            {Array.from({ length: DAILY_GOAL }, (_, i) => (
+              <div key={i} style={{
+                width: '28px', height: '8px', borderRadius: '4px',
+                backgroundColor: i < done ? 'var(--primary)' : '#2a2a46',
+                transition: 'background-color 0.3s'
+              }} />
+            ))}
+          </div>
+          <p style={{ fontSize: '0.72rem', color: allDone ? 'var(--success)' : 'var(--text-secondary)', lineHeight: 1.4 }}>
+            {allDone ? `${done} sprints today — daily goal complete!` : `${done}/${DAILY_GOAL} sprints today · Adaptive mode targets your weaknesses`}
+          </p>
+        </div>
+      )}
+      {today === null && (
+        <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '12px', lineHeight: 1.4 }}>
+          Jump into an adaptive sprint · We'll focus on your weakest areas
+        </p>
+      )}
     </div>
   );
 }
