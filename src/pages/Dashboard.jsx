@@ -375,7 +375,7 @@ export default function Dashboard({ user, isMobile }) {
           <div style={{ fontWeight: '600', marginBottom: '2px' }}>Review Errors</div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
             {reviewCount > 0
-              ? `${reviewCount} question${reviewCount !== 1 ? 's' : ''} queued — +25 XP each when mastered`
+              ? `${reviewCount} question${reviewCount !== 1 ? 's' : ''} queued — up to +35 XP each when mastered`
               : 'Answer some questions incorrectly to build your review queue'}
           </div>
         </div>

@@ -56,6 +56,19 @@ function parseSegments(text) {
       segments.push({ type: 'text', content: processed.slice(i) });
       break;
     }
+    // Currency: $<digit> is a dollar amount, not a math delimiter -- skip it
+    const nextChar = processed[start + 1];
+    if (nextChar && /[0-9,]/.test(nextChar)) {
+      // Collect text up to and including this currency symbol, continue scanning
+      const textSoFar = processed.slice(i, start + 1);
+      if (segments.length > 0 && segments[segments.length - 1].type === 'text') {
+        segments[segments.length - 1].content += textSoFar;
+      } else {
+        segments.push({ type: 'text', content: textSoFar });
+      }
+      i = start + 1;
+      continue;
+    }
     if (start > i) {
       segments.push({ type: 'text', content: processed.slice(i, start) });
     }
