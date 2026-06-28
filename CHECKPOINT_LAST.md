@@ -1,108 +1,65 @@
-# Checkpoint - ADHDSat Premium Shippable
+# ADHDSat Checkpoint
 
 **Updated:** 2026-06-28
 
-## Status: SHIPPABLE
+## Status: SHIPPABLE -- Ready to push and deploy
 
-The product is feature-complete, bug-free, and ready to ship. All remaining work is optional enhancements (deployment, more questions, push notifications).
+## Completed This Session
 
----
+### Critical MathText Fixes
+- **Root cause fixed**: `asciiToLatex` converts `2^3` → `$2^{3}$`; old heuristic matched `$2` as currency (digits followed by `^`) leaving an orphaned `$` that greedily consumed all following text as one garbled italic block. New regex `/^(\d+)(?=\s|[.,;:!?)]|$)/` only treats `$N` as currency when followed by whitespace or sentence punctuation.
+- **Multi-line explanation fix**: Removed `mergeDollarSpans` which was incorrectly concatenating adjacent-line math spans like `$x=3$\n$x-4=0...$` into one broken block.
+- **Answer choices fix**: `$3$`, `$4$`, `$7$` now render correctly as math (not as `$3` currency + `$` orphan).
 
-## This Session's Additions (post-compaction)
+### Vercel Deployment
+- `server/db.js`: Detects `VERCEL` env, copies `adhdsat.db` → `/tmp`, auto-seeds from `data/questions.json` if empty.
+- `server/index.js`: Exports app for serverless; `app.listen()` skipped on Vercel.
+- `vercel.json`: Rewrites `/api/*` → Express function, `/*` → SPA.
 
-- **Keyboard shortcut hint** below answer choices ("1-4 to select · Enter to check · H for hint")
-- **ErrorBoundary** wraps entire app -- crashes show recovery UI, never blank screen
-- **Health endpoint** `/api/health` returns status + question count, deployment-ready
-- **Enter key on summary screen** now correctly navigates to Dashboard (was a dead hint)
-- **Study Plan no-test-date fix** -- "Test date passed" was shown when no date was set; now hides gracefully
-- **Emoji removal** -- 3 raw emoji replaced with Lucide icons (Onboarding 🎯 → Target, Dashboard 📊 → BarChart2, Study Now ⚡ → text)
-- **Difficulty-weighted score prediction** (hard=2x, medium=1.5x, easy=1x)
-- **Review sprint summary screen** (grade/XP/SM-2 message/Review More button)
-- **Daily sprint goal tracker** (3-pip progress bar + /api/today/:userId endpoint)
-- **Pre-fetch next question** while user reads explanation (instant transitions)
-- **MathText in wrong answer explanations** (math questions now render KaTeX in summary)
-- **Grid-in autoFocus** -- text input auto-focused when grid-in question loads
-- **Duplicate shortcut hint removed** from question header
+### UI Polish
+- Dashboard: `progress.predictedScore.english` null → shows `--` not blank.
+- Sprint summary stat grid: Reduced padding/gap, `minWidth: 0` -- no more XP card clipping on mobile.
+- Sprint mode `←` button: Replaced unicode arrow with `ChevronLeft` Lucide icon.
+- Sprint milestone toast `✓`: Replaced with `CheckCircle2` Lucide icon.
 
----
+## Git Log (latest 10)
+```
+0a4a887 fix: replace unicode arrow in sprint mode button with ChevronLeft icon
+5f028a6 fix: summary stat cards fit mobile, Dashboard R&W shows '--' when no data
+ccf64f8 fix: remove functions section from vercel config
+0e2ad9f fix: MathText currency regex (root cause)
+18a4c09 feat: Vercel deployment + MathText multi-line fix
+448f330 fix: MathText $3$ renders as math not currency
+3d9c5a4 fix: MathText currency heuristic (digit-only token check)
+047182c fix: MathText currency dollar signs not math delimiters
+2683c3d feat: production static file serving + Sprint Again restarts same mode
+```
 
-## Complete Feature Set
+## What Works (verified via Playwright live testing)
+- Adaptive/math/english sprint modes, 5/10/15/20Q
+- Practice test mode (22q math / 27q english with timers)
+- SM-2 spaced repetition review queue
+- MathText: currency (`$75 for`), math (`$2x$`, `$2^{3}$`, `$3$`), multi-line explanations
+- Sprint Again restarts same mode instantly (no picker round-trip)
+- Session recovery prompt (Zap icon, no emoji)
+- Pre-fetch covers all questions including last
+- XP scaling by difficulty (15/20/30 sprint; 20/25/35 review)
+- Difficulty-weighted score prediction (shown after 10+ answers)
+- Domain performance tracking and visualization
+- Level-up toast on XP milestones
+- Confetti on personal best accuracy
+- Domain breakdown on sprint summary screen
+- Wrong answer cards (expandable, show correct answer + explanation)
+- ErrorBoundary with recovery button
+- Streak tracking (daily)
+- Zero raw emoji across entire codebase (all replaced with Lucide icons)
 
-### Core Sprint Loop
-- [x] Adaptive, Math, English sprint modes
-- [x] Practice Test modes (Math 22q/35min, English 27q/32min)
-- [x] Sprint length selector (5/10/15/20 questions), persisted
-- [x] SM-2 spaced repetition for review queue
-- [x] KaTeX math rendering (inline + passage)
-- [x] SSE streaming explanations (Gemini Deep Dive)
-- [x] Hint system (2 hints/question, disabled in test mode)
-- [x] Keyboard shortcuts (1-4 pick, Enter submit/advance, H hint)
-- [x] Wrong answer review cards post-sprint (expandable + MathText)
-- [x] Domain breakdown on summary screen
-- [x] Question pre-fetching for instant transitions
+## Next Action (human)
+1. `git push origin main`
+2. Create Vercel project, connect repo
+3. Add env var: `GEMINI_API_KEY` in Vercel dashboard
+4. Deploy
 
-### ADHD Optimization
-- [x] Study Now button (1-click start, no decision fatigue)
-- [x] Session mode memory (skip mode picker on return)
-- [x] Daily sprint goal tracker (3-pip progress bar)
-- [x] Time milestone toasts (2/5/10 min)
-- [x] Confetti on personal best accuracy
-- [x] Domain neglect alerts (hyperfocus trap prevention)
-- [x] Change-mode escape (only on Q1)
-- [x] Session recovery: resume prompt after refresh/crash
-- [x] prefers-reduced-motion accessibility
-- [x] Streak calendar (7-day visual)
-- [x] Review count badge on BottomNav
-- [x] LevelUpToast notification
-- [x] Grid-in autofocus for keyboard flow
-
-### Intelligence
-- [x] Score report upload → Gemini Vision → per-domain subscores
-- [x] Adaptive question selection (Gemini + rule-based fallback)
-- [x] Section filtering (Math/English domains per mode)
-- [x] AI insights + Today's Focus panel on Dashboard
-- [x] Difficulty-weighted predicted score range
-
-### Dashboard & Progress
-- [x] Welcome + total questions answered
-- [x] Study Plan widget (target score, test date optional, gap, sprints/day)
-- [x] Today's Focus (AI + rule-based insights)
-- [x] Sprint mode cards (Adaptive/Math/English)
-- [x] Review Errors CTA (count + link)
-- [x] Domain performance grid (4x2, "No data yet" empty state)
-- [x] Accuracy sparkline chart (SVG, trend label, 1/2+ sprints)
-- [x] Predicted score range (unlocks at 10+ questions)
-
-### Mobile
-- [x] BottomNav with review badge (fixed bottom, iOS safe area)
-- [x] Responsive padding (clamp)
-- [x] 2-column domain grid
-- [x] Single-column sprint mode cards
-- [x] Column passage layout
-
-### Profile
-- [x] Display name editing (inline, Enter to save)
-- [x] Baseline scores with sliders
-- [x] Score report upload (Gemini Vision)
-- [x] XP / level / streak progress display
-- [x] Focus areas selector
-- [x] Domain accuracy bars
-- [x] Sprint history table
-- [x] CSV export of question history
-- [x] Danger Zone: reset profile (2-step confirmation)
-
-### Infrastructure
-- [x] 26 REST endpoints on Express 5
-- [x] /api/health endpoint
-- [x] SQLite via better-sqlite3 (idempotent migrations)
-- [x] Rule-based fallback for all Gemini calls
-- [x] GEMINI_API_KEY in .env (gitignored)
-- [x] 532 questions (all with hints + explanations)
-- [x] ErrorBoundary wrapping entire app
-
----
-
-## Human Decisions Needed
-- Deploy to Vercel/Railway (env vars: GEMINI_API_KEY, PORT)
-- Optional: add more SAT questions (currently 532)
-- Optional: push notifications for daily study reminders
+## Known Limitations
+- SQLite on Vercel: user data resets on cold starts. Questions always available from bundled JSON. Acceptable for MVP.
+- English subscore shows `--` until 3+ English questions answered.
