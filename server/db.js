@@ -1,11 +1,28 @@
 import Database from 'better-sqlite3';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
+import { existsSync, copyFileSync, readFileSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbPath = path.join(__dirname, 'adhdsat.db');
+// On Vercel, project files are read-only; use /tmp for the writable DB copy.
+const srcDbPath = path.join(__dirname, 'adhdsat.db');
+const tmpDbPath = '/tmp/adhdsat.db';
+const isVercel = !!process.env.VERCEL;
+
+let dbPath;
+if (isVercel) {
+  if (!existsSync(tmpDbPath)) {
+    if (existsSync(srcDbPath)) {
+      copyFileSync(srcDbPath, tmpDbPath);
+    }
+  }
+  dbPath = tmpDbPath;
+} else {
+  dbPath = srcDbPath;
+}
+
 const db = new Database(dbPath);
 
 const initDb = () => {
@@ -92,6 +109,38 @@ const initDb = () => {
 
   const qCols = db.prepare("PRAGMA table_info(questions)").all().map(c => c.name);
   if (!qCols.includes('source')) db.exec("ALTER TABLE questions ADD COLUMN source TEXT DEFAULT 'ingest'");
+
+  // On Vercel, if questions table is empty, seed from bundled JSON
+  if (isVercel) {
+    const count = db.prepare('SELECT COUNT(*) as cnt FROM questions').get().cnt;
+    if (count === 0) {
+      const jsonPath = path.join(__dirname, 'data', 'questions.json');
+      if (existsSync(jsonPath)) {
+        const questions = JSON.parse(readFileSync(jsonPath, 'utf8'));
+        const insert = db.prepare(`
+          INSERT OR IGNORE INTO questions
+          (id, section, domain, skill, difficulty, question_text, passage_text, choices,
+           is_grid_in, grid_in_answer, explanation, hint_1, hint_2, tags, source, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        const seedAll = db.transaction(() => {
+          for (const q of questions) {
+            insert.run(
+              q.id, q.section, q.domain, q.skill, q.difficulty,
+              q.question_text, q.passage_text || null,
+              JSON.stringify(q.choices || []),
+              q.is_grid_in ? 1 : 0, q.grid_in_answer || null,
+              q.explanation || null, q.hint_1 || null, q.hint_2 || null,
+              JSON.stringify(q.tags || []), q.source || 'ingest',
+              new Date().toISOString()
+            );
+          }
+        });
+        seedAll();
+        console.log(`[ADHDSat] Seeded ${questions.length} questions from JSON`);
+      }
+    }
+  }
 };
 
 initDb();

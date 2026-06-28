@@ -37,16 +37,11 @@ function asciiToLatex(text) {
   return out;
 }
 
-// Merge adjacent $...$ spans so we don't produce $a$$b$ sequences
-function mergeDollarSpans(text) {
-  return text.replace(/\$([^$]+)\$\s*\$([^$]+)\$/g, (_, a, b) => `$${a} ${b}$`);
-}
-
 function parseSegments(text) {
   if (!text) return [];
 
-  // Run ASCII upgrader first, then merge
-  const processed = mergeDollarSpans(asciiToLatex(String(text)));
+  // asciiToLatex may produce adjacent $a$$b$ spans; the parser handles them correctly as-is
+  const processed = asciiToLatex(String(text));
 
   const segments = [];
   let i = 0;

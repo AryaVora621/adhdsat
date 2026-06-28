@@ -750,7 +750,12 @@ if (existsSync(distPath)) {
   });
 }
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`[ADHDSat] Server running on port ${PORT}`);
-});
+// Local dev: start the HTTP server. On Vercel, the app is exported and wrapped serverlessly.
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
+    console.log(`[ADHDSat] Server running on port ${PORT}`);
+  });
+}
+
+export default app;

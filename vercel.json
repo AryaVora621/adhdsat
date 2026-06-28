@@ -1,16 +1,15 @@
 {
+  "version": 2,
   "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "framework": "vite",
   "outputDirectory": "dist",
-  "env": {
-    "GEMINI_API_KEY": "@GEMINI_API_KEY"
-  },
   "functions": {
     "server/index.js": {
-      "runtime": "nodejs18.x",
-      "memory": 1024
+      "memory": 1024,
+      "maxDuration": 30
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/server/index.js" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
