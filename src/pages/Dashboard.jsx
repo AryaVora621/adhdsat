@@ -396,8 +396,8 @@ export default function Dashboard({ user, isMobile }) {
             <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: 'var(--primary)' }}>{progress.predictedScore.range}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>R&amp;W {progress.predictedScore.english}</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Math {progress.predictedScore.math}</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>R&amp;W {progress.predictedScore.english ?? '--'}</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Math {progress.predictedScore.math ?? '--'}</div>
             {progress.baseline?.english ? (
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
                 Baseline: {progress.baseline.english + progress.baseline.math}

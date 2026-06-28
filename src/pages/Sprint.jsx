@@ -116,15 +116,15 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
         {SPRINT_LENGTH} questions{testTimeUsed ? ` · ${Math.floor(testTimeUsed / 60)}:${String(testTimeUsed % 60).padStart(2, '0')} used` : ' finished'}
       </p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '20px' }}>
         {[
           { label: 'Correct', value: `${finalStats.correct}/${finalStats.attempted}` },
           { label: 'Accuracy', value: `${accuracy}%`, color: grade.color },
           { label: 'XP Earned', value: `+${finalStats.xp}`, color: 'var(--xp-gold)' }
         ].map(stat => (
-          <div key={stat.label} style={{ backgroundColor: 'var(--bg-card)', padding: '20px', borderRadius: '14px', border: '1px solid #2a2a46' }}>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>{stat.label}</div>
-            <div style={{ fontSize: '1.6rem', fontWeight: 'bold', color: stat.color || 'var(--text-primary)' }}>{stat.value}</div>
+          <div key={stat.label} style={{ backgroundColor: 'var(--bg-card)', padding: '14px 10px', borderRadius: '14px', border: '1px solid #2a2a46', minWidth: 0 }}>
+            <div style={{ fontSize: '0.62rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{stat.label}</div>
+            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: stat.color || 'var(--text-primary)' }}>{stat.value}</div>
           </div>
         ))}
       </div>
