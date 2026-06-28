@@ -144,13 +144,29 @@ app.get('/api/questions/next', async (req, res) => {
 
   // Validate that Gemini's pick is within the allowed section; if not, fall through to rule-based
   if (!criteria || !allowedDomains.includes(criteria.domain)) {
-    let targetDomain = weakAreas[0] || allowedDomains[0];
+    // Pick the weakest domain (lowest accuracy), or a domain with no data, or a flagged weak area
+    let targetDomain = null;
     let lowestAcc = Infinity;
-    for (const [d, acc] of Object.entries(domainAccuracy)) {
-      if (!allowedDomains.includes(d)) continue;
-      if (acc !== null && acc < lowestAcc) { lowestAcc = acc; targetDomain = d; }
+    // Prefer domains with no data at all (virgin territory)
+    const untriedDomains = allowedDomains.filter(d => domainAccuracy[d] === undefined);
+    if (untriedDomains.length > 0) {
+      // Prioritize flagged weak areas with no data, else first untried
+      targetDomain = untriedDomains.find(d => weakAreas.includes(d)) || untriedDomains[0];
+    } else {
+      // All domains tried -- pick weakest
+      for (const [d, acc] of Object.entries(domainAccuracy)) {
+        if (!allowedDomains.includes(d) || acc === null) continue;
+        if (acc < lowestAcc) { lowestAcc = acc; targetDomain = d; }
+      }
+      if (!targetDomain) targetDomain = weakAreas[0] || allowedDomains[0];
     }
-    criteria = { domain: targetDomain, difficulty: 'medium' };
+    // Vary difficulty based on domain accuracy
+    const domainAcc = domainAccuracy[targetDomain];
+    const difficulty = domainAcc === undefined || domainAcc === null ? 'medium'
+      : domainAcc < 0.4 ? 'easy'
+      : domainAcc > 0.75 ? 'hard'
+      : 'medium';
+    criteria = { domain: targetDomain, difficulty };
   }
 
   const placeholders = seen.length > 0 ? seen.map(() => '?').join(',') : "'__none__'";

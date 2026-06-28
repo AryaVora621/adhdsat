@@ -197,6 +197,11 @@ export default function Sprint({ user, setUser }) {
   const [sprintLength, setSprintLength] = useState(10);
   const sprintLengthRef = useRef(10);
   const [resumePrompt, setResumePrompt] = useState(null);
+  const [isTestMode, setIsTestMode] = useState(false);
+  const isTestModeRef = useRef(false);
+  const [testTimeLimit, setTestTimeLimit] = useState(0); // seconds, 0 = no limit
+  const testTimeLimitRef = useRef(0);
+  const endSprintRef = useRef(null); // ref to force-end sprint when time expires
 
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -247,16 +252,32 @@ export default function Sprint({ user, setUser }) {
     setElapsed(0);
     timeStartRef.current = Date.now();
     timerRef.current = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - timeStartRef.current) / 1000));
+      const now = Date.now();
+      setElapsed(Math.floor((now - timeStartRef.current) / 1000));
       // Check sprint-level time milestones
       if (sprintStartRef.current) {
-        const sprintElapsed = Math.floor((Date.now() - sprintStartRef.current) / 1000);
-        for (const m of MILESTONES) {
-          if (sprintElapsed >= m.seconds && !milestoneShownRef.current.has(m.seconds)) {
-            milestoneShownRef.current.add(m.seconds);
-            setMilestone(m.label);
-            setTimeout(() => setMilestone(null), 3000);
-            break;
+        const sprintElapsed = Math.floor((now - sprintStartRef.current) / 1000);
+        // Test mode: auto-end sprint when countdown hits 0
+        if (isTestModeRef.current && testTimeLimitRef.current > 0) {
+          const remaining = testTimeLimitRef.current - sprintElapsed;
+          if (remaining <= 0) {
+            clearInterval(timerRef.current);
+            // Trigger sprint end by setting questionNum past length
+            setQuestionNum(prev => {
+              endSprintRef.current?.();
+              return prev;
+            });
+            return;
+          }
+        }
+        if (!isTestModeRef.current) {
+          for (const m of MILESTONES) {
+            if (sprintElapsed >= m.seconds && !milestoneShownRef.current.has(m.seconds)) {
+              milestoneShownRef.current.add(m.seconds);
+              setMilestone(m.label);
+              setTimeout(() => setMilestone(null), 3000);
+              break;
+            }
           }
         }
       }
@@ -268,8 +289,24 @@ export default function Sprint({ user, setUser }) {
   useEffect(() => () => clearInterval(timerRef.current), []);
 
   const startSprint = async (mode) => {
-    sprintModeRef.current = mode;
-    setSprintMode(mode);
+    // Test modes: full-section timed simulation
+    const testModeMap = { 'test-math': { section: 'math', seconds: 35 * 60, questions: 22 }, 'test-english': { section: 'english', seconds: 32 * 60, questions: 27 } };
+    const testConfig = testModeMap[mode];
+    const effectiveMode = testConfig ? testConfig.section : mode;
+    const isTest = !!testConfig;
+    isTestModeRef.current = isTest;
+    setIsTestMode(isTest);
+    if (testConfig) {
+      sprintLengthRef.current = testConfig.questions;
+      setSprintLength(testConfig.questions);
+      testTimeLimitRef.current = testConfig.seconds;
+      setTestTimeLimit(testConfig.seconds);
+    } else {
+      testTimeLimitRef.current = 0;
+      setTestTimeLimit(0);
+    }
+    sprintModeRef.current = effectiveMode;
+    setSprintMode(effectiveMode);
     setLoading(true);
     sprintStartRef.current = Date.now();
     milestoneShownRef.current = new Set();
@@ -394,28 +431,37 @@ export default function Sprint({ user, setUser }) {
     }
   }, [selectedChoice, question, isAnswered, hintsUsed, sprintId, stats, questionNum, user.id]);
 
+  const finishSprint = useCallback(async (currentStats) => {
+    const current = currentStats || stats;
+    stopTimer();
+    try {
+      await fetch(`/api/sprints/${sprintId}/finish`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          questions_attempted: current.attempted,
+          questions_correct: current.correct,
+          xp_earned: current.xp
+        })
+      });
+    } catch {}
+    sessionStorage.removeItem('activeSprint');
+    setFinalStats(current);
+    setShowSummary(true);
+  }, [sprintId, stats]);
+
+  // Expose finishSprint via ref so the timer interval can call it
+  useEffect(() => { endSprintRef.current = () => finishSprint(stats); }, [finishSprint, stats]);
+
   const handleNext = useCallback(async () => {
     const current = stats;
     if (questionNum >= sprintLengthRef.current) {
-      try {
-        await fetch(`/api/sprints/${sprintId}/finish`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            questions_attempted: current.attempted,
-            questions_correct: current.correct,
-            xp_earned: current.xp
-          })
-        });
-      } catch {}
-      sessionStorage.removeItem('activeSprint');
-      setFinalStats(current);
-      setShowSummary(true);
+      await finishSprint(current);
     } else {
       setQuestionNum(n => n + 1);
       await fetchNextQuestion();
     }
-  }, [questionNum, sprintId, stats]);
+  }, [questionNum, sprintId, stats, finishSprint]);
 
   // Keyboard shortcuts: 1-4 pick choice, Enter submits / advances
   useEffect(() => {
@@ -570,6 +616,10 @@ export default function Sprint({ user, setUser }) {
       { key: 'math', label: 'Math', sub: 'Algebra, Advanced Math, Geometry...', icon: <Calculator size={28} /> },
       { key: 'english', label: 'English', sub: 'Reading, Writing & Language...', icon: <BookOpen size={28} /> },
     ];
+    const testModes = [
+      { key: 'test-math', label: 'Math Test', sub: '22 questions · 35 min · full module simulation', icon: <Calculator size={24} />, time: '35 min' },
+      { key: 'test-english', label: 'English Test', sub: '27 questions · 32 min · full module simulation', icon: <BookOpen size={24} />, time: '32 min' },
+    ];
     return (
       <div style={{ padding: 'clamp(16px, 5vw, 48px)', maxWidth: '600px', margin: '0 auto', width: '100%' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>Choose Sprint Mode</h1>
@@ -603,7 +653,32 @@ export default function Sprint({ user, setUser }) {
             </button>
           ))}
         </div>
-        <button onClick={() => navigate('/')} style={{ marginTop: '20px', padding: '10px 16px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+
+        {/* Practice Test section */}
+        <div style={{ marginTop: '28px', marginBottom: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+            <div style={{ flex: 1, height: '1px', backgroundColor: '#2a2a46' }} />
+            <span style={{ fontSize: '0.7rem', color: 'var(--xp-gold)', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '600' }}>Practice Test</span>
+            <div style={{ flex: 1, height: '1px', backgroundColor: '#2a2a46' }} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {testModes.map(m => (
+              <button key={m.key} onClick={() => startSprint(m.key)}
+                style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', backgroundColor: 'rgba(255,215,64,0.04)', border: '1px solid rgba(255,215,64,0.2)', borderRadius: '14px', textAlign: 'left', cursor: 'pointer', transition: 'border-color 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,215,64,0.5)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,215,64,0.2)'}>
+                <span style={{ color: 'var(--xp-gold)' }}>{m.icon}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '2px' }}>{m.label}</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{m.sub}</div>
+                </div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--xp-gold)', fontWeight: '600', flexShrink: 0, backgroundColor: 'rgba(255,215,64,0.1)', padding: '3px 8px', borderRadius: '8px' }}>⏱ {m.time}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <button onClick={() => navigate('/')} style={{ marginTop: '16px', padding: '10px 16px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
           Back to Dashboard
         </button>
       </div>
@@ -631,8 +706,14 @@ export default function Sprint({ user, setUser }) {
     ? parseFloat(selectedChoice) === question.grid_in_answer
     : question.choices.find(c => c.label === selectedChoice)?.is_correct;
 
-  const timerColor = elapsed < 60 ? 'var(--text-secondary)' : elapsed < 120 ? 'var(--xp-gold)' : 'var(--error)';
-  const timerStr = `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, '0')}`;
+  // In test mode, show countdown; otherwise show count-up per-question timer
+  const sprintElapsedSec = sprintStartRef.current ? Math.floor((Date.now() - sprintStartRef.current) / 1000) : 0;
+  const countdown = isTestMode && testTimeLimit > 0 ? Math.max(0, testTimeLimit - sprintElapsedSec) : null;
+  const timerColor = countdown !== null
+    ? (countdown < 300 ? 'var(--error)' : countdown < 600 ? 'var(--xp-gold)' : 'var(--primary)')
+    : (elapsed < 60 ? 'var(--text-secondary)' : elapsed < 120 ? 'var(--xp-gold)' : 'var(--error)');
+  const timerSec = countdown !== null ? countdown : elapsed;
+  const timerStr = `${Math.floor(timerSec / 60)}:${String(timerSec % 60).padStart(2, '0')}`;
 
   return (
     <div style={{ padding: 'clamp(16px, 5vw, 48px)', maxWidth: '800px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column' }}>

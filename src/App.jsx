@@ -86,7 +86,7 @@ function AppInner() {
         </Routes>
       </div>
       {showNav && !isMobile && <Sidebar user={user} />}
-      {showNav && isMobile && <BottomNav />}
+      {showNav && isMobile && <BottomNav userId={user?.id} />}
       {levelUpToast && <LevelUpToast level={levelUpToast} onDone={() => setLevelUpToast(null)} />}
     </div>
   );
