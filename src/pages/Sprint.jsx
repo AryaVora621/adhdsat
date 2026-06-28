@@ -380,7 +380,7 @@ export default function Sprint({ user, setUser }) {
 
   const handleAnswerSubmit = useCallback(async (choiceOverride) => {
     const choice = choiceOverride ?? selectedChoice;
-    if (!choice && question?.is_grid_in === 0) return;
+    if (!choice) return;
     if (isAnswered) return;
 
     stopTimer();
@@ -940,7 +940,7 @@ export default function Sprint({ user, setUser }) {
             </button>
           )}
           <button className="primary" onClick={() => handleAnswerSubmit()}
-            disabled={!selectedChoice && question.is_grid_in === 0}
+            disabled={!selectedChoice}
             style={{ flex: 2, padding: '13px', fontSize: '1rem' }}>
             Check Answer
           </button>

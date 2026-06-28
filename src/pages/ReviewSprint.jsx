@@ -70,7 +70,7 @@ export default function ReviewSprint({ user, setUser }) {
   };
 
   const handleAnswerSubmit = useCallback(async () => {
-    if (!selectedChoice && question?.is_grid_in === 0) return;
+    if (!selectedChoice) return;
     if (isAnswered) return;
     let correct = false;
     if (question.is_grid_in) {
@@ -401,7 +401,7 @@ export default function ReviewSprint({ user, setUser }) {
             Hint ({2 - hintsUsed} left)
           </button>
           <button className="primary" onClick={handleAnswerSubmit}
-            disabled={!selectedChoice && question.is_grid_in === 0}
+            disabled={!selectedChoice}
             style={{ flex: 2, padding: '13px', fontSize: '1rem' }}>
             Check Answer
           </button>

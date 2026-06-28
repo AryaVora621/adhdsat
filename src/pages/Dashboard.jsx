@@ -303,9 +303,9 @@ export default function Dashboard({ user, isMobile }) {
         {greetingName ? `Welcome back, ${greetingName}!` : 'Ready to train?'}
       </h1>
       <p style={{ color: 'var(--text-secondary)', marginBottom: isMobile ? '24px' : '40px', fontSize: '0.95rem' }}>
-        {loading
+        {loading || !progress
           ? 'Loading your progress...'
-          : progress?.totalAnswered === 0
+          : progress.totalAnswered === 0
           ? 'Start your first sprint to see progress here.'
           : `${progress.totalAnswered} questions answered total.`
         }
