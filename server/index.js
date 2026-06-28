@@ -239,7 +239,7 @@ app.get('/api/progress', (req, res) => {
   }
 
   let predictedScore = null;
-  if (totalAnswered >= 20) {
+  if (totalAnswered >= 10) {
     const mathDomains = ['Algebra', 'Advanced Math', 'Problem Solving & Data Analysis', 'Geometry & Trig'];
     const engDomains = ['Information & Ideas', 'Craft & Structure', 'Expression of Ideas', 'Standard English Conventions'];
     const avgAcc = (domains) => {

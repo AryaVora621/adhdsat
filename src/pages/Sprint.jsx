@@ -255,15 +255,25 @@ export default function Sprint({ user, setUser }) {
 
         <div style={{ display: 'flex', gap: '12px' }}>
           <button onClick={() => navigate('/review')}
-            style={{ flex: 1, padding: '14px', fontSize: '0.95rem', borderColor: 'rgba(255,215,64,0.3)', color: 'var(--xp-gold)' }}>
+            style={{ flex: 1, padding: '14px', fontSize: '0.9rem', borderColor: 'rgba(255,215,64,0.3)', color: 'var(--xp-gold)' }}>
             Review Errors
           </button>
-          <button className="primary" onClick={() => navigate('/')}
+          <button className="primary" onClick={async () => {
+              setShowSummary(false); setFinalStats(null);
+              setStats({ attempted: 0, correct: 0, xp: 0 }); setQuestionNum(1);
+              setQuestion(null); setLoading(true);
+              const res = await fetch('/api/sprints', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, sprint_type: 'adaptive' }) });
+              const data = await res.json(); setSprintId(data.id);
+              fetchNextQuestion();
+            }}
             style={{ flex: 2, padding: '14px', fontSize: '1rem' }}>
-            Back to Dashboard
+            Sprint Again
           </button>
         </div>
-        <p style={{ marginTop: '12px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Press Enter to go to Dashboard</p>
+        <button onClick={() => navigate('/')} style={{ width: '100%', marginTop: '10px', padding: '10px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+          Back to Dashboard
+        </button>
+        <p style={{ marginTop: '8px', fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Press Enter for Dashboard</p>
       </div>
     );
   }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, XCircle, ChevronRight, AlertCircle, Zap, BookOpen } from 'lucide-react';
 import MathText from '../components/MathText';
@@ -68,8 +68,9 @@ export default function ReviewSprint({ user, setUser }) {
     }
   };
 
-  const handleAnswerSubmit = async () => {
-    if (!selectedChoice && question.is_grid_in === 0) return;
+  const handleAnswerSubmit = useCallback(async () => {
+    if (!selectedChoice && question?.is_grid_in === 0) return;
+    if (isAnswered) return;
     let correct = false;
     if (question.is_grid_in) {
       correct = parseFloat(selectedChoice) === question.grid_in_answer;
@@ -112,7 +113,43 @@ export default function ReviewSprint({ user, setUser }) {
       });
       setUser(await userRes.json());
     } catch {}
-  };
+  }, [selectedChoice, question, isAnswered, hintsUsed, sprintId, user.id]);
+
+  const handleNextCb = useCallback(async () => {
+    if (questionNum >= REVIEW_LENGTH) {
+      try {
+        await fetch(`/api/sprints/${sprintId}/finish`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ questions_attempted: stats.attempted, questions_correct: stats.correct, xp_earned: stats.xp })
+        });
+      } catch {}
+      navigate('/');
+    } else {
+      setQuestionNum(n => n + 1);
+      await fetchNextQuestion();
+    }
+  }, [questionNum, sprintId, stats, navigate]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const onKey = (e) => {
+      if (!question || loading || noErrors) return;
+      if (e.target.tagName === 'INPUT') return;
+      if (!isAnswered) {
+        if (['1','2','3','4'].includes(e.key) && !question.is_grid_in) {
+          const label = ['A','B','C','D'][parseInt(e.key) - 1];
+          if (label && question.choices.find(c => c.label === label)) setSelectedChoice(label);
+        }
+        if (e.key === 'Enter') handleAnswerSubmit();
+        if (e.key === 'h' || e.key === 'H') { if (hintsUsed < 2) setHintsUsed(h => h + 1); }
+      } else {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleNextCb(); }
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [question, isAnswered, loading, noErrors, hintsUsed, handleAnswerSubmit, handleNextCb]);
 
   const handleDeepDive = async () => {
     setDeepDiveLoading(true);
@@ -145,21 +182,6 @@ export default function ReviewSprint({ user, setUser }) {
     }
   };
 
-  const handleNext = async () => {
-    if (questionNum >= REVIEW_LENGTH) {
-      try {
-        await fetch(`/api/sprints/${sprintId}/finish`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ questions_attempted: stats.attempted, questions_correct: stats.correct, xp_earned: stats.xp })
-        });
-      } catch {}
-      navigate('/');
-    } else {
-      setQuestionNum(n => n + 1);
-      await fetchNextQuestion();
-    }
-  };
 
   if (loading) {
     return (
@@ -219,6 +241,7 @@ export default function ReviewSprint({ user, setUser }) {
         <span style={{ fontSize: '0.75rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px' }}>{question.domain}</span>
         <span style={{ color: '#2a2a46' }}>|</span>
         <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>{question.difficulty}</span>
+        {!isAnswered && <span style={{ marginLeft: 'auto', fontSize: '0.65rem', color: '#2a2a46' }}>1-4 to pick, Enter to submit</span>}
       </div>
 
       {/* Question */}
@@ -318,10 +341,11 @@ export default function ReviewSprint({ user, setUser }) {
               )}
             </div>
           )}
-          <button className="primary animate-pop" onClick={handleNext}
+          <button className="primary animate-pop" onClick={handleNextCb}
             style={{ width: '100%', padding: '15px', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
             {questionNum < REVIEW_LENGTH ? 'Next Review' : 'Finish Review'} <ChevronRight size={18} />
           </button>
+          <p style={{ textAlign: 'center', marginTop: '8px', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Press Enter to continue</p>
         </div>
       ) : (
         <div style={{ display: 'flex', gap: '10px' }}>

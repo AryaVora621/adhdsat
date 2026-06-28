@@ -6,12 +6,25 @@ import Sprint from './pages/Sprint';
 import Onboarding from './pages/Onboarding';
 import Profile from './pages/Profile';
 import ReviewSprint from './pages/ReviewSprint';
+import LevelUpToast from './components/LevelUpToast';
 import './index.css';
+
+const getLevel = (xp) => Math.floor((xp || 0) / 500) + 1;
 
 function AppInner() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [levelUpToast, setLevelUpToast] = useState(null);
   const navigate = useNavigate();
+
+  const setUserWithLevelCheck = (newUser) => {
+    setUser(prev => {
+      if (prev && newUser && getLevel(newUser.total_xp) > getLevel(prev.total_xp)) {
+        setLevelUpToast(getLevel(newUser.total_xp));
+      }
+      return newUser;
+    });
+  };
 
   useEffect(() => {
     let userId = localStorage.getItem('userId');
@@ -27,7 +40,7 @@ function AppInner() {
     })
       .then(res => res.json())
       .then(data => {
-        setUser(data);
+        setUserWithLevelCheck(data);
         setLoading(false);
         if (!data.onboarding_completed) {
           navigate('/onboarding');
@@ -51,15 +64,16 @@ function AppInner() {
     <div style={{ display: 'flex', width: '100%', height: '100vh' }}>
       <div style={{ flex: '1', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
         <Routes>
-          <Route path="/onboarding" element={<Onboarding user={user} setUser={setUser} />} />
+          <Route path="/onboarding" element={<Onboarding user={user} setUser={setUserWithLevelCheck} />} />
           <Route path="/" element={user?.onboarding_completed ? <Dashboard user={user} /> : <Navigate to="/onboarding" />} />
-          <Route path="/sprint" element={user?.onboarding_completed ? <Sprint user={user} setUser={setUser} /> : <Navigate to="/onboarding" />} />
-          <Route path="/profile" element={user?.onboarding_completed ? <Profile user={user} setUser={setUser} /> : <Navigate to="/onboarding" />} />
-          <Route path="/review" element={user?.onboarding_completed ? <ReviewSprint user={user} setUser={setUser} /> : <Navigate to="/onboarding" />} />
+          <Route path="/sprint" element={user?.onboarding_completed ? <Sprint user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
+          <Route path="/profile" element={user?.onboarding_completed ? <Profile user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
+          <Route path="/review" element={user?.onboarding_completed ? <ReviewSprint user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
       {showSidebar && <Sidebar user={user} />}
+      {levelUpToast && <LevelUpToast level={levelUpToast} onDone={() => setLevelUpToast(null)} />}
     </div>
   );
 }
