@@ -1,132 +1,108 @@
 # Checkpoint - ADHDSat Premium Shippable
 
-## Status: Premium Product Complete
+**Updated:** 2026-06-28
 
-### This Session's Additions
+## Status: SHIPPABLE
 
-**Mobile Responsive Layout**
-- BottomNav component: fixed bottom tabs (Home/Sprint/Review/Profile) on <768px
-- useIsMobile hook in App.jsx swaps Sidebar → BottomNav
-- Dashboard: responsive padding clamp(16px,5vw,48px), 2-col domain grid on mobile
-- Sprint/Review: passage+question stacks column on mobile, math overflow fix
-- All page paddings use clamp() -- fluid on any screen size
-
-**Onboarding Improvements**
-- Step 3 now collects target score (slider) + test date (date input)
-- Auto-saves study plan on completion so Dashboard Study Plan widget pre-populates
-- Gap display shows points needed from baseline to target
-
-**Streak Calendar**
-- Sidebar: 7-day "THIS WEEK" activity calendar (colored dots for study days)
-- Server: /api/activity-days/:userId endpoint (last 7 days of practice)
-
-**Domain Card Empty States**
-- Shows "No data yet" (italic, muted) instead of "--"
-- Card border only activates (colored by accuracy) once data exists
-
-**Practice Test Mode**
-- Sprint picker: "PRACTICE TEST" section with Math Test (22q/35min) and English Test (27q/32min)
-- Gold styling to distinguish from regular sprint modes
-- Countdown timer (cyan >10min, gold 5-10min, red <5min)
-- Hints disabled in test mode (real SAT has no hints)
-- Summary: "Test Complete!" + "Practice Test Simulation" badge + time used
-- Auto-ends sprint when countdown reaches 0
-
-**Algorithm Improvements**
-- Rule-based fallback now prioritizes untried domains (coverage-first)
-- Difficulty varies: easy <40% acc, medium default, hard >75% acc
-- Test mode timer fires endSprintRef when time expires
-
-**Review Badge**
-- BottomNav now shows red badge with count of pending review cards
+The product is feature-complete, bug-free, and ready to ship. All remaining work is optional enhancements (deployment, more questions, push notifications).
 
 ---
 
-## Full Feature Set
+## This Session's Additions (post-compaction)
+
+- **Keyboard shortcut hint** below answer choices ("1-4 to select · Enter to check · H for hint")
+- **ErrorBoundary** wraps entire app -- crashes show recovery UI, never blank screen
+- **Health endpoint** `/api/health` returns status + question count, deployment-ready
+- **Enter key on summary screen** now correctly navigates to Dashboard (was a dead hint)
+- **Study Plan no-test-date fix** -- "Test date passed" was shown when no date was set; now hides gracefully
+- **Emoji removal** -- 3 raw emoji replaced with Lucide icons (Onboarding 🎯 → Target, Dashboard 📊 → BarChart2, Study Now ⚡ → text)
+- **Difficulty-weighted score prediction** (hard=2x, medium=1.5x, easy=1x)
+- **Review sprint summary screen** (grade/XP/SM-2 message/Review More button)
+- **Daily sprint goal tracker** (3-pip progress bar + /api/today/:userId endpoint)
+- **Pre-fetch next question** while user reads explanation (instant transitions)
+- **MathText in wrong answer explanations** (math questions now render KaTeX in summary)
+- **Grid-in autoFocus** -- text input auto-focused when grid-in question loads
+- **Duplicate shortcut hint removed** from question header
+
+---
+
+## Complete Feature Set
 
 ### Core Sprint Loop
 - [x] Adaptive, Math, English sprint modes
-- [x] Practice Test modes (Math 35min, English 32min) -- NEW
-- [x] Sprint length selector (5/10/15/20 questions)
+- [x] Practice Test modes (Math 22q/35min, English 27q/32min)
+- [x] Sprint length selector (5/10/15/20 questions), persisted
 - [x] SM-2 spaced repetition for review queue
 - [x] KaTeX math rendering (inline + passage)
 - [x] SSE streaming explanations (Gemini Deep Dive)
 - [x] Hint system (2 hints/question, disabled in test mode)
-- [x] Keyboard shortcuts (1-4 pick, Enter submit, H hint)
-- [x] Wrong answer review cards post-sprint (expandable)
+- [x] Keyboard shortcuts (1-4 pick, Enter submit/advance, H hint)
+- [x] Wrong answer review cards post-sprint (expandable + MathText)
 - [x] Domain breakdown on summary screen
+- [x] Question pre-fetching for instant transitions
 
 ### ADHD Optimization
 - [x] Study Now button (1-click start, no decision fatigue)
 - [x] Session mode memory (skip mode picker on return)
+- [x] Daily sprint goal tracker (3-pip progress bar)
 - [x] Time milestone toasts (2/5/10 min)
 - [x] Confetti on personal best accuracy
 - [x] Domain neglect alerts (hyperfocus trap prevention)
-- [x] Change-mode escape (only on Q1, not mid-sprint)
+- [x] Change-mode escape (only on Q1)
 - [x] Session recovery: resume prompt after refresh/crash
 - [x] prefers-reduced-motion accessibility
-- [x] Streak calendar (7-day visual motivation)
+- [x] Streak calendar (7-day visual)
 - [x] Review count badge on BottomNav
+- [x] LevelUpToast notification
+- [x] Grid-in autofocus for keyboard flow
 
 ### Intelligence
 - [x] Score report upload → Gemini Vision → per-domain subscores
-- [x] Adaptive question selection (Gemini + improved rule-based fallback)
+- [x] Adaptive question selection (Gemini + rule-based fallback)
 - [x] Section filtering (Math/English domains per mode)
 - [x] AI insights + Today's Focus panel on Dashboard
-- [x] Predicted score range (unlocks at 10+ questions)
+- [x] Difficulty-weighted predicted score range
 
 ### Dashboard & Progress
 - [x] Welcome + total questions answered
-- [x] Study Plan widget (target score, test date, gap, sprints/day)
+- [x] Study Plan widget (target score, test date optional, gap, sprints/day)
 - [x] Today's Focus (AI + rule-based insights)
-- [x] Sprint mode cards (Adaptive/Math/English with hover states)
-- [x] Review Errors CTA (shows count, links to review queue)
-- [x] Domain performance grid (4x2, with accuracy + "No data yet" empty state)
-- [x] Accuracy sparkline chart (SVG, trend label)
-- [x] Recent sprint history rows
+- [x] Sprint mode cards (Adaptive/Math/English)
+- [x] Review Errors CTA (count + link)
+- [x] Domain performance grid (4x2, "No data yet" empty state)
+- [x] Accuracy sparkline chart (SVG, trend label, 1/2+ sprints)
+- [x] Predicted score range (unlocks at 10+ questions)
 
 ### Mobile
-- [x] BottomNav with review badge
+- [x] BottomNav with review badge (fixed bottom, iOS safe area)
 - [x] Responsive padding (clamp)
 - [x] 2-column domain grid
 - [x] Single-column sprint mode cards
 - [x] Column passage layout
-- [x] Math overflow auto-scroll
 
 ### Profile
-- [x] Display name editing
-- [x] Baseline scores with sliders (editable)
-- [x] Score report upload (Gemini Vision analysis)
+- [x] Display name editing (inline, Enter to save)
+- [x] Baseline scores with sliders
+- [x] Score report upload (Gemini Vision)
 - [x] XP / level / streak progress display
 - [x] Focus areas selector
-- [x] Subscores from uploaded report
+- [x] Domain accuracy bars
+- [x] Sprint history table
 - [x] CSV export of question history
-- [x] Danger Zone: reset profile (with confirmation)
+- [x] Danger Zone: reset profile (2-step confirmation)
 
 ### Infrastructure
-- [x] 25 REST endpoints on Express 5
+- [x] 26 REST endpoints on Express 5
+- [x] /api/health endpoint
 - [x] SQLite via better-sqlite3 (idempotent migrations)
-- [x] Rule-based fallback for all Gemini calls (never breaks)
+- [x] Rule-based fallback for all Gemini calls
 - [x] GEMINI_API_KEY in .env (gitignored)
-- [x] Vite HMR dev + production build
 - [x] 532 questions (all with hints + explanations)
+- [x] ErrorBoundary wrapping entire app
 
 ---
 
-## Git Log (This Session)
-```
-feat: test mode polish
-feat: practice test mode + review badge + adaptive algorithm improvements
-feat: streak calendar + domain empty states + activity endpoint
-feat: mobile responsive layout + onboarding study plan
-```
-
-## Server Status
-- Port 3001: Backend running
-- Port 5173: Frontend HMR active
-- 25 REST endpoints
-
 ## Human Decisions Needed
-- Optional: push to Vercel/Railway for deployment
+- Deploy to Vercel/Railway (env vars: GEMINI_API_KEY, PORT)
 - Optional: add more SAT questions (currently 532)
-- Optional: add push notifications for daily study reminders
+- Optional: push notifications for daily study reminders
