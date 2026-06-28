@@ -211,6 +211,8 @@ export default function Sprint({ user, setUser }) {
   const testTimeLimitRef = useRef(0);
   const endSprintRef = useRef(null); // ref to force-end sprint when time expires
 
+  const prefetchedQuestionRef = useRef(null);
+
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [hintsUsed, setHintsUsed] = useState(0);
@@ -333,19 +335,38 @@ export default function Sprint({ user, setUser }) {
     }
   };
 
+  const fetchQuestionFromAPI = async () => {
+    const mode = sprintModeRef.current;
+    const sectionParam = mode && mode !== 'adaptive' ? `&section=${mode}` : '';
+    const res = await fetch(`/api/questions/next?userId=${user.id}${sectionParam}`);
+    if (!res.ok) throw new Error('No questions');
+    return res.json();
+  };
+
+  const prefetchNextQuestion = () => {
+    fetchQuestionFromAPI()
+      .then(q => { prefetchedQuestionRef.current = q; })
+      .catch(() => {});
+  };
+
   const fetchNextQuestion = async () => {
-    setLoading(true);
     setSelectedChoice(null);
     setIsAnswered(false);
     setHintsUsed(0);
     setDeepDiveText('');
     setShowDeepDive(false);
+    // Use pre-fetched question if available for instant transition
+    if (prefetchedQuestionRef.current) {
+      const q = prefetchedQuestionRef.current;
+      prefetchedQuestionRef.current = null;
+      setQuestion(q);
+      setLoading(false);
+      startTimer();
+      return;
+    }
+    setLoading(true);
     try {
-      const mode = sprintModeRef.current;
-      const sectionParam = mode && mode !== 'adaptive' ? `&section=${mode}` : '';
-      const res = await fetch(`/api/questions/next?userId=${user.id}${sectionParam}`);
-      if (!res.ok) throw new Error('No questions');
-      const q = await res.json();
+      const q = await fetchQuestionFromAPI();
       setQuestion(q);
       startTimer();
     } catch (err) {
@@ -434,6 +455,8 @@ export default function Sprint({ user, setUser }) {
           wrongAnswers: currentWrong.slice(-20)
         }));
       } catch { /* storage full, skip */ }
+      // Pre-fetch next question while user reads explanation
+      if (questionNum < sprintLengthRef.current - 1) prefetchNextQuestion();
     } catch (err) {
       console.error(err);
     }
