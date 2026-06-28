@@ -56,10 +56,12 @@ function parseSegments(text) {
       segments.push({ type: 'text', content: processed.slice(i) });
       break;
     }
-    // Currency: $<digit> is a dollar amount, not a math delimiter -- skip it
-    const nextChar = processed[start + 1];
-    if (nextChar && /[0-9,]/.test(nextChar)) {
-      // Collect text up to and including this currency symbol, continue scanning
+    // Currency: $<digits-only> (e.g. $75, $1,200) is a dollar amount, not a math delimiter.
+    // Distinguish from math like $2x+3$ by checking the token after $ is purely numeric.
+    // A currency amount is digits (+ commas/periods) followed by a non-alpha char or end.
+    const afterDollar = processed.slice(start + 1);
+    const currencyMatch = afterDollar.match(/^(\d[\d,.]*)(?:[^a-zA-Z]|$)/);
+    if (currencyMatch) {
       const textSoFar = processed.slice(i, start + 1);
       if (segments.length > 0 && segments[segments.length - 1].type === 'text') {
         segments[segments.length - 1].content += textSoFar;
