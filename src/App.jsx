@@ -1,5 +1,6 @@
 import React, { useState, useEffect, Component } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Zap } from 'lucide-react';
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null }; }
@@ -8,7 +9,7 @@ class ErrorBoundary extends Component {
     if (this.state.error) {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', padding: '32px', textAlign: 'center', gap: '16px' }}>
-          <div style={{ fontSize: '2rem' }}>⚡</div>
+          <Zap size={40} color="var(--primary)" />
           <h2 style={{ color: 'var(--primary)', margin: 0 }}>Something went wrong</h2>
           <p style={{ color: 'var(--text-secondary)', maxWidth: '400px', lineHeight: 1.5 }}>
             ADHDSat hit an unexpected error. Your progress is saved.

@@ -715,7 +715,7 @@ export default function Sprint({ user, setUser }) {
                   <div style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '2px' }}>{m.label}</div>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{m.sub}</div>
                 </div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--xp-gold)', fontWeight: '600', flexShrink: 0, backgroundColor: 'rgba(255,215,64,0.1)', padding: '3px 8px', borderRadius: '8px' }}>⏱ {m.time}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--xp-gold)', fontWeight: '600', flexShrink: 0, backgroundColor: 'rgba(255,215,64,0.1)', padding: '3px 8px', borderRadius: '8px' }}>{m.time}</span>
               </button>
             ))}
           </div>
