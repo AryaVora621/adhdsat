@@ -154,18 +154,27 @@ export default function Sprint({ user, setUser }) {
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef(null);
   const timeStartRef = useRef(Date.now());
+  const sprintStartRef = useRef(null);
+  const milestoneShownRef = useRef(new Set());
+  const [milestone, setMilestone] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   const SPRINT_LENGTH = sprintLengthRef.current;
 
-  // If navigated from Dashboard with a pre-selected mode, auto-start
+  // Auto-start from Dashboard navigation state or remembered mode
   useEffect(() => {
     const preMode = location.state?.mode;
-    if (preMode && sprintMode === null) {
-      startSprint(preMode);
-    }
+    const remembered = sessionStorage.getItem('lastSprintMode');
+    const modeToStart = preMode || remembered;
+    if (modeToStart) startSprint(modeToStart);
   }, []);
+
+  const MILESTONES = [
+    { seconds: 120, label: '2 min in — keep going!' },
+    { seconds: 300, label: '5 minutes — you\'re on fire!' },
+    { seconds: 600, label: '10 min — serious focus mode!' },
+  ];
 
   // Start per-question timer
   const startTimer = () => {
@@ -174,6 +183,18 @@ export default function Sprint({ user, setUser }) {
     timeStartRef.current = Date.now();
     timerRef.current = setInterval(() => {
       setElapsed(Math.floor((Date.now() - timeStartRef.current) / 1000));
+      // Check sprint-level time milestones
+      if (sprintStartRef.current) {
+        const sprintElapsed = Math.floor((Date.now() - sprintStartRef.current) / 1000);
+        for (const m of MILESTONES) {
+          if (sprintElapsed >= m.seconds && !milestoneShownRef.current.has(m.seconds)) {
+            milestoneShownRef.current.add(m.seconds);
+            setMilestone(m.label);
+            setTimeout(() => setMilestone(null), 3000);
+            break;
+          }
+        }
+      }
     }, 1000);
   };
 
@@ -185,6 +206,8 @@ export default function Sprint({ user, setUser }) {
     sprintModeRef.current = mode;
     setSprintMode(mode);
     setLoading(true);
+    sprintStartRef.current = Date.now();
+    milestoneShownRef.current = new Set();
     try {
       const res = await fetch('/api/sprints', {
         method: 'POST',
@@ -394,6 +417,9 @@ export default function Sprint({ user, setUser }) {
       setStats({ attempted: 0, correct: 0, xp: 0 }); setQuestionNum(1);
       setQuestion(null); setLoading(false); setSprintId(null);
       setWrongAnswers([]);
+      setMilestone(null);
+      sprintStartRef.current = null;
+      milestoneShownRef.current = new Set();
       setSprintMode(null); sprintModeRef.current = null;
     };
     return (
@@ -483,7 +509,26 @@ export default function Sprint({ user, setUser }) {
 
   return (
     <div style={{ padding: '48px', maxWidth: '800px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column' }}>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes milestoneIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes milestoneOut { from { opacity: 1; } to { opacity: 0; } }
+      `}</style>
+
+      {/* Milestone toast */}
+      {milestone && (
+        <div style={{
+          position: 'fixed', top: '24px', left: '50%', transform: 'translateX(-50%)',
+          backgroundColor: 'rgba(0,230,118,0.12)', border: '1px solid rgba(0,230,118,0.4)',
+          borderRadius: '24px', padding: '10px 22px', zIndex: 9999,
+          display: 'flex', alignItems: 'center', gap: '8px',
+          animation: 'milestoneIn 0.25s ease-out',
+          backdropFilter: 'blur(8px)'
+        }}>
+          <span style={{ color: 'var(--success)', fontSize: '1rem' }}>✓</span>
+          <span style={{ color: 'var(--success)', fontWeight: '700', fontSize: '0.9rem' }}>{milestone}</span>
+        </div>
+      )}
 
       {/* Progress bar + timer */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
