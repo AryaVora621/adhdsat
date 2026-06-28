@@ -1,460 +1,284 @@
-# ADHDSat — ADHD-Focused SAT Prep Platform
-
-An SAT prep platform designed specifically for students with ADHD or who struggle to study effectively, targeting 1500+ scores through gamification, paced sprints, adaptive learning, and a distraction-free experience.
-
----
-
-## 1. Problem Statement
-
-Traditional SAT prep platforms assume sustained focus and self-regulation — two things students with ADHD struggle with most. Students who are intellectually capable of scoring 1500+ often underperform because:
-
-- They can't sustain long study sessions
-- They lose motivation without immediate, tangible feedback
-- Decision paralysis prevents them from starting
-- Careless errors (not content gaps) tank their scores
-- They lack external structure for scheduling and pacing
-
-ADHDSat solves this by wrapping rigorous SAT content in an experience purpose-built for how ADHD brains actually work.
+# ADHDSat Design Spec
+**Date:** 2026-06-28
+**Status:** Approved
 
 ---
 
-## 2. Target User
+## Context
 
-- High school students (primarily juniors/seniors) with ADHD or focus challenges
-- Students already scoring 1200–1400 who need the push to 1500+
-- Students who have tried other platforms (Khan Academy, Bluebook) but couldn't stick with them
+The builder (Arya) is preparing for the SAT in 1-2 months with a current score of ~1370 (English ~630, Math ~730) and a target of 1500-1550. The platform needs to be personally usable immediately while also being architected for a broader ADHD-focused audience.
 
----
-
-## 3. Tech Stack
-
-| Layer | Technology | Rationale |
-|-------|-----------|-----------|
-| **Frontend** | React (Vite) | Fast SPA with hot reload; component-based for modular UI |
-| **Styling** | Vanilla CSS | Full control over the premium, custom dark-mode aesthetic |
-| **Backend/DB** | Supabase (PostgreSQL) | Managed auth, realtime DB, row-level security, SQL migrations |
-| **Hosting** | Vercel or Netlify | Free tier, automatic deploys from Git |
-| **Fonts** | Google Fonts (Inter, JetBrains Mono) | Clean, modern, highly readable |
+The existing codebase has a working Sprint loop (React + Vite), Express + SQLite backend, XP/leveling system, and a dark cyber aesthetic. The gap is: no real question bank, no onboarding, no adaptive difficulty, and no progress visibility. This spec fills those gaps.
 
 ---
 
-## 4. UI/UX Design
+## Goals
 
-### 4.1 Layout: "High-Dopamine Zones" (Option C)
-
-The core layout splits the screen into two distinct zones:
-
-**Left Zone — Focus Area (~70% width)**
-- Contains ONLY the active question, passage (if R&W), and answer choices
-- Dark charcoal background (`#1a1a2e`) with off-white text (`#e8e8e8`) — avoids halation from pure black/white
-- Generous whitespace, large readable type (18px+ body)
-- Minimal UI chrome — no nav bar, no logos, no links during a sprint
-- Progress bar at the top showing questions completed in current sprint
-
-**Right Zone — Gamification Dashboard (~30% width)**
-- Vibrant, high-dopamine sidebar with:
-  - **Sprint Timer** — countdown with visual ring animation
-  - **Streak Counter** — fire emoji + day count, pulses on increment
-  - **XP Counter** — running total with "+XP" pop animations on correct answers
-  - **Level & Progress Ring** — current mastery level with circular progress to next level
-  - **Daily Goal** — "12/20 questions today" with fill bar
-  - **Achievements** — most recent unlocked badge
-  - **Weekly Goals** — completion percentage ring
-
-### 4.2 Color Palette
-
-| Element | Color | Hex |
-|---------|-------|-----|
-| Background (main) | Dark navy | `#0f0f1a` |
-| Card background | Dark charcoal | `#1a1a2e` |
-| Sidebar background | Deep purple-black | `#16162a` |
-| Primary accent | Electric cyan | `#00d4ff` |
-| Success | Vibrant green | `#00e676` |
-| Error | Soft red | `#ff5252` |
-| XP/Gold | Amber | `#ffd740` |
-| Text primary | Off-white | `#e8e8e8` |
-| Text secondary | Muted gray | `#8888aa` |
-
-### 4.3 Accessibility & Neurodivergent Accommodations
-
-- **"Reduce Motion" toggle** in settings + automatic `prefers-reduced-motion` CSS media query support
-- **Adjustable text size** (14/16/18/20/22px)
-- **Theme options**: Dark (default), Light, Sepia, High Contrast
-- **Font options**: Inter (default), OpenDyslexic (dyslexia-friendly)
-- **WCAG 4.5:1 contrast ratio** minimum for all text
-- **No auto-playing animations** — all motion is triggered by user action
-- **No parallax, no sudden movements, no flashing** (WCAG 2.3.1 compliance)
-- **Color never used alone** — always paired with icons, patterns, or text labels
+- Ship a personally usable SAT prep tool within the 1-2 month exam window
+- Ingest a real SAT question bank (500+ questions) immediately
+- Gemini-powered adaptive difficulty and answer explanations
+- Onboarding flow that captures baseline scores and weak areas
+- Dashboard with domain-level progress visibility
+- Optional score report upload (image) to auto-populate baseline
 
 ---
 
-## 5. Core Features
+## Out of Scope (Phase 2)
 
-### 5.1 Paced Sprints (Pomodoro-Style)
-
-The primary study mode. Students work in timed bursts with enforced breaks.
-
-- **Configurable sprint length**: 10 / 15 / 20 / 25 minutes (default: 15)
-- **Break length**: 5 minutes (15 min after every 4 sprints)
-- **"Hyperfocus Extension"**: If a sprint ends mid-question, offer a "Keep Going" button to extend by 5 minutes — no penalty, just flexibility
-- **Sprint summary screen**: After each sprint, show questions answered, accuracy, XP earned, streak status
-- **Break screen**: During breaks, show motivational stats, suggest stretching, or show a fun fact
-- **Visual timer**: Circular countdown ring in the gamification sidebar — always visible but not intrusive
-
-### 5.2 Gamification System
-
-**XP (Experience Points)**
-- +10 XP per correct answer (Easy)
-- +20 XP per correct answer (Medium)
-- +40 XP per correct answer (Hard)
-- +5 XP for attempting (even if wrong) — rewards effort, not just accuracy
-- Bonus XP multipliers for **in-sprint correct-answer streaks** (1.5x at 5 correct in a row, 2x at 10 correct in a row). This is separate from the daily login streak.
-
-**Levels**
-| Level | Title | XP Required |
-|-------|-------|-------------|
-| 1 | Beginner | 0 |
-| 2 | Apprentice | 500 |
-| 3 | Scholar | 1,500 |
-| 4 | Strategist | 3,500 |
-| 5 | Expert | 7,000 |
-| 6 | Master | 12,000 |
-| 7 | Grandmaster | 20,000 |
-| 8 | SAT Sage | 35,000 |
-
-**Streaks**
-- Daily streak: incremented by completing at least 1 sprint per day
-- Streak milestones at 3, 7, 14, 30, 60, 100 days with bonus XP rewards
-- "Streak Freeze" power-up: bank 1 per week, auto-activates if you miss a day
-
-**Achievements/Badges** (25 total at launch)
-- "First Sprint" — Complete your first sprint
-- "Perfect Sprint" — 100% accuracy in a sprint
-- "Math Ace" — 50 correct math answers
-- "Grammar Guru" — 50 correct English answers
-- "Night Owl" — Study after 10pm
-- "Early Bird" — Study before 7am
-- "Ironclad" — 30-day streak
-- "Module 1 Master" — Pass 5 Module 1 Gauntlets
-- "Century" — Answer 100 questions total
-- "Half-K" — Answer 500 questions total
-- "Thousand Club" — Answer 1,000 questions total
-- "Streak Starter" — 3-day streak
-- "Week Warrior" — 7-day streak
-- "Fortnight Fighter" — 14-day streak
-- "Two Months Strong" — 60-day streak
-- "The Hundred" — 100-day streak
-- "Hint Master" — Use 50 hints (learning is not weakness)
-- "Error Analyst" — Tag 25 errors with Error DNA
-- "Algebra Boss" — 90%+ accuracy across 50 Algebra questions
-- "Geometry Guru" — 90%+ accuracy across 50 Geometry questions
-- "Reading Rockstar" — 90%+ accuracy across 50 R&W questions
-- "Speed Demon" — Complete a sprint in under 10 minutes
-- "Daily Devotee" — Complete 10 daily challenges
-- "Score Climber" — Increase predicted score by 50+ points
-- "Full Sim" — Complete a full practice test
-
-**Daily Challenge**
-- 1 curated hard question per day
-- Bonus +50 XP for correct answer
-- Visible on dashboard even when not in a sprint
-
-### 5.3 Question Engine
-
-**Question Types**
-- **Multiple Choice (4 options)** — R&W and Math
-- **Student-Produced Response (Grid-in)** — Math only, free text input with validation
-
-**Question Metadata**
-Each question stores:
-- `id` (UUID)
-- `section` (english | math)
-- `domain` (e.g., "Craft & Structure", "Algebra")
-- `skill` (e.g., "Vocabulary in Context", "Linear Equations")
-- `difficulty` (easy | medium | hard)
-- `question_text` (with LaTeX support for math via KaTeX)
-- `passage_text` (for R&W questions, nullable)
-- `choices` (JSON array of {label, text, is_correct})
-- `is_grid_in` (boolean, math only)
-- `grid_in_answer` (numeric, for grid-in validation)
-- `explanation` (step-by-step explanation text)
-- `hint_1` (gentle nudge hint)
-- `hint_2` (more specific directional hint)
-- `tags` (array of topic tags for search/filter)
-
-**Difficulty Distribution (for 1500+ prep)**
-- Easy: ~20% of bank
-- Medium: ~35% of bank
-- Hard: ~45% of bank
-
-**Target Bank Size**: ~2,500 questions total
-- English (R&W): ~1,250 questions across 4 domains
-- Math: ~1,250 questions across 4 domains
-
-### 5.4 Hint System
-
-Instead of immediately showing the answer, offer progressive hints:
-
-1. **Hint Level 1**: A gentle nudge (e.g., "Think about what the author's main argument is")
-2. **Hint Level 2**: A more specific direction (e.g., "Look at the contrast between paragraphs 2 and 3")
-3. **Full Explanation**: Complete step-by-step walkthrough (shown after answering or giving up)
-
-- Using a hint reduces XP earned by 50% (still rewards attempting)
-- Hints are human-written, not generated
-
-### 5.5 Spaced Repetition (SM-2 Algorithm)
-
-Missed or hinted questions are automatically scheduled for review:
-
-- Interval calculation based on SM-2 algorithm (same as Satori Prep's implementation)
-- Questions rated on a 0–5 quality scale based on performance
-- Review queue integrated into sprint mode — sprints mix new + review questions
-- Students can see their "Review Due" count on the dashboard
-
-### 5.6 Error DNA Analysis
-
-After each sprint/test, categorize every wrong answer:
-
-| Error Type | Description | Icon |
-|------------|-------------|------|
-| **Content Gap** | Didn't know the concept | 📚 |
-| **Careless Error** | Knew it but misread/miscalculated | ⚡ |
-| **Time Pressure** | Rushed due to timer | ⏰ |
-
-Students self-tag their errors after reviewing the explanation. The system pre-selects a suggested tag based on simple heuristics (e.g., if time_spent < 30s → suggest "Time Pressure"; if hint was used → suggest "Content Gap"), but the student always makes the final choice. No AI/LLM is used for this — just rule-based suggestions. Over time, the dashboard shows:
-- "68% of your errors are Careless Errors" → suggests focus exercises
-- "Your Content Gaps are concentrated in Geometry" → suggests targeted drills
-- Trend over time: "Your careless errors dropped 15% this month!"
-
-### 5.7 "What To Do Next" Flow
-
-Every screen ends with a single, clear call-to-action. Never present an empty dashboard.
-
-- After login: "Ready for your daily sprint? [Start Sprint]" or "You have 8 review questions due. [Review Now]"
-- After a sprint: "Great sprint! Take a 5-minute break. [Start Break Timer]"
-- After a break: "Ready to go again? [Next Sprint]" or "You've hit your daily goal! [View Stats]"
-- If no sprint completed today: "Your streak is at risk! Complete 1 sprint to keep it alive. [Quick Sprint]"
-
-### 5.8 Module 1 Gauntlet
-
-A specialized practice mode simulating Digital SAT Module 1:
-- 27 R&W questions in 32 minutes OR 22 Math questions in 35 minutes
-- Scored and graded: "Would you be routed to Hard Module 2?"
-- Tracks routing history: "You've been routed to Hard in 7/10 attempts"
-- Builds confidence and familiarity with the adaptive test structure
-
-### 5.9 Full Practice Test Mode
-
-Simulates the complete Digital SAT experience:
-- Module 1 R&W (27 questions, 32 min) → Module 2 R&W adaptive (27 questions, 32 min)
-- 10-minute break
-- Module 1 Math (22 questions, 35 min) → Module 2 Math adaptive (22 questions, 35 min)
-- Score estimation using IRT-approximated scoring
-- Detailed score report with Error DNA breakdown
-
-**Adaptive Routing Logic:** If the student scores ≥70% on Module 1, they are routed to the "Hard" Module 2 pool (drawn from hard-difficulty questions). Below 70% routes to the "Standard" Module 2 pool (drawn from easy/medium questions). The 70% threshold approximates the real College Board routing behavior. Scoring is weighted: correct answers on Hard Module 2 are worth more toward the final estimated score.
-
-### 5.10 Score Predictor
-
-Based on practice performance, estimate a real SAT score range:
-- Uses rolling accuracy across the last 50 R&W questions and last 50 Math questions separately, then combines into a composite 400–1600 score
-- Weighted by difficulty: Easy correct = 1 point, Medium correct = 2 points, Hard correct = 4 points. The ratio of earned points to maximum possible points maps to a 200–800 section score
-- Displays as a range (e.g., "1420–1480") with ±30 point confidence interval
-- Updates after every answered question on the dashboard
-- Requires a minimum of 25 questions answered per section before displaying a prediction (shows "Need more data" otherwise)
+- Google OAuth / multi-user accounts
+- Supabase migration (SQLite is fine for single-user personal use)
+- PDF score report upload (only PNG/JPG for MVP)
+- Spaced repetition review engine (placeholder exists in Dashboard)
+- AI question generation (Phase 2 after real bank is exhausted)
 
 ---
 
-## 6. Data Model
+## Architecture
 
-### 6.1 Tables
+```
+Frontend (React + Vite)
+├── Onboarding wizard        /onboarding
+├── Dashboard                /             (enhanced)
+├── Sprint loop              /sprint        (upgraded)
+└── Score report upload      (modal within onboarding)
 
-**`users`**
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID (PK) | Supabase auth user ID |
-| display_name | TEXT | User's display name |
-| total_xp | INTEGER | Cumulative XP |
-| current_level | INTEGER | Derived from total_xp |
-| current_streak | INTEGER | Consecutive days studied |
-| longest_streak | INTEGER | All-time longest streak |
-| last_active_date | DATE | For streak calculation |
-| streak_freezes | INTEGER | Remaining streak freezes |
-| sprint_length_pref | INTEGER | Preferred sprint length in minutes |
-| theme_pref | TEXT | dark / light / sepia / high-contrast |
-| font_pref | TEXT | inter / opendyslexic |
-| font_size_pref | INTEGER | 14 / 16 / 18 / 20 / 22 |
-| reduce_motion | BOOLEAN | Accessibility preference |
-| created_at | TIMESTAMPTZ | Account creation |
+Backend (Express + SQLite, port 3001)
+├── POST /api/onboarding          save baseline + weak areas
+├── GET  /api/questions/next      Gemini adaptive criteria → DB query
+├── POST /api/sprints             create sprint record
+├── POST /api/sprints/:id/finish  mark sprint complete
+├── POST /api/answers             existing, unchanged
+├── GET  /api/progress            domain stats over time
+├── POST /api/analyze-report      Gemini Vision: parse score screenshot
+└── existing user/xp endpoints   unchanged
 
-**`questions`**
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID (PK) | Question ID |
-| section | TEXT | english / math |
-| domain | TEXT | e.g., "Craft & Structure" |
-| skill | TEXT | e.g., "Vocabulary in Context" |
-| difficulty | TEXT | easy / medium / hard |
-| question_text | TEXT | Question content (supports LaTeX) |
-| passage_text | TEXT | Passage for R&W (nullable) |
-| choices | JSONB | Array of {label, text, is_correct} |
-| is_grid_in | BOOLEAN | Math grid-in flag |
-| grid_in_answer | NUMERIC | Correct grid-in answer |
-| explanation | TEXT | Step-by-step explanation |
-| hint_1 | TEXT | Gentle nudge |
-| hint_2 | TEXT | More specific direction |
-| tags | TEXT[] | Topic tags for filtering |
-| created_at | TIMESTAMPTZ | |
+Gemini API (google/generative-ai SDK)
+├── Adaptive criteria     given user history → return { domain, difficulty }
+├── Explanations          on wrong answer → step-by-step explanation
+└── Score report parsing  given image → return { english_score, math_score, weak_areas[] }
 
-**`user_answers`**
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID (PK) | |
-| user_id | UUID (FK → users) | |
-| question_id | UUID (FK → questions) | |
-| selected_choice | TEXT | User's answer |
-| is_correct | BOOLEAN | |
-| hints_used | INTEGER | 0, 1, or 2 |
-| error_type | TEXT | content_gap / careless / time_pressure (nullable) |
-| time_spent_seconds | INTEGER | Time on this question |
-| sprint_id | UUID (FK → sprints) | Which sprint this was in |
-| created_at | TIMESTAMPTZ | |
+Data pipeline (one-time)
+└── server/ingest.js      load public SAT JSON dataset → SQLite questions table
+```
 
-**`sprints`**
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID (PK) | |
-| user_id | UUID (FK → users) | |
-| sprint_type | TEXT | practice / review / gauntlet / full_test |
-| section_filter | TEXT | english / math / mixed |
-| domain_filter | TEXT | Specific domain (nullable) |
-| difficulty_filter | TEXT | easy / medium / hard / mixed |
-| duration_minutes | INTEGER | Sprint length |
-| questions_attempted | INTEGER | |
-| questions_correct | INTEGER | |
-| xp_earned | INTEGER | |
-| started_at | TIMESTAMPTZ | |
-| completed_at | TIMESTAMPTZ | |
-
-**`spaced_repetition`**
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID (PK) | |
-| user_id | UUID (FK → users) | |
-| question_id | UUID (FK → questions) | |
-| easiness_factor | REAL | SM-2 easiness factor (default 2.5) |
-| interval_days | INTEGER | Days until next review |
-| repetitions | INTEGER | Number of successful reviews |
-| next_review_date | DATE | When to show again |
-| last_quality | INTEGER | Last quality rating (0–5) |
-
-**`achievements`**
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID (PK) | |
-| user_id | UUID (FK → users) | |
-| achievement_key | TEXT | e.g., "first_sprint", "perfect_sprint" |
-| unlocked_at | TIMESTAMPTZ | |
-
-**`daily_challenges`**
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID (PK) | |
-| question_id | UUID (FK → questions) | |
-| challenge_date | DATE | The date this challenge is active |
-| bonus_xp | INTEGER | XP reward (default 50) |
+**Gemini key:** stored in `.env` as `GEMINI_API_KEY`. Server checks for it on startup and logs a clear error if missing. All Gemini calls have a rule-based fallback (see Adaptive Difficulty section).
 
 ---
 
-## 7. Page Structure
+## Data Model Changes
 
-| Route | Page | Description |
-|-------|------|-------------|
-| `/` | Landing Page | Marketing/info page with CTA to sign up |
-| `/login` | Login/Signup | Supabase Auth (email + Google OAuth) |
-| `/dashboard` | Dashboard | "What To Do Next" + stats overview |
-| `/sprint` | Sprint Mode | Active practice session (core experience) |
-| `/sprint/summary` | Sprint Summary | Post-sprint results + Error DNA |
-| `/review` | Review Queue | Spaced repetition review session |
-| `/gauntlet` | Module 1 Gauntlet | Timed Module 1 simulation |
-| `/test` | Full Practice Test | Complete SAT simulation |
-| `/test/report` | Test Report | Detailed score report |
-| `/stats` | Statistics | Detailed progress analytics |
-| `/settings` | Settings | Preferences, accessibility, account |
-| `/daily` | Daily Challenge | Today's challenge question |
+The existing schema needs two changes:
 
----
+### 1. Extend `users` table
 
-## 8. Question Content — Scope & Priority
+```sql
+ALTER TABLE users ADD COLUMN baseline_english INTEGER DEFAULT 0;
+ALTER TABLE users ADD COLUMN baseline_math INTEGER DEFAULT 0;
+ALTER TABLE users ADD COLUMN weak_areas TEXT DEFAULT '[]';  -- JSON array of domain strings
+ALTER TABLE users ADD COLUMN onboarding_completed INTEGER DEFAULT 0;
+```
 
-### Phase 1: English (R&W) — ~1,250 questions
+Run these as idempotent migrations in `db.js` using `IF NOT EXISTS` column checks via `PRAGMA table_info`.
 
-| Domain | Skill | Easy | Med | Hard | Total |
-|--------|-------|------|-----|------|-------|
-| **Craft & Structure** | Vocabulary in Context | 25 | 45 | 55 | 125 |
-| | Text Structure & Purpose | 23 | 40 | 50 | 113 |
-| | Cross-Text Connections | 22 | 40 | 50 | 112 |
-| **Information & Ideas** | Central Ideas | 22 | 38 | 48 | 108 |
-| | Command of Evidence (Textual) | 22 | 38 | 48 | 108 |
-| | Command of Evidence (Quantitative) | 21 | 39 | 47 | 107 |
-| **Standard English Conventions** | Boundaries (Punctuation) | 22 | 38 | 48 | 108 |
-| | Form, Structure & Sense | 22 | 38 | 48 | 108 |
-| | Other Conventions | 21 | 39 | 47 | 107 |
-| **Expression of Ideas** | Transitions | 25 | 35 | 45 | 105 |
-| | Rhetorical Synthesis | 25 | 35 | 45 | 105 |
-| | **Subtotal** | | | | **~1,226** |
+### 2. Add `source` field to `questions` table
 
-### Phase 2: Math — ~1,250 questions
+```sql
+ALTER TABLE questions ADD COLUMN source TEXT DEFAULT 'ingest';
+-- values: 'ingest' | 'ai_generated'
+```
 
-| Domain | Skill | Easy | Med | Hard | Total |
-|--------|-------|------|-----|------|-------|
-| **Algebra** | Linear Equations (1 var) | 22 | 38 | 50 | 110 |
-| | Linear Equations (2 var) | 22 | 38 | 50 | 110 |
-| | Linear Functions | 22 | 38 | 50 | 110 |
-| | Systems of Linear Equations | 22 | 36 | 48 | 106 |
-| **Advanced Math** | Quadratics & Polynomials | 22 | 38 | 50 | 110 |
-| | Exponential Functions | 22 | 38 | 50 | 110 |
-| | Nonlinear Equations | 22 | 38 | 50 | 110 |
-| | Absolute Value & Other | 22 | 36 | 48 | 106 |
-| **Problem Solving & Data** | Ratios, Rates, Proportions | 20 | 33 | 42 | 95 |
-| | Percentages | 18 | 30 | 40 | 88 |
-| | Statistics & Probability | 18 | 30 | 40 | 88 |
-| **Geometry & Trig** | Area, Volume, Angles | 18 | 30 | 40 | 88 |
-| | Right Triangles & Trig | 18 | 30 | 40 | 88 |
-| | Circles | 15 | 25 | 35 | 75 |
-| | **Subtotal** | | | | **~1,264** |
-
-**Grand Total: ~2,490 questions**
+Enables filtering by origin. Existing seed questions get `source = 'seed'`.
 
 ---
 
-## 9. Verification Plan
+## Question Bank Ingestion
 
-### Automated Tests
-- Unit tests for SM-2 spaced repetition algorithm
-- Unit tests for XP calculation and level progression
-- Unit tests for streak logic (including streak freeze)
-- Unit tests for score predictor algorithm
-- Component tests for question rendering (multiple choice + grid-in)
-- Component tests for sprint timer
-- Integration tests for Supabase auth flow
-- Integration tests for answer submission and scoring
+**Source:** A public GitHub SAT question JSON dataset (e.g., sat-practice-data repos with College Board practice test questions parsed into structured JSON). Target: 500-1000 questions covering all domains.
 
-### Manual Verification
-- Accessibility audit: screen reader, keyboard navigation, color contrast
-- `prefers-reduced-motion` testing
-- Mobile responsiveness testing
-- Sprint timer accuracy testing
-- Full practice test flow end-to-end
-- Error DNA tagging UX review
+**Script:** `server/ingest.js`
+- Reads a local JSON file (`server/data/questions.json`)
+- Maps each question to the existing `questions` table schema
+- Skips duplicates by ID
+- Logs ingestion summary (N inserted, N skipped)
+- Run once: `node server/ingest.js`
+
+**Domain coverage targets for 1500-1550 prep:**
+
+| Section | Domain | Priority |
+|---------|--------|----------|
+| Math | Algebra | High |
+| Math | Advanced Math | High |
+| Math | Problem Solving & Data Analysis | Medium |
+| Math | Geometry & Trig | Medium |
+| English | Information & Ideas | High |
+| English | Craft & Structure | High |
+| English | Expression of Ideas | Medium |
+| English | Standard English Conventions | Medium |
 
 ---
 
-## 10. Out of Scope (for v1)
+## Onboarding Flow
 
-- Mobile native app (responsive web only)
-- AI-powered question generation (all questions human-written)
-- Social/community features (leaderboards, friends)
-- Tutoring/live instruction
-- Payment/subscription tiers
-- Semantic search (future enhancement)
+**Route:** `/onboarding` — shown automatically on first load if `onboarding_completed = 0`. Skipped if already completed (checked via localStorage `userId` + DB lookup).
+
+**Step 1 — Scores**
+- Input: estimated English score (400-800 slider or number input)
+- Input: estimated Math score (400-800 slider or number input)
+- Optional: "Upload past score report" button → opens image upload modal
+
+**Step 2 — Weak Areas (multi-select)**
+Two columns (Math / English), checkboxes per domain. Pre-selected based on score report analysis if uploaded.
+
+Math domains: Algebra, Advanced Math, Problem Solving & Data Analysis, Geometry & Trig
+English domains: Information & Ideas, Craft & Structure, Expression of Ideas, Standard English Conventions
+
+**Step 3 — Confirm**
+Summary card: "Starting point: English 630, Math 730. Weak areas: Craft & Structure, Advanced Math. Let's go."
+CTA: "Begin First Sprint"
+
+**Score report upload (optional modal within Step 1):**
+- Accepts PNG/JPG only (not PDF)
+- Image sent to `POST /api/analyze-report` as base64
+- Gemini Vision extracts: `{ english_score, math_score, weak_areas[] }`
+- Pre-fills Step 1 and Step 2 fields
+- If Gemini fails or returns low-confidence result, user fills manually
+
+---
+
+## Adaptive Difficulty Engine
+
+**Endpoint:** `GET /api/questions/next?userId=<id>`
+
+**Flow:**
+1. Backend loads user's last 30 `user_answers` with domain, skill, difficulty, is_correct
+2. Computes accuracy per domain: `{ "Algebra": 0.72, "Craft & Structure": 0.41, ... }`
+3. Calls Gemini with a compact prompt:
+
+```
+User SAT prep profile:
+- Target score: 1500-1550
+- Domain accuracy (last 30 questions): { ... }
+- Weak areas flagged at onboarding: [ ... ]
+
+Return JSON: { "domain": "<domain>", "difficulty": "easy|medium|hard" }
+Pick the domain with the most room for improvement. 
+Alternate between weak domains rather than drilling one repeatedly.
+```
+
+4. Gemini returns criteria. Backend queries:
+```sql
+SELECT * FROM questions
+WHERE domain = ? AND difficulty = ?
+  AND id NOT IN (last 50 seen question IDs for this user)
+ORDER BY RANDOM() LIMIT 1
+```
+5. Returns question to frontend.
+
+**Fallback (if Gemini call fails or times out):**
+- Sort domains by ascending accuracy
+- Pick lowest-accuracy domain
+- Select random question at `medium` difficulty from that domain
+- No Gemini dependency; Sprint loop never breaks
+
+**Sprint pre-load vs. single-fetch:**
+Sprint.jsx currently pre-loads 5 questions at once. Change to single-question fetch per question (`/api/questions/next`) so adaptive selection runs after every answer. Latency is acceptable (~200-500ms) given the user reads the explanation first.
+
+---
+
+## Gemini Explanations
+
+After a wrong answer, the existing static `explanation` field is shown. Enhance this:
+
+1. Show the stored `explanation` immediately (no latency)
+2. Below it, show a "Deep Dive" button
+3. On click, POST to `/api/explain` with `{ questionId, selectedChoice, correctAnswer, questionText }`
+4. Gemini generates a step-by-step walkthrough tailored to the wrong answer chosen
+5. Stream the response to the frontend (Gemini supports streaming; use `streamGenerateContent`)
+
+This avoids blocking the answer reveal on a Gemini call while still offering richer explanations on demand.
+
+---
+
+## Dashboard Enhancements
+
+The existing Dashboard shows XP, level, and streak (in Sidebar). Add:
+
+**Domain Performance Grid**
+- 8 cards (4 Math domains, 4 English domains)
+- Each card shows: domain name, accuracy % (last 20 questions), trend arrow (up/down vs. prior 20)
+- Color coded: green >75%, yellow 50-75%, red <50%
+- Data source: `GET /api/progress?userId=<id>`
+
+**Predicted Score**
+- Simple formula: weighted accuracy across domains mapped to SAT score range
+- Math section score = f(avg accuracy across 4 Math domains)
+- English section score = f(avg accuracy across 4 English domains)
+- Displayed as a range: "Predicted: 1420-1480" based on last 50 answers
+- Not shown until user has answered 20+ questions total
+
+**Sprint History**
+- List of last 10 completed sprints: date, questions attempted, % correct, XP earned
+- Data source: `sprints` table (currently never written to — fix in Sprint.jsx)
+
+---
+
+## Sprint Loop Fixes
+
+Three bugs in `Sprint.jsx` to fix as part of this work:
+
+1. **No real sprint record:** Call `POST /api/sprints` on sprint start, store `sprintId` in component state. Call `POST /api/sprints/:id/finish` when sprint ends.
+
+2. **Hardcoded `sprint_id: 'sprint_1'`:** Replace with real `sprintId` from state.
+
+3. **Mocked `time_spent_seconds: 30`:** Add a `useRef` timer that starts when question renders, records elapsed seconds on answer submit.
+
+4. **Pre-loaded 5 questions → single-fetch adaptive:** Replace the upfront `fetch('/api/questions?limit=5')` with a per-question fetch to `/api/questions/next`. Update progress bar to show current question number (e.g., "Question 8") instead of a fixed-length bar.
+
+---
+
+## User Identity (No Auth)
+
+- On first load, generate a UUID and store in `localStorage` as `userId`
+- Call `POST /api/users` to create profile (already exists)
+- If `onboarding_completed = 0`, redirect to `/onboarding`
+- All API calls include `userId` as query param or request body
+- Clearing localStorage = fresh start (acceptable for personal use)
+
+---
+
+## Environment
+
+`.env` (not committed):
+```
+GEMINI_API_KEY=your_key_here
+PORT=3001
+```
+
+Add `.env` to `.gitignore` (already present for `*.env` patterns — verify).
+
+---
+
+## Build Order
+
+This is sequenced to get the tool personally usable as fast as possible:
+
+1. **Question bank** — source JSON dataset, write `ingest.js`, seed SQLite (Day 1-2)
+2. **Schema migrations** — add `baseline_english`, `baseline_math`, `weak_areas`, `onboarding_completed`, `source` fields (Day 1)
+3. **Onboarding flow** — wizard UI + `POST /api/onboarding` + score report upload (Day 2-4)
+4. **Adaptive difficulty** — `/api/questions/next`, Gemini criteria call, fallback logic (Day 3-5)
+5. **Sprint loop fixes** — real sprint IDs, timer, single-question adaptive fetch (Day 4-5)
+6. **Gemini explanations** — `/api/explain` endpoint + "Deep Dive" button in Sprint (Day 5-6)
+7. **Dashboard enhancements** — domain grid, predicted score, sprint history (Day 6-8)
+
+---
+
+## Verification
+
+- `npm run dev` starts both Vite and Express without errors
+- Fresh load redirects to `/onboarding`, completes without errors, lands on Dashboard
+- Sprint starts, fetches one question at a time adaptively, records answers and sprint record
+- After 5 wrong answers in one domain, next questions skew toward that domain
+- Dashboard domain grid shows accurate per-domain accuracy after 20+ answers
+- Score report upload (JPG) correctly pre-fills onboarding fields via Gemini
+- If `GEMINI_API_KEY` is missing or invalid, Sprint still works via fallback question selection
+- `node server/ingest.js` loads questions and logs summary without errors
