@@ -3,7 +3,40 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { CheckCircle2, XCircle, ChevronRight, AlertCircle, Zap, Trophy, Calculator, BookOpen, Shuffle } from 'lucide-react';
 import MathText from '../components/MathText';
 
-function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, navigate, onSprintAgain }) {
+function WrongAnswerCard({ item }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div style={{ backgroundColor: 'var(--bg-main)', borderRadius: '10px', border: '1px solid rgba(255,82,82,0.2)', overflow: 'hidden' }}>
+      <button onClick={() => setExpanded(e => !e)}
+        style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '12px 16px', textAlign: 'left', backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}>
+        <span style={{ fontSize: '0.68rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px', flexShrink: 0, marginTop: '2px', minWidth: '80px' }}>{item.domain.split(' ')[0]}</span>
+        <span style={{ flex: 1, fontSize: '0.88rem', lineHeight: 1.4, color: 'var(--text-primary)' }}>{item.text.length > 100 ? item.text.slice(0, 100) + '...' : item.text}</span>
+        <span style={{ fontSize: '0.72rem', color: expanded ? 'var(--primary)' : 'var(--text-secondary)', flexShrink: 0 }}>{expanded ? 'Hide' : 'Show'}</span>
+      </button>
+      {expanded && (
+        <div style={{ padding: '0 16px 14px', borderTop: '1px solid #2a2a46' }}>
+          <div style={{ display: 'flex', gap: '16px', marginTop: '12px', marginBottom: '10px', fontSize: '0.85rem' }}>
+            <div>
+              <span style={{ color: 'var(--error)', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '1px' }}>You chose</span>
+              <div style={{ color: 'var(--text-secondary)', marginTop: '2px' }}>{item.selectedLabel ? `${item.selectedLabel}: ` : ''}{item.selectedText}</div>
+            </div>
+            <div>
+              <span style={{ color: 'var(--success)', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Correct</span>
+              <div style={{ color: 'var(--success)', marginTop: '2px', fontWeight: '600' }}>{item.correctLabel ? `${item.correctLabel}: ` : ''}{item.correctAnswer}</div>
+            </div>
+          </div>
+          {item.explanation && (
+            <div style={{ fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text-secondary)', borderTop: '1px solid #2a2a46', paddingTop: '10px' }}>
+              {item.explanation}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, navigate, onSprintAgain, wrongAnswers }) {
   const [breakdown, setBreakdown] = useState(null);
 
   useEffect(() => {
@@ -62,6 +95,18 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
         </div>
       )}
 
+      {wrongAnswers?.length > 0 && (
+        <div style={{ textAlign: 'left', marginBottom: '20px' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <XCircle size={13} color="var(--error)" />
+            {wrongAnswers.length} Wrong Answer{wrongAnswers.length !== 1 ? 's' : ''} — tap to review
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {wrongAnswers.map((item, i) => <WrongAnswerCard key={i} item={item} />)}
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'flex', gap: '12px' }}>
         <button onClick={() => navigate('/review')}
           style={{ flex: 1, padding: '14px', fontSize: '0.9rem', borderColor: 'rgba(255,215,64,0.3)', color: 'var(--xp-gold)' }}>
@@ -81,7 +126,11 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
 }
 
 export default function Sprint({ user, setUser }) {
-  const [sprintMode, setSprintMode] = useState(null); // null = mode picker, 'math'|'english'|'adaptive'
+  const [sprintMode, setSprintModeState] = useState(() => sessionStorage.getItem('lastSprintMode') || null);
+  const setSprintMode = (mode) => {
+    setSprintModeState(mode);
+    if (mode) sessionStorage.setItem('lastSprintMode', mode);
+  };
   const sprintModeRef = useRef(null);
   const [sprintId, setSprintId] = useState(null);
   const [question, setQuestion] = useState(null);
@@ -90,6 +139,9 @@ export default function Sprint({ user, setUser }) {
   const [stats, setStats] = useState({ attempted: 0, correct: 0, xp: 0 });
   const [showSummary, setShowSummary] = useState(false);
   const [finalStats, setFinalStats] = useState(null);
+  const [wrongAnswers, setWrongAnswers] = useState([]);
+  const [sprintLength, setSprintLength] = useState(10);
+  const sprintLengthRef = useRef(10);
 
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -104,7 +156,8 @@ export default function Sprint({ user, setUser }) {
   const timeStartRef = useRef(Date.now());
   const navigate = useNavigate();
   const location = useLocation();
-  const SPRINT_LENGTH = 10;
+
+  const SPRINT_LENGTH = sprintLengthRef.current;
 
   // If navigated from Dashboard with a pre-selected mode, auto-start
   useEffect(() => {
@@ -194,6 +247,22 @@ export default function Sprint({ user, setUser }) {
       xp: prev.xp + xpGained
     }));
 
+    if (!correct) {
+      const correctAnswer = question.is_grid_in
+        ? String(question.grid_in_answer)
+        : question.choices.find(c => c.is_correct)?.text || '';
+      setWrongAnswers(prev => [...prev, {
+        id: question.id,
+        text: question.question_text,
+        domain: question.domain,
+        selectedChoice: choice,
+        selectedText: question.choices.find(c => c.label === choice)?.text || choice,
+        correctLabel: question.choices.find(c => c.is_correct)?.label || '',
+        correctAnswer,
+        explanation: question.explanation || ''
+      }]);
+    }
+
     try {
       await fetch('/api/answers', {
         method: 'POST',
@@ -221,7 +290,7 @@ export default function Sprint({ user, setUser }) {
 
   const handleNext = useCallback(async () => {
     const current = stats;
-    if (questionNum >= SPRINT_LENGTH) {
+    if (questionNum >= sprintLengthRef.current) {
       try {
         await fetch(`/api/sprints/${sprintId}/finish`, {
           method: 'POST',
@@ -324,6 +393,7 @@ export default function Sprint({ user, setUser }) {
       setShowSummary(false); setFinalStats(null);
       setStats({ attempted: 0, correct: 0, xp: 0 }); setQuestionNum(1);
       setQuestion(null); setLoading(false); setSprintId(null);
+      setWrongAnswers([]);
       setSprintMode(null); sprintModeRef.current = null;
     };
     return (
@@ -335,6 +405,7 @@ export default function Sprint({ user, setUser }) {
         SPRINT_LENGTH={SPRINT_LENGTH}
         navigate={navigate}
         onSprintAgain={handleSprintAgain}
+        wrongAnswers={wrongAnswers}
       />
     );
   }
@@ -349,7 +420,21 @@ export default function Sprint({ user, setUser }) {
     return (
       <div style={{ padding: '48px', maxWidth: '600px', margin: '0 auto', width: '100%' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>Choose Sprint Mode</h1>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '40px' }}>Pick your focus for this 10-question sprint</p>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>Pick your focus and length</p>
+
+        {/* Length selector */}
+        <div style={{ marginBottom: '28px' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px' }}>Sprint Length</div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {[5, 10, 15, 20].map(n => (
+              <button key={n} onClick={() => { setSprintLength(n); sprintLengthRef.current = n; }}
+                style={{ padding: '8px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', border: `2px solid ${sprintLength === n ? 'var(--primary)' : '#2a2a46'}`, backgroundColor: sprintLength === n ? 'rgba(0,212,255,0.08)' : 'transparent', color: sprintLength === n ? 'var(--primary)' : 'var(--text-secondary)', transition: 'all 0.15s' }}>
+                {n}Q
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {modes.map(m => (
             <button key={m.key} onClick={() => startSprint(m.key)}
@@ -361,6 +446,7 @@ export default function Sprint({ user, setUser }) {
                 <div style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '3px' }}>{m.label}</div>
                 <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{m.sub}</div>
               </div>
+              <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: 'var(--text-secondary)', flexShrink: 0 }}>{sprintLength} questions</span>
             </button>
           ))}
         </div>

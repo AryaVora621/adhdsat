@@ -37,6 +37,43 @@ function DomainCard({ name, stats }) {
   );
 }
 
+function QuickStartCard({ navigate, user }) {
+  const [starting, setStarting] = useState(false);
+
+  const handleStudyNow = async () => {
+    setStarting(true);
+    try {
+      const res = await fetch('/api/sprints', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, sprint_type: 'adaptive' })
+      });
+      const data = await res.json();
+      navigate('/sprint', { state: { mode: 'adaptive' } });
+    } catch (err) {
+      console.error(err);
+      setStarting(false);
+    }
+  };
+
+  return (
+    <div style={{
+      backgroundImage: 'linear-gradient(135deg, rgba(0,212,255,0.12), rgba(0,230,118,0.08))',
+      padding: '28px', borderRadius: '16px', border: '1px solid rgba(0,212,255,0.25)',
+      textAlign: 'center', marginBottom: '28px'
+    }}>
+      <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '600' }}>Let's Go!</div>
+      <button className="primary" onClick={handleStudyNow} disabled={starting}
+        style={{ padding: '16px 32px', fontSize: '1.15rem', width: '100%', fontWeight: '700', letterSpacing: '0.5px' }}>
+        {starting ? 'Starting...' : '⚡ Study Now'}
+      </button>
+      <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '12px', lineHeight: 1.4 }}>
+        Jump into an adaptive sprint · We'll focus on your weakest areas
+      </p>
+    </div>
+  );
+}
+
 function StudyPlanWidget({ user, navigate }) {
   const [plan, setPlan] = useState(null);
   const [editing, setEditing] = useState(false);
@@ -173,6 +210,9 @@ export default function Dashboard({ user }) {
           : `${progress.totalAnswered} questions answered total.`
         }
       </p>
+
+      {/* Quick start */}
+      <QuickStartCard navigate={navigate} user={user} />
 
       {/* Study plan */}
       <StudyPlanWidget user={user} navigate={navigate} />
