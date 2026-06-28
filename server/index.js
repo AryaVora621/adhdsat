@@ -270,6 +270,34 @@ app.get('/api/progress', (req, res) => {
   });
 });
 
+// --- Sprint domain breakdown ---
+app.get('/api/sprints/:id/breakdown', (req, res) => {
+  const rows = db.prepare(`
+    SELECT q.domain, ua.is_correct, ua.time_spent_seconds
+    FROM user_answers ua
+    JOIN questions q ON ua.question_id = q.id
+    WHERE ua.sprint_id = ?
+  `).all(req.params.id);
+
+  const byDomain = {};
+  let totalTime = 0;
+  for (const r of rows) {
+    if (!byDomain[r.domain]) byDomain[r.domain] = { correct: 0, total: 0 };
+    byDomain[r.domain].total++;
+    if (r.is_correct) byDomain[r.domain].correct++;
+    if (r.time_spent_seconds) totalTime += r.time_spent_seconds;
+  }
+
+  const domains = Object.entries(byDomain).map(([domain, s]) => ({
+    domain,
+    correct: s.correct,
+    total: s.total,
+    accuracy: s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0
+  })).sort((a, b) => a.accuracy - b.accuracy);
+
+  res.json({ domains, totalTime });
+});
+
 // --- Review Errors (SM-2 Spaced Repetition) ---
 
 // Ensure a review card exists for every wrong answer the user has made

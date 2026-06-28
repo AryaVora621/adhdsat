@@ -3,6 +3,92 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, XCircle, ChevronRight, AlertCircle, Zap, Trophy } from 'lucide-react';
 import MathText from '../components/MathText';
 
+function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, navigate, user, setShowSummary, setFinalStats, setStats, setQuestionNum, setQuestion, setLoading, setSprintId, fetchNextQuestion }) {
+  const [breakdown, setBreakdown] = useState(null);
+
+  useEffect(() => {
+    if (!sprintId) return;
+    fetch(`/api/sprints/${sprintId}/breakdown`)
+      .then(r => r.json())
+      .then(setBreakdown)
+      .catch(() => {});
+  }, [sprintId]);
+
+  const domainColor = (acc) => acc >= 70 ? 'var(--success)' : acc >= 50 ? 'var(--xp-gold)' : 'var(--error)';
+
+  const handleSprintAgain = async () => {
+    setShowSummary(false); setFinalStats(null);
+    setStats({ attempted: 0, correct: 0, xp: 0 }); setQuestionNum(1);
+    setQuestion(null); setLoading(true);
+    const res = await fetch('/api/sprints', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, sprint_type: 'adaptive' }) });
+    const data = await res.json(); setSprintId(data.id);
+    fetchNextQuestion();
+  };
+
+  return (
+    <div style={{ padding: '48px', maxWidth: '600px', margin: '0 auto', width: '100%', textAlign: 'center' }}>
+      <Trophy size={48} color="var(--xp-gold)" style={{ marginBottom: '24px' }} />
+      <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>Sprint Complete!</h1>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>{SPRINT_LENGTH} questions finished</p>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+        {[
+          { label: 'Correct', value: `${finalStats.correct}/${finalStats.attempted}` },
+          { label: 'Accuracy', value: `${accuracy}%`, color: grade.color },
+          { label: 'XP Earned', value: `+${finalStats.xp}`, color: 'var(--xp-gold)' }
+        ].map(stat => (
+          <div key={stat.label} style={{ backgroundColor: 'var(--bg-card)', padding: '20px', borderRadius: '14px', border: '1px solid #2a2a46' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>{stat.label}</div>
+            <div style={{ fontSize: '1.6rem', fontWeight: 'bold', color: stat.color || 'var(--text-primary)' }}>{stat.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ backgroundColor: 'var(--bg-card)', padding: '12px 24px', borderRadius: '14px', border: `2px solid ${grade.color}`, marginBottom: '24px' }}>
+        <span style={{ fontSize: '1.1rem', fontWeight: '700', color: grade.color }}>{grade.label}</span>
+      </div>
+
+      {breakdown?.domains?.length > 0 && (
+        <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px 20px', borderRadius: '14px', border: '1px solid #2a2a46', marginBottom: '24px', textAlign: 'left' }}>
+          <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '12px' }}>Domain Breakdown</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {breakdown.domains.map(d => (
+              <div key={d.domain} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ flex: 1, fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{d.domain}</span>
+                <div style={{ width: '80px', height: '4px', backgroundColor: '#2a2a46', borderRadius: '2px', overflow: 'hidden' }}>
+                  <div style={{ width: `${d.accuracy}%`, height: '100%', backgroundColor: domainColor(d.accuracy) }} />
+                </div>
+                <span style={{ fontSize: '0.82rem', fontWeight: '600', color: domainColor(d.accuracy), minWidth: '38px', textAlign: 'right' }}>{d.accuracy}%</span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', minWidth: '30px' }}>{d.correct}/{d.total}</span>
+              </div>
+            ))}
+          </div>
+          {breakdown.totalTime > 0 && (
+            <div style={{ marginTop: '12px', fontSize: '0.72rem', color: 'var(--text-secondary)', borderTop: '1px solid #2a2a46', paddingTop: '10px' }}>
+              Total time: {Math.floor(breakdown.totalTime / 60)}m {breakdown.totalTime % 60}s
+            </div>
+          )}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: '12px' }}>
+        <button onClick={() => navigate('/review')}
+          style={{ flex: 1, padding: '14px', fontSize: '0.9rem', borderColor: 'rgba(255,215,64,0.3)', color: 'var(--xp-gold)' }}>
+          Review Errors
+        </button>
+        <button className="primary" onClick={handleSprintAgain}
+          style={{ flex: 2, padding: '14px', fontSize: '1rem' }}>
+          Sprint Again
+        </button>
+      </div>
+      <button onClick={() => navigate('/')} style={{ width: '100%', marginTop: '10px', padding: '10px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+        Back to Dashboard
+      </button>
+      <p style={{ marginTop: '8px', fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Press Enter for Dashboard</p>
+    </div>
+  );
+}
+
 export default function Sprint({ user, setUser }) {
   const [sprintId, setSprintId] = useState(null);
   const [question, setQuestion] = useState(null);
@@ -231,52 +317,26 @@ export default function Sprint({ user, setUser }) {
       : { label: 'Needs Work', color: 'var(--error)' };
 
     return (
-      <div style={{ padding: '48px', maxWidth: '600px', margin: '0 auto', width: '100%', textAlign: 'center' }}>
-        <Trophy size={48} color="var(--xp-gold)" style={{ marginBottom: '24px' }} />
-        <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>Sprint Complete!</h1>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '40px' }}>{SPRINT_LENGTH} questions finished</p>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '40px' }}>
-          {[
-            { label: 'Correct', value: `${finalStats.correct}/${finalStats.attempted}` },
-            { label: 'Accuracy', value: `${accuracy}%`, color: grade.color },
-            { label: 'XP Earned', value: `+${finalStats.xp}`, color: 'var(--xp-gold)' }
-          ].map(stat => (
-            <div key={stat.label} style={{ backgroundColor: 'var(--bg-card)', padding: '20px', borderRadius: '14px', border: '1px solid #2a2a46' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>{stat.label}</div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 'bold', color: stat.color || 'var(--text-primary)' }}>{stat.value}</div>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px 24px', borderRadius: '14px', border: `2px solid ${grade.color}`, marginBottom: '32px' }}>
-          <span style={{ fontSize: '1.1rem', fontWeight: '700', color: grade.color }}>{grade.label}</span>
-        </div>
-
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={() => navigate('/review')}
-            style={{ flex: 1, padding: '14px', fontSize: '0.9rem', borderColor: 'rgba(255,215,64,0.3)', color: 'var(--xp-gold)' }}>
-            Review Errors
-          </button>
-          <button className="primary" onClick={async () => {
-              setShowSummary(false); setFinalStats(null);
-              setStats({ attempted: 0, correct: 0, xp: 0 }); setQuestionNum(1);
-              setQuestion(null); setLoading(true);
-              const res = await fetch('/api/sprints', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, sprint_type: 'adaptive' }) });
-              const data = await res.json(); setSprintId(data.id);
-              fetchNextQuestion();
-            }}
-            style={{ flex: 2, padding: '14px', fontSize: '1rem' }}>
-            Sprint Again
-          </button>
-        </div>
-        <button onClick={() => navigate('/')} style={{ width: '100%', marginTop: '10px', padding: '10px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-          Back to Dashboard
-        </button>
-        <p style={{ marginTop: '8px', fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Press Enter for Dashboard</p>
-      </div>
+      <SummaryScreen
+        finalStats={finalStats}
+        sprintId={sprintId}
+        accuracy={accuracy}
+        grade={grade}
+        SPRINT_LENGTH={SPRINT_LENGTH}
+        navigate={navigate}
+        user={user}
+        setShowSummary={setShowSummary}
+        setFinalStats={setFinalStats}
+        setStats={setStats}
+        setQuestionNum={setQuestionNum}
+        setQuestion={setQuestion}
+        setLoading={setLoading}
+        setSprintId={setSprintId}
+        fetchNextQuestion={fetchNextQuestion}
+      />
     );
   }
+
 
   if (loading) {
     return (

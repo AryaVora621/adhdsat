@@ -161,12 +161,23 @@ async function generateForDomain(genAI, domain, section, prefix, existingQuestio
   const prompt = buildPrompt(domain, section, existingIds, count);
 
   let result;
-  try {
-    result = await model.generateContent(prompt);
-  } catch (err) {
-    console.error(`[generate] Gemini error for ${domain}:`, err.message);
-    return [];
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    try {
+      result = await model.generateContent(prompt);
+      break;
+    } catch (err) {
+      const is503 = err.message && (err.message.includes('503') || err.message.includes('overloaded') || err.message.includes('temporarily'));
+      if (is503 && attempt < 4) {
+        const delay = attempt * 8000;
+        console.log(`[generate] 503 for ${domain}, retrying in ${delay/1000}s (attempt ${attempt}/4)...`);
+        await new Promise(r => setTimeout(r, delay));
+        continue;
+      }
+      console.error(`[generate] Gemini error for ${domain}:`, err.message);
+      return [];
+    }
   }
+  if (!result) return [];
 
   const text = result.response.text().trim();
 
