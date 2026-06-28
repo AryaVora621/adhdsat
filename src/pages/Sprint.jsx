@@ -195,6 +195,7 @@ export default function Sprint({ user, setUser }) {
   const [wrongAnswers, setWrongAnswers] = useState([]);
   const [sprintLength, setSprintLength] = useState(10);
   const sprintLengthRef = useRef(10);
+  const [resumePrompt, setResumePrompt] = useState(null);
 
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -215,8 +216,18 @@ export default function Sprint({ user, setUser }) {
 
   const SPRINT_LENGTH = sprintLengthRef.current;
 
-  // Auto-start from Dashboard navigation state or remembered mode
+  // Auto-start from Dashboard navigation state, saved recovery state, or remembered mode
   useEffect(() => {
+    const saved = sessionStorage.getItem('activeSprint');
+    if (saved) {
+      try {
+        const state = JSON.parse(saved);
+        if (state.sprintId && state.questionNum > 1) {
+          setResumePrompt(state);
+          return;
+        }
+      } catch {}
+    }
     const preMode = location.state?.mode;
     const remembered = sessionStorage.getItem('lastSprintMode');
     const modeToStart = preMode || remembered;
@@ -359,10 +370,18 @@ export default function Sprint({ user, setUser }) {
         body: JSON.stringify({ xp_gained: xpGained })
       });
       setUser(await userRes.json());
+
+      // Autosave recovery state (using functional update pattern via ref to avoid stale closure)
+      const nextStats = { attempted: stats.attempted + 1, correct: stats.correct + (correct ? 1 : 0), xp: stats.xp + xpGained };
+      sessionStorage.setItem('activeSprint', JSON.stringify({
+        sprintId, mode: sprintModeRef.current,
+        questionNum: questionNum + 1, stats: nextStats,
+        sprintLength: sprintLengthRef.current
+      }));
     } catch (err) {
       console.error(err);
     }
-  }, [selectedChoice, question, isAnswered, hintsUsed, sprintId, user.id]);
+  }, [selectedChoice, question, isAnswered, hintsUsed, sprintId, stats, questionNum, user.id]);
 
   const handleNext = useCallback(async () => {
     const current = stats;
@@ -378,6 +397,7 @@ export default function Sprint({ user, setUser }) {
           })
         });
       } catch {}
+      sessionStorage.removeItem('activeSprint');
       setFinalStats(current);
       setShowSummary(true);
     } else {
@@ -473,6 +493,7 @@ export default function Sprint({ user, setUser }) {
       setMilestone(null);
       sprintStartRef.current = null;
       milestoneShownRef.current = new Set();
+      sessionStorage.removeItem('activeSprint');
       setSprintMode(null); sprintModeRef.current = null;
     };
     return (
@@ -486,6 +507,47 @@ export default function Sprint({ user, setUser }) {
         onSprintAgain={handleSprintAgain}
         wrongAnswers={wrongAnswers}
       />
+    );
+  }
+
+  // Resume prompt: shown when there's a saved sprint from a previous session
+  if (resumePrompt) {
+    return (
+      <div style={{ padding: '48px', maxWidth: '480px', margin: '0 auto', width: '100%' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '32px', border: '1px solid rgba(0,212,255,0.3)', textAlign: 'center' }}>
+          <Zap size={36} color="var(--primary)" style={{ marginBottom: '16px' }} />
+          <h2 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '8px' }}>Unfinished Sprint</h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px' }}>
+            You were on Q{resumePrompt.questionNum} of {resumePrompt.sprintLength || 10} ({resumePrompt.stats?.correct || 0} correct so far).<br />
+            Want to pick up where you left off?
+          </p>
+          <button className="primary" style={{ width: '100%', padding: '14px', fontSize: '1rem', marginBottom: '10px' }}
+            onClick={() => {
+              const s = resumePrompt;
+              sprintModeRef.current = s.mode;
+              setSprintModeState(s.mode);
+              setSprintId(s.sprintId);
+              setQuestionNum(s.questionNum);
+              setStats(s.stats || { attempted: 0, correct: 0, xp: 0 });
+              sprintLengthRef.current = s.sprintLength || 10;
+              setSprintLength(s.sprintLength || 10);
+              sprintStartRef.current = Date.now();
+              setResumePrompt(null);
+              fetchNextQuestion();
+            }}>
+            Resume Sprint
+          </button>
+          <button style={{ width: '100%', padding: '10px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}
+            onClick={() => {
+              sessionStorage.removeItem('activeSprint');
+              setResumePrompt(null);
+              const remembered = sessionStorage.getItem('lastSprintMode');
+              if (remembered) startSprint(remembered);
+            }}>
+            Start Fresh
+          </button>
+        </div>
+      </div>
     );
   }
 
