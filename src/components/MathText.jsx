@@ -55,8 +55,9 @@ function parseSegments(text) {
     // Distinguish from math like $2x+3$ by checking the token after $ is purely numeric.
     // A currency amount is digits (+ commas/periods) followed by a non-alpha char or end.
     const afterDollar = processed.slice(start + 1);
-    // Exclude $ from char check: $3$ is math ($3 followed by $), $3 followed by space/text is currency
-    const currencyMatch = afterDollar.match(/^(\d[\d,.]*)(?:[^a-zA-Z$]|$)/);
+    // Currency: $<digits> immediately followed by whitespace or sentence punctuation.
+    // This correctly rejects $2^{3}$ (^ is not punctuation) and $3$ ($ is not punctuation).
+    const currencyMatch = afterDollar.match(/^(\d+)(?=\s|[.,;:!?)]|$)/);
     if (currencyMatch) {
       const textSoFar = processed.slice(i, start + 1);
       if (segments.length > 0 && segments[segments.length - 1].type === 'text') {
