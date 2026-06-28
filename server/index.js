@@ -528,6 +528,18 @@ app.get('/api/insights/:userId', async (req, res) => {
     insights.push({ type: 'focus', priority: 2, text: `You flagged ${weakAreas.slice(0, 2).join(' and ')} as weak areas. Start with an Adaptive sprint to build your baseline there.` });
   }
 
+  // Domain neglect alert: domains with no data while total answered >= 20
+  if (totalAnswered >= 20) {
+    const practicedDomains = new Set(Object.keys(domainAccuracy));
+    const neglectedMath = MATH_DOMAINS.filter(d => !practicedDomains.has(d));
+    const neglectedEng = ENG_DOMAINS.filter(d => !practicedDomains.has(d));
+    if (neglectedMath.length >= 2) {
+      insights.push({ type: 'neglect', priority: 2, text: `Hyperfocus alert: you haven't practiced ${neglectedMath.slice(0, 2).join(' or ')} yet. These could hide on test day.` });
+    } else if (neglectedEng.length >= 2) {
+      insights.push({ type: 'neglect', priority: 2, text: `Hyperfocus alert: you haven't practiced ${neglectedEng.slice(0, 2).join(' or ')} yet. Don't let English sections catch you off guard.` });
+    }
+  }
+
   // Try AI insight if Gemini is available and we have enough data
   let aiInsight = null;
   const geminiClient = process.env.GEMINI_API_KEY;

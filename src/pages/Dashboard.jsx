@@ -233,6 +233,7 @@ export default function Dashboard({ user }) {
                 <span style={{ marginTop: '3px', flexShrink: 0 }}>
                   {ins.type === 'review' ? <BookOpen size={13} color="var(--xp-gold)" /> :
                    ins.type === 'urgency' ? <AlertCircle size={13} color="var(--error)" /> :
+                   ins.type === 'neglect' ? <AlertCircle size={13} color="var(--xp-gold)" /> :
                    <TrendingUp size={13} color="var(--success)" />}
                 </span>
                 <p style={{ fontSize: '0.88rem', lineHeight: 1.55, color: 'var(--text-secondary)', margin: 0 }}>{ins.text}</p>

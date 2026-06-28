@@ -614,7 +614,14 @@ export default function Sprint({ user, setUser }) {
         <span style={{ fontSize: '0.75rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px' }}>{question.domain}</span>
         <span style={{ color: '#2a2a46' }}>|</span>
         <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>{question.difficulty}</span>
-        {!isAnswered && (
+        {!isAnswered && questionNum === 1 && (
+          <button onClick={() => { setSprintMode(null); setSprintModeState(null); sessionStorage.removeItem('lastSprintMode'); setSprintId(null); setQuestion(null); setLoading(false); sprintStartRef.current = null; }}
+            style={{ marginLeft: 'auto', fontSize: '0.68rem', color: 'var(--text-secondary)', padding: '2px 8px', borderRadius: '6px', border: '1px solid #2a2a46', backgroundColor: 'transparent', cursor: 'pointer' }}
+            title="Change sprint mode">
+            ← change mode
+          </button>
+        )}
+        {!isAnswered && questionNum > 1 && (
           <span style={{ marginLeft: 'auto', fontSize: '0.65rem', color: '#2a2a46' }}>1-4 to pick, Enter to submit</span>
         )}
       </div>
