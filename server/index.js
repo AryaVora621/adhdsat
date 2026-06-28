@@ -16,6 +16,13 @@ const MATH_DOMAINS = ['Algebra', 'Advanced Math', 'Problem Solving & Data Analys
 const ENG_DOMAINS = ['Information & Ideas', 'Craft & Structure', 'Expression of Ideas', 'Standard English Conventions'];
 const DOMAINS = [...MATH_DOMAINS, ...ENG_DOMAINS];
 
+// --- Health ---
+
+app.get('/api/health', (req, res) => {
+  const qCount = db.prepare('SELECT COUNT(*) as cnt FROM questions').get().cnt;
+  res.json({ status: 'ok', questions: qCount, ts: new Date().toISOString() });
+});
+
 // --- Users ---
 
 app.get('/api/users/:id', (req, res) => {
