@@ -584,6 +584,7 @@ export default function Sprint({ user, setUser }) {
       : { label: 'Needs Work', color: 'var(--error)' };
 
     const handleSprintAgain = () => {
+      const currentMode = sprintModeRef.current;
       setShowSummary(false); setFinalStats(null);
       setStats({ attempted: 0, correct: 0, xp: 0 }); setQuestionNum(1);
       setQuestion(null); setLoading(false); setSprintId(null);
@@ -592,7 +593,9 @@ export default function Sprint({ user, setUser }) {
       sprintStartRef.current = null;
       milestoneShownRef.current = new Set();
       sessionStorage.removeItem('activeSprint');
-      setSprintMode(null); sprintModeRef.current = null;
+      // Keep same mode -- restart immediately without going to picker
+      if (currentMode) startSprint(currentMode);
+      else { setSprintMode(null); sprintModeRef.current = null; }
     };
     return (
       <SummaryScreen

@@ -1,8 +1,13 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import { existsSync } from 'fs';
 import db from './db.js';
 import { getAdaptiveCriteria, streamExplanation, analyzeScoreReport } from './gemini.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 if (!process.env.GEMINI_API_KEY) {
   console.warn('[ADHDSat] GEMINI_API_KEY not set -- adaptive difficulty and explanations will use fallback mode.');
@@ -733,6 +738,17 @@ app.get('/api/today/:userId', (req, res) => {
   `).get(req.params.userId).cnt;
   res.json({ sprints_today: sprints, answers_today: answers });
 });
+
+// Serve frontend build in production
+const distPath = join(__dirname, '..', 'dist');
+if (existsSync(distPath)) {
+  app.use(express.static(distPath));
+  // SPA fallback: all non-API routes serve index.html
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(join(distPath, 'index.html'));
+  });
+}
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
