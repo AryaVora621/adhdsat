@@ -525,6 +525,14 @@ export default function Sprint({ user, setUser }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [question, isAnswered, loading, showSummary, selectedChoice, hintsUsed, handleAnswerSubmit, handleNext]);
 
+  // Summary screen: Enter navigates to dashboard
+  useEffect(() => {
+    if (!showSummary) return;
+    const onKey = (e) => { if (e.key === 'Enter') navigate('/'); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showSummary, navigate]);
+
   const handleDeepDive = async () => {
     setDeepDiveLoading(true);
     setShowDeepDive(true);

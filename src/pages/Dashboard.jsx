@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlayCircle, BookOpen, TrendingUp, TrendingDown, Minus, Target, Calendar, Zap, Calculator, AlertCircle, Shuffle } from 'lucide-react';
+import { PlayCircle, BookOpen, TrendingUp, TrendingDown, Minus, Target, Calendar, Zap, Calculator, AlertCircle, Shuffle, BarChart2 } from 'lucide-react';
 
 const DOMAINS = [
   { name: 'Algebra', section: 'Math' },
@@ -80,7 +80,7 @@ function QuickStartCard({ navigate, user }) {
       </div>
       <button className="primary" onClick={handleStudyNow} disabled={starting}
         style={{ padding: '16px 32px', fontSize: '1.15rem', width: '100%', fontWeight: '700', letterSpacing: '0.5px' }}>
-        {starting ? 'Starting...' : allDone ? '⚡ Keep Going' : '⚡ Study Now'}
+        {starting ? 'Starting...' : allDone ? 'Keep Going' : 'Study Now'}
       </button>
       {today !== null && (
         <div style={{ marginTop: '14px' }}>
@@ -162,7 +162,8 @@ function StudyPlanWidget({ user, navigate }) {
   }
 
   // Compute plan stats
-  const daysLeft = Math.max(0, Math.round((new Date(plan.test_date) - Date.now()) / 86400000));
+  const hasTestDate = !!plan.test_date;
+  const daysLeft = hasTestDate ? Math.max(0, Math.round((new Date(plan.test_date) - Date.now()) / 86400000)) : null;
   const currentTotal = (user.baseline_english || 0) + (user.baseline_math || 0);
   const gap = Math.max(0, plan.target_score - currentTotal);
   const sprintsPerDay = daysLeft > 0 ? Math.ceil(gap / (daysLeft * 50)) : 0;
@@ -180,15 +181,17 @@ function StudyPlanWidget({ user, navigate }) {
           <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '2px' }}>Target</div>
           <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--primary)' }}>{plan.target_score}</div>
         </div>
-        <div>
-          <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '2px' }}>Days Left</div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: daysLeft < 14 ? 'var(--error)' : daysLeft < 30 ? 'var(--xp-gold)' : 'var(--success)' }}>{daysLeft}</div>
-        </div>
+        {hasTestDate && (
+          <div>
+            <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '2px' }}>Days Left</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: daysLeft < 14 ? 'var(--error)' : daysLeft < 30 ? 'var(--xp-gold)' : 'var(--success)' }}>{daysLeft}</div>
+          </div>
+        )}
         <div>
           <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '2px' }}>Gap</div>
           <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: gap === 0 ? 'var(--success)' : 'var(--xp-gold)' }}>{gap > 0 ? `+${gap}` : 'At target'}</div>
         </div>
-        {daysLeft > 0 && gap > 0 && (
+        {hasTestDate && daysLeft > 0 && gap > 0 && (
           <div>
             <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '2px' }}>Sprints/Day</div>
             <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{sprintsPerDay}</div>
@@ -199,7 +202,7 @@ function StudyPlanWidget({ user, navigate }) {
         <div style={{ width: `${Math.min(pct, 100)}%`, height: '100%', backgroundColor: 'var(--primary)', transition: 'width 0.5s ease' }} />
       </div>
       <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '5px' }}>
-        {currentTotal} / {plan.target_score} (baseline) -- {daysLeft > 0 ? `test on ${new Date(plan.test_date).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'})}` : 'Test date passed'}
+        {currentTotal} / {plan.target_score} baseline{hasTestDate ? ` · test on ${new Date(plan.test_date).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'})}` : ''}
       </div>
     </div>
   );
@@ -442,7 +445,7 @@ export default function Dashboard({ user, isMobile }) {
 
       {!loading && progress?.totalAnswered === 0 && (
         <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
-          <div style={{ fontSize: '2rem', marginBottom: '12px' }}>📊</div>
+          <BarChart2 size={36} color="#3a3a56" style={{ marginBottom: '12px' }} />
           <p>Domain stats appear after you answer questions in a sprint.</p>
         </div>
       )}

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, ChevronRight, ChevronLeft, Zap } from 'lucide-react';
+import { Upload, ChevronRight, ChevronLeft, Zap, Target } from 'lucide-react';
 
 const MATH_DOMAINS = ['Algebra', 'Advanced Math', 'Problem Solving & Data Analysis', 'Geometry & Trig'];
 const ENG_DOMAINS = ['Information & Ideas', 'Craft & Structure', 'Expression of Ideas', 'Standard English Conventions'];
@@ -198,7 +198,7 @@ export default function Onboarding({ user, setUser }) {
       {step === 3 && (
         <div style={cardStyle}>
           <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🎯</div>
+            <Target size={40} color="var(--primary)" style={{ marginBottom: '12px' }} />
             <h2 style={{ fontSize: '1.6rem', marginBottom: '8px' }}>Set Your Target</h2>
             <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>ADHDSat will adapt every question to close your gap.</p>
           </div>
