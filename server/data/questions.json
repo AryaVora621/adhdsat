@@ -22544,5 +22544,214 @@
       "area"
     ],
     "source": "authored"
+  },
+  {
+    "id": "gridin_013",
+    "section": "Math",
+    "domain": "Algebra",
+    "skill": "Linear equations with fractions",
+    "difficulty": "medium",
+    "question_text": "If (x / 3) + 5 = 11, what is the value of x?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 18,
+    "explanation": "Subtract 5 from both sides: x / 3 = 6. Multiply both sides by 3: x = 18.",
+    "hint_1": "Isolate the fraction term first.",
+    "hint_2": "Once x / 3 = 6, multiply both sides by 3.",
+    "tags": [
+      "linear",
+      "grid-in",
+      "fractions"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_014",
+    "section": "Math",
+    "domain": "Algebra",
+    "skill": "Linear equations in one variable",
+    "difficulty": "medium",
+    "question_text": "If 4x + 3 = 13, what is the value of x?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 2.5,
+    "explanation": "Subtract 3 from both sides: 4x = 10. Divide by 4: x = 2.5. Grid-in answers can be decimals.",
+    "hint_1": "The answer does not have to be a whole number.",
+    "hint_2": "4x = 10, so x = 10 / 4 = 2.5.",
+    "tags": [
+      "linear",
+      "grid-in",
+      "decimal"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_015",
+    "section": "Math",
+    "domain": "Advanced Math",
+    "skill": "Factoring quadratics",
+    "difficulty": "hard",
+    "question_text": "If x^2 - 5x + 6 = 0 and x > 2, what is the value of x?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 3,
+    "explanation": "Factor: (x - 2)(x - 3) = 0, so x = 2 or x = 3. Since x > 2, x = 3.",
+    "hint_1": "Find two numbers that multiply to 6 and add to 5.",
+    "hint_2": "The factors give x = 2 or x = 3; pick the one greater than 2.",
+    "tags": [
+      "quadratic",
+      "grid-in",
+      "factoring"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_016",
+    "section": "Math",
+    "domain": "Advanced Math",
+    "skill": "Exponential equations",
+    "difficulty": "hard",
+    "question_text": "If 3^(x + 1) = 81, what is the value of x?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 3,
+    "explanation": "Write 81 as a power of 3: 81 = 3^4. So 3^(x + 1) = 3^4, which gives x + 1 = 4 and x = 3.",
+    "hint_1": "Express 81 as 3 raised to a power.",
+    "hint_2": "If 3^(x+1) = 3^4, then x + 1 = 4.",
+    "tags": [
+      "exponent",
+      "grid-in",
+      "powers"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_017",
+    "section": "Math",
+    "domain": "Problem Solving & Data Analysis",
+    "skill": "Percentages",
+    "difficulty": "medium",
+    "question_text": "If 8 is 40 percent of a number, what is that number?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 20,
+    "explanation": "Let the number be n. Then 0.40 x n = 8, so n = 8 / 0.40 = 20.",
+    "hint_1": "Translate to an equation: 0.40 times the number equals 8.",
+    "hint_2": "Divide 8 by 0.40.",
+    "tags": [
+      "percent",
+      "grid-in"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_018",
+    "section": "Math",
+    "domain": "Problem Solving & Data Analysis",
+    "skill": "Rates",
+    "difficulty": "medium",
+    "question_text": "A car travels 150 miles in 2.5 hours. What is its average speed, in miles per hour?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 60,
+    "explanation": "Average speed = distance / time = 150 / 2.5 = 60 miles per hour.",
+    "hint_1": "Speed equals distance divided by time.",
+    "hint_2": "150 / 2.5 = 60.",
+    "tags": [
+      "rate",
+      "grid-in",
+      "speed"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_019",
+    "section": "Math",
+    "domain": "Problem Solving & Data Analysis",
+    "skill": "Ratios and proportions",
+    "difficulty": "medium",
+    "question_text": "The ratio of boys to girls in a class is 3 to 2. If there are 30 students in total, how many are girls?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 12,
+    "explanation": "The ratio 3 to 2 has 3 + 2 = 5 parts. Each part is 30 / 5 = 6 students. Girls are 2 parts: 2 x 6 = 12.",
+    "hint_1": "Add the ratio parts to find how many equal groups there are.",
+    "hint_2": "5 parts in 30 students means each part is 6; girls are 2 parts.",
+    "tags": [
+      "ratio",
+      "grid-in",
+      "proportion"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_020",
+    "section": "Math",
+    "domain": "Geometry & Trig",
+    "skill": "Right triangles: Pythagorean theorem",
+    "difficulty": "hard",
+    "question_text": "A rectangle has a length of 12 and a width of 5. What is the length of its diagonal?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 13,
+    "explanation": "The diagonal is the hypotenuse of a right triangle with legs 12 and 5: square root of (12^2 + 5^2) = square root of (144 + 25) = square root of 169 = 13.",
+    "hint_1": "The diagonal splits the rectangle into two right triangles.",
+    "hint_2": "Use 12^2 + 5^2 = 169, then take the square root.",
+    "tags": [
+      "pythagorean",
+      "grid-in",
+      "rectangle"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_021",
+    "section": "Math",
+    "domain": "Geometry & Trig",
+    "skill": "Volume of solids",
+    "difficulty": "medium",
+    "question_text": "A cube has a volume of 27 cubic units. What is the length of one edge?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 3,
+    "explanation": "The volume of a cube is edge^3. Since edge^3 = 27, the edge is the cube root of 27, which is 3.",
+    "hint_1": "Volume of a cube is the edge length cubed.",
+    "hint_2": "What number cubed equals 27?",
+    "tags": [
+      "volume",
+      "grid-in",
+      "cube"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_022",
+    "section": "Math",
+    "domain": "Geometry & Trig",
+    "skill": "Right triangles: Pythagorean theorem",
+    "difficulty": "hard",
+    "question_text": "In a right triangle, one leg has length 9 and the hypotenuse has length 15. What is the length of the other leg?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 12,
+    "explanation": "Using a^2 + b^2 = c^2: 9^2 + b^2 = 15^2, so b^2 = 225 - 81 = 144 and b = 12.",
+    "hint_1": "The hypotenuse is the longest side; solve for the missing leg.",
+    "hint_2": "b^2 = 15^2 - 9^2 = 144.",
+    "tags": [
+      "pythagorean",
+      "grid-in",
+      "right-triangle"
+    ],
+    "source": "authored"
   }
 ]
