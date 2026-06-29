@@ -31,14 +31,24 @@ import Landing from './pages/Landing';
 import LevelUpToast from './components/LevelUpToast';
 
 // Route-split the in-app pages so newcomers only download the landing shell
-// first; the heavier authed screens load on demand.
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Sprint = lazy(() => import('./pages/Sprint'));
-const Onboarding = lazy(() => import('./pages/Onboarding'));
-const Profile = lazy(() => import('./pages/Profile'));
-const ReviewSprint = lazy(() => import('./pages/ReviewSprint'));
-const PracticeTest = lazy(() => import('./pages/PracticeTest'));
-const Upgrade = lazy(() => import('./pages/Upgrade'));
+// first; the heavier authed screens load on demand. Import thunks are kept so
+// the high-traffic routes can be prefetched during idle time (instant nav).
+const load = {
+  Dashboard: () => import('./pages/Dashboard'),
+  Sprint: () => import('./pages/Sprint'),
+  Onboarding: () => import('./pages/Onboarding'),
+  Profile: () => import('./pages/Profile'),
+  ReviewSprint: () => import('./pages/ReviewSprint'),
+  PracticeTest: () => import('./pages/PracticeTest'),
+  Upgrade: () => import('./pages/Upgrade'),
+};
+const Dashboard = lazy(load.Dashboard);
+const Sprint = lazy(load.Sprint);
+const Onboarding = lazy(load.Onboarding);
+const Profile = lazy(load.Profile);
+const ReviewSprint = lazy(load.ReviewSprint);
+const PracticeTest = lazy(load.PracticeTest);
+const Upgrade = lazy(load.Upgrade);
 import './index.css';
 
 const useIsMobile = () => {
@@ -151,6 +161,21 @@ function AppInner() {
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  // Once the user is in the app, warm the chunks they're most likely to open next
+  // during idle time, so navigating from the dashboard feels instant. import()
+  // results are cached by the browser, so React.lazy resolves immediately later.
+  useEffect(() => {
+    if (!user?.onboarding_completed) return;
+    const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 800));
+    const handle = idle(() => {
+      load.Sprint();
+      load.ReviewSprint();
+      load.PracticeTest();
+      load.Profile();
+    });
+    return () => (window.cancelIdleCallback || clearTimeout)(handle);
+  }, [user?.onboarding_completed]);
 
   if (loading) {
     return (
