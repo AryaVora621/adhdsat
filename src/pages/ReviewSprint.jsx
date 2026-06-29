@@ -21,9 +21,18 @@ export default function ReviewSprint({ user, setUser }) {
   const [deepDiveLoading, setDeepDiveLoading] = useState(false);
   const [showDeepDive, setShowDeepDive] = useState(false);
   const [sm2Result, setSm2Result] = useState(null);
+  const [nextReviewCount, setNextReviewCount] = useState(0);
 
   const timeStartRef = useRef(Date.now());
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!showSummary || !user?.id) return;
+    fetch(`/api/review/count?userId=${user.id}`)
+      .then(r => r.json())
+      .then(data => setNextReviewCount(data?.count || 0))
+      .catch(() => {});
+  }, [showSummary, user?.id]);
 
   useEffect(() => {
     const startReview = async () => {
@@ -222,13 +231,24 @@ export default function ReviewSprint({ user, setUser }) {
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '4px' }}>XP Earned</div>
           </div>
         </div>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '28px', lineHeight: 1.6, fontSize: '0.9rem' }}>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '20px', lineHeight: 1.6, fontSize: '0.9rem' }}>
           {accuracy >= 80
             ? 'Great work! Cards you got right are scheduled further out. Keep it up.'
             : accuracy >= 60
             ? 'Solid effort. Cards you missed will come back sooner for more practice.'
             : 'These concepts need more work. Cards are scheduled to return shortly.'}
         </p>
+
+        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #2a2a46', borderRadius: '12px', padding: '16px', marginBottom: '28px' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Next Review</div>
+          <div style={{ fontSize: '1.3rem', fontWeight: '700', color: 'var(--primary)' }}>
+            {nextReviewCount > 0 ? `${nextReviewCount} card${nextReviewCount !== 1 ? 's' : ''} due` : 'No cards due soon'}
+          </div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '6px' }}>
+            {nextReviewCount > 0 ? 'Come back tomorrow to continue strengthening these concepts' : 'Perfect - you\'re caught up!'}
+          </div>
+        </div>
+
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
           <button className="primary" onClick={() => navigate('/')} style={{ padding: '12px 28px' }}>Back to Dashboard</button>
           <button onClick={() => { setShowSummary(false); setQuestionNum(1); setStats({ attempted: 0, correct: 0, xp: 0 }); fetchNextQuestion(); }}
