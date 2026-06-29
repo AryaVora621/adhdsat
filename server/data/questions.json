@@ -2506,7 +2506,7 @@
     "domain": "Expression of Ideas",
     "skill": "Transitions",
     "difficulty": "easy",
-    "question_text": "Choose the best transition to complete the sentence: 'The team worked hard all season; _______, they won the championship.'",
+    "question_text": "Choose the best transition to complete the sentence: 'The team worked hard all season; ___, they won the championship.'",
     "passage_text": null,
     "choices": [
       {
@@ -2632,7 +2632,7 @@
     "domain": "Expression of Ideas",
     "skill": "Transitions",
     "difficulty": "hard",
-    "question_text": "'Renewable energy sources are becoming more affordable. _______, the initial installation costs can still be prohibitive for low-income households.'",
+    "question_text": "'Renewable energy sources are becoming more affordable. ___, the initial installation costs can still be prohibitive for low-income households.'",
     "passage_text": null,
     "choices": [
       {
@@ -2716,7 +2716,7 @@
     "domain": "Expression of Ideas",
     "skill": "Precise word choice",
     "difficulty": "easy",
-    "question_text": "Which word BEST replaces 'said' to indicate that a scientist communicated findings officially? 'The scientist _____ that the results confirmed the hypothesis.'",
+    "question_text": "Which word BEST replaces 'said' to indicate that a scientist communicated findings officially? 'The scientist _ that the results confirmed the hypothesis.'",
     "passage_text": null,
     "choices": [
       {
@@ -2842,7 +2842,7 @@
     "domain": "Expression of Ideas",
     "skill": "Transitions",
     "difficulty": "medium",
-    "question_text": "'The new medicine reduced pain in 80% of patients. _______, it caused significant side effects in 30% of cases.'",
+    "question_text": "'The new medicine reduced pain in 80% of patients. ___, it caused significant side effects in 30% of cases.'",
     "passage_text": null,
     "choices": [
       {
@@ -5851,7 +5851,7 @@
     "skill": "Transitions",
     "difficulty": "easy",
     "question_text": "Which choice provides the most logical transition from the third sentence to the fourth sentence?",
-    "passage_text": "The Arctic tern undertakes the longest migratory journey of any bird. It flies from the Arctic to the Antarctic and back each year, covering an astounding 49,000 miles. This incredible feat allows it to experience two summers annually. _______, such a demanding journey requires immense energy reserves and precise navigational abilities.",
+    "passage_text": "The Arctic tern undertakes the longest migratory journey of any bird. It flies from the Arctic to the Antarctic and back each year, covering an astounding 49,000 miles. This incredible feat allows it to experience two summers annually. ___, such a demanding journey requires immense energy reserves and precise navigational abilities.",
     "choices": [
       {
         "label": "A",
@@ -5976,7 +5976,7 @@
     "skill": "Transitions",
     "difficulty": "easy",
     "question_text": "Which choice best introduces the information that follows in the sentence?",
-    "passage_text": "Neuroscience research has made significant strides in understanding brain function. We now have a clearer picture of how different regions specialize in specific tasks. _______, the complex interplay between these regions, creating consciousness and thought, remains largely enigmatic.",
+    "passage_text": "Neuroscience research has made significant strides in understanding brain function. We now have a clearer picture of how different regions specialize in specific tasks. ___, the complex interplay between these regions, creating consciousness and thought, remains largely enigmatic.",
     "choices": [
       {
         "label": "A",
@@ -6143,7 +6143,7 @@
     "skill": "Transitions",
     "difficulty": "medium",
     "question_text": "Which choice best establishes a relationship of cause and effect between the two sentences?",
-    "passage_text": "Researchers have found that regular exposure to green spaces can significantly reduce stress levels. Spending time in nature lowers cortisol and blood pressure. _______, cities worldwide are investing in urban parks and community gardens.",
+    "passage_text": "Researchers have found that regular exposure to green spaces can significantly reduce stress levels. Spending time in nature lowers cortisol and blood pressure. ___, cities worldwide are investing in urban parks and community gardens.",
     "choices": [
       {
         "label": "A",
@@ -6311,7 +6311,7 @@
     "skill": "Transitions",
     "difficulty": "hard",
     "question_text": "At this point, the writer wants to emphasize that the development of AI is not without its significant challenges. Which choice best accomplishes this goal?",
-    "passage_text": "Artificial intelligence has advanced rapidly in recent years, demonstrating capabilities once confined to science fiction. From complex data analysis to natural language processing, AI is transforming industries and daily life. The potential benefits, such as medical diagnostics and climate modeling, are immense. _______, ethical concerns regarding bias in algorithms, job displacement, and autonomous decision-making require careful consideration.",
+    "passage_text": "Artificial intelligence has advanced rapidly in recent years, demonstrating capabilities once confined to science fiction. From complex data analysis to natural language processing, AI is transforming industries and daily life. The potential benefits, such as medical diagnostics and climate modeling, are immense. ___, ethical concerns regarding bias in algorithms, job displacement, and autonomous decision-making require careful consideration.",
     "choices": [
       {
         "label": "A",
@@ -6353,7 +6353,7 @@
     "skill": "Transitions",
     "difficulty": "easy",
     "question_text": "Which choice most smoothly and logically connects the two sentences?",
-    "passage_text": "Many migratory birds face perilous journeys, navigating thousands of miles across continents. They rely on complex internal compasses and celestial cues. _______, their populations are increasingly threatened by habitat loss and climate change.",
+    "passage_text": "Many migratory birds face perilous journeys, navigating thousands of miles across continents. They rely on complex internal compasses and celestial cues. ___, their populations are increasingly threatened by habitat loss and climate change.",
     "choices": [
       {
         "label": "A",
@@ -6521,7 +6521,7 @@
     "skill": "Transitions",
     "difficulty": "medium",
     "question_text": "Which choice most effectively combines the sentences at the underlined portion, creating a concise and logical statement?",
-    "passage_text": "The chameleon's ability to change color is often attributed solely to camouflage. _______, its chromatophores, specialized pigment-containing cells, also respond to temperature, mood, and light intensity, serving diverse social signals.",
+    "passage_text": "The chameleon's ability to change color is often attributed solely to camouflage. ___, its chromatophores, specialized pigment-containing cells, also respond to temperature, mood, and light intensity, serving diverse social signals.",
     "choices": [
       {
         "label": "A",
@@ -6647,7 +6647,7 @@
     "skill": "Transitions",
     "difficulty": "medium",
     "question_text": "Which phrase, if inserted at the beginning of the sentence, best connects it to the preceding sentence?",
-    "passage_text": "The Roman Empire's vast network of roads facilitated rapid troop movements and efficient trade. These arteries of communication were crucial for maintaining control over distant provinces. _______, their construction required immense engineering prowess, often traversing challenging terrain with impressive bridges and aqueducts.",
+    "passage_text": "The Roman Empire's vast network of roads facilitated rapid troop movements and efficient trade. These arteries of communication were crucial for maintaining control over distant provinces. ___, their construction required immense engineering prowess, often traversing challenging terrain with impressive bridges and aqueducts.",
     "choices": [
       {
         "label": "A",
@@ -11452,7 +11452,7 @@
     ],
     "is_grid_in": 0,
     "grid_in_answer": null,
-    "explanation": "Let's analyze Function A and Function B separately.\n\n**Function A: y = 3x + 5**\nThis is in slope-intercept form (y = mx + b).\nSlope (m_A) = 3\nY-intercept (b_A) = 5\n\n**Function B: from the table**\n| x | y |\n|---|---|\n| 0 | 10 |\n| 1 | 8 |\n| 2 | 6 |\n\nTo find the y-intercept of Function B, look for the value of y when x = 0. From the table, when x = 0, y = 10.\nY-intercept (b_B) = 10\n\nTo find the slope of Function B, use any two points from the table, for example (0, 10) and (1, 8):\nSlope (m_B) = (y2 - y1) / (x2 - x1) = (8 - 10) / (1 - 0) = -2 / 1 = -2\n\n**Comparison:**\n- Slopes: m_A = 3, m_B = -2. Function A has a greater slope (3 > -2).\n- Y-intercepts: b_A = 5, b_B = 10. Function B has a greater y-intercept (10 > 5).\n\nTherefore, the statement that accurately compares them is that Function A has a greater slope, and Function B has a greater y-intercept.",
+    "explanation": "Let's analyze Function A and Function B separately.\n\nFunction A: y = 3x + 5\nThis is in slope-intercept form (y = mx + b).\nSlope (m_A) = 3\nY-intercept (b_A) = 5\n\nFunction B: from the table\n| x | y |\n|---|---|\n| 0 | 10 |\n| 1 | 8 |\n| 2 | 6 |\n\nTo find the y-intercept of Function B, look for the value of y when x = 0. From the table, when x = 0, y = 10.\nY-intercept (b_B) = 10\n\nTo find the slope of Function B, use any two points from the table, for example (0, 10) and (1, 8):\nSlope (m_B) = (y2 - y1) / (x2 - x1) = (8 - 10) / (1 - 0) = -2 / 1 = -2\n\nComparison:\n- Slopes: m_A = 3, m_B = -2. Function A has a greater slope (3 > -2).\n- Y-intercepts: b_A = 5, b_B = 10. Function B has a greater y-intercept (10 > 5).\n\nTherefore, the statement that accurately compares them is that Function A has a greater slope, and Function B has a greater y-intercept.",
     "hint_1": "For each function, determine its slope and y-intercept. Remember how to find these values from both an equation and a table.",
     "hint_2": "For Function A (y = mx + b), 'm' is the slope and 'b' is the y-intercept. For Function B from the table, the y-intercept is the 'y' value when 'x' is 0, and the slope can be calculated using the change in y over the change in x for any two points.",
     "tags": [
@@ -12605,7 +12605,7 @@
     ],
     "is_grid_in": 0,
     "grid_in_answer": null,
-    "explanation": "Let x be the number of pounds of Brand A coffee and y be the number of pounds of Brand B coffee.\n1.  **\"A customer wants to buy at least 5 pounds of coffee in total\"**: This means the sum of the pounds of Brand A and Brand B must be greater than or equal to 5. So, x + y ≥ 5.\n2.  **\"but spend no more than $50\"**: The cost of Brand A is $8 per pound, so 8x is the cost for Brand A. The cost of Brand B is $12 per pound, so 12y is the cost for Brand B. The total cost must be less than or equal to $50. So, 8x + 12y ≤ 50.\nCombining these, the system of inequalities is:\nx + y ≥ 5\n8x + 12y ≤ 50",
+    "explanation": "Let x be the number of pounds of Brand A coffee and y be the number of pounds of Brand B coffee.\n1.  \"A customer wants to buy at least 5 pounds of coffee in total\": This means the sum of the pounds of Brand A and Brand B must be greater than or equal to 5. So, x + y ≥ 5.\n2.  \"but spend no more than $50\": The cost of Brand A is $8 per pound, so 8x is the cost for Brand A. The cost of Brand B is $12 per pound, so 12y is the cost for Brand B. The total cost must be less than or equal to $50. So, 8x + 12y ≤ 50.\nCombining these, the system of inequalities is:\nx + y ≥ 5\n8x + 12y ≤ 50",
     "hint_1": "Break down the problem into two separate conditions: total pounds and total cost.",
     "hint_2": "Translate 'at least' and 'no more than' into the correct inequality symbols.",
     "tags": [
@@ -12819,7 +12819,7 @@
     ],
     "is_grid_in": 0,
     "grid_in_answer": null,
-    "explanation": "We need to solve each inequality separately and then find the intersection of their solutions.\n**First inequality: (x/2) + 3 ≥ 7**\nSubtract 3 from both sides:\nx/2 ≥ 7 - 3\nx/2 ≥ 4\nMultiply both sides by 2:\nx ≥ 8\n\n**Second inequality: 2x - 5 < 15**\nAdd 5 to both sides:\n2x < 15 + 5\n2x < 20\nDivide both sides by 2:\nx < 10\n\nFor x to satisfy both inequalities, x must be greater than or equal to 8 AND less than 10. Combining these two conditions gives the solution 8 ≤ x < 10.",
+    "explanation": "We need to solve each inequality separately and then find the intersection of their solutions.\nFirst inequality: (x/2) + 3 ≥ 7\nSubtract 3 from both sides:\nx/2 ≥ 7 - 3\nx/2 ≥ 4\nMultiply both sides by 2:\nx ≥ 8\n\nSecond inequality: 2x - 5 < 15\nAdd 5 to both sides:\n2x < 15 + 5\n2x < 20\nDivide both sides by 2:\nx < 10\n\nFor x to satisfy both inequalities, x must be greater than or equal to 8 AND less than 10. Combining these two conditions gives the solution 8 ≤ x < 10.",
     "hint_1": "Solve each inequality independently.",
     "hint_2": "The solution must satisfy BOTH inequalities. Look for the intersection of the two solution sets.",
     "tags": [
@@ -23171,7 +23171,7 @@
     "domain": "Standard English Conventions",
     "skill": "Subject-verb agreement",
     "difficulty": "medium",
-    "question_text": "Which choice completes the text so that it conforms to the conventions of Standard English? The group of volunteers ______ preparing meals for the shelter every weekend.",
+    "question_text": "Which choice completes the text so that it conforms to the conventions of Standard English? The group of volunteers __ preparing meals for the shelter every weekend.",
     "passage_text": null,
     "choices": [
       {
@@ -23212,7 +23212,7 @@
     "domain": "Standard English Conventions",
     "skill": "Punctuation: colons",
     "difficulty": "medium",
-    "question_text": "Which choice completes the text so that it conforms to the conventions of Standard English? She set three goals for the semester______ raise her GPA, join a club, and run a 5K.",
+    "question_text": "Which choice completes the text so that it conforms to the conventions of Standard English? She set three goals for the semester__ raise her GPA, join a club, and run a 5K.",
     "passage_text": null,
     "choices": [
       {
@@ -23254,7 +23254,7 @@
     "domain": "Expression of Ideas",
     "skill": "Transitions",
     "difficulty": "medium",
-    "question_text": "Which choice best completes the text with a logical transition? The first prototype failed every stress test. ______, the data it produced revealed exactly which joints to reinforce in the next design.",
+    "question_text": "Which choice best completes the text with a logical transition? The first prototype failed every stress test. __, the data it produced revealed exactly which joints to reinforce in the next design.",
     "passage_text": null,
     "choices": [
       {
@@ -23295,7 +23295,7 @@
     "domain": "Craft & Structure",
     "skill": "Words in context",
     "difficulty": "medium",
-    "question_text": "Which choice completes the text with the most logical and precise word? The researcher's ______ method, in which she tested one variable at a time and recorded every result, earned the trust of her peers.",
+    "question_text": "Which choice completes the text with the most logical and precise word? The researcher's __ method, in which she tested one variable at a time and recorded every result, earned the trust of her peers.",
     "passage_text": null,
     "choices": [
       {
@@ -23377,7 +23377,7 @@
     "domain": "Standard English Conventions",
     "skill": "Verb tense",
     "difficulty": "hard",
-    "question_text": "Which choice completes the text so that it conforms to the conventions of Standard English? By the time the rescue team reached the ridge, the hikers ______ for shelter for nearly two hours.",
+    "question_text": "Which choice completes the text so that it conforms to the conventions of Standard English? By the time the rescue team reached the ridge, the hikers __ for shelter for nearly two hours.",
     "passage_text": null,
     "choices": [
       {
@@ -23910,7 +23910,7 @@
     "domain": "Standard English Conventions",
     "skill": "Possessive nouns",
     "difficulty": "medium",
-    "question_text": "Which choice completes the text so that it conforms to the conventions of Standard English? After the championship game, the ______ uniforms were collected and sent to be cleaned.",
+    "question_text": "Which choice completes the text so that it conforms to the conventions of Standard English? After the championship game, the __ uniforms were collected and sent to be cleaned.",
     "passage_text": null,
     "choices": [
       {
@@ -23951,7 +23951,7 @@
     "domain": "Expression of Ideas",
     "skill": "Transitions",
     "difficulty": "medium",
-    "question_text": "Which choice best completes the text with a logical transition? Solar panels were once prohibitively expensive for the average household. ______, falling manufacturing costs have made them affordable for many homeowners.",
+    "question_text": "Which choice best completes the text with a logical transition? Solar panels were once prohibitively expensive for the average household. __, falling manufacturing costs have made them affordable for many homeowners.",
     "passage_text": null,
     "choices": [
       {
@@ -24033,7 +24033,7 @@
     "domain": "Craft & Structure",
     "skill": "Words in context",
     "difficulty": "hard",
-    "question_text": "Which choice completes the text with the most logical and precise word? Although several critics found the novel ______, many readers embraced its sprawling, unconventional structure.",
+    "question_text": "Which choice completes the text with the most logical and precise word? Although several critics found the novel __, many readers embraced its sprawling, unconventional structure.",
     "passage_text": null,
     "choices": [
       {
@@ -24565,7 +24565,7 @@
     "domain": "Standard English Conventions",
     "skill": "Sentence boundaries",
     "difficulty": "medium",
-    "question_text": "Which choice completes the text so that it conforms to the conventions of Standard English? The museum's new exhibit features rare manuscripts ______ draws visitors from across the country.",
+    "question_text": "Which choice completes the text so that it conforms to the conventions of Standard English? The museum's new exhibit features rare manuscripts __ draws visitors from across the country.",
     "passage_text": null,
     "choices": [
       {
@@ -24606,7 +24606,7 @@
     "domain": "Expression of Ideas",
     "skill": "Transitions",
     "difficulty": "medium",
-    "question_text": "Which choice best completes the text with a logical transition? The new filing policy reduced paperwork significantly. ______, it cut the average processing time for each request nearly in half.",
+    "question_text": "Which choice best completes the text with a logical transition? The new filing policy reduced paperwork significantly. __, it cut the average processing time for each request nearly in half.",
     "passage_text": null,
     "choices": [
       {
@@ -24688,7 +24688,7 @@
     "domain": "Craft & Structure",
     "skill": "Words in context",
     "difficulty": "medium",
-    "question_text": "Which choice completes the text with the most logical and precise word? The outcome of the vote was ______; despite hours of debate, no one could predict which way it would go.",
+    "question_text": "Which choice completes the text with the most logical and precise word? The outcome of the vote was __; despite hours of debate, no one could predict which way it would go.",
     "passage_text": null,
     "choices": [
       {
@@ -26769,7 +26769,7 @@
     ],
     "is_grid_in": 0,
     "grid_in_answer": null,
-    "explanation": "1.  **Find the slope of line L:** The given line is y = (-2/3)x + 5. Its slope, m1, is -2/3. For two lines to be perpendicular, the product of their slopes must be -1. So, the slope of line L, m2, is the negative reciprocal of m1.\n    m2 = -1 / (-2/3) = 3/2.\n\n2.  **Find the equation of line L:** We have the slope m = 3/2 and a point (x1, y1) = (4, -1) that line L passes through. Use the point-slope form: y - y1 = m(x - x1).\n    y - (-1) = (3/2)(x - 4)\n    y + 1 = (3/2)x - (3/2)*4\n    y + 1 = (3/2)x - 6\n    Subtract 1 from both sides to get the slope-intercept form:\n    y = (3/2)x - 7.\n\n3.  **Find the x-intercept of line L:** The x-intercept is the point where y = 0.\n    0 = (3/2)x - 7\n    Add 7 to both sides:\n    7 = (3/2)x\n    Multiply both sides by 2/3 to solve for x:\n    x = 7 * (2/3)\n    x = 14/3.",
+    "explanation": "1.  Find the slope of line L: The given line is y = (-2/3)x + 5. Its slope, m1, is -2/3. For two lines to be perpendicular, the product of their slopes must be -1. So, the slope of line L, m2, is the negative reciprocal of m1.\n    m2 = -1 / (-2/3) = 3/2.\n\n2.  Find the equation of line L: We have the slope m = 3/2 and a point (x1, y1) = (4, -1) that line L passes through. Use the point-slope form: y - y1 = m(x - x1).\n    y - (-1) = (3/2)(x - 4)\n    y + 1 = (3/2)x - (3/2)*4\n    y + 1 = (3/2)x - 6\n    Subtract 1 from both sides to get the slope-intercept form:\n    y = (3/2)x - 7.\n\n3.  Find the x-intercept of line L: The x-intercept is the point where y = 0.\n    0 = (3/2)x - 7\n    Add 7 to both sides:\n    7 = (3/2)x\n    Multiply both sides by 2/3 to solve for x:\n    x = 7 * (2/3)\n    x = 14/3.",
     "hint_1": "Remember that the slope of a line perpendicular to another line is the negative reciprocal of the original line's slope.",
     "hint_2": "Once you have the slope and a point, use the point-slope form (y - y1 = m(x - x1)) to find the equation of the line. Then set y = 0 to find the x-intercept.",
     "tags": [
@@ -28463,7 +28463,7 @@
     ],
     "is_grid_in": 0,
     "grid_in_answer": null,
-    "explanation": "We are given the function f(x) = (ax + b) / (x + c) and information about its asymptotes and a point.\n\n1.  **Horizontal Asymptote**: For a rational function where the degree of the numerator is equal to the degree of the denominator (both are 1 in this case), the horizontal asymptote is y = a/1. Given that the horizontal asymptote is y = 2, we have a/1 = 2, so a = 2.\n    Now, f(x) = (2x + b) / (x + c).\n\n2.  **Vertical Asymptote**: A vertical asymptote occurs where the denominator is zero and the numerator is non-zero. Given that the vertical asymptote is x = -3, we set the denominator equal to zero:\n    x + c = 0\n    Substitute x = -3:\n    -3 + c = 0\n    c = 3\n    Now, f(x) = (2x + b) / (x + 3).\n\n3.  **Use f(0) = 4**: We are given that when x = 0, f(x) = 4. Substitute these values into the function:\n    4 = (2*0 + b) / (0 + 3)\n    4 = b / 3\n    b = 12\n    So, the complete function is f(x) = (2x + 12) / (x + 3).\n\n4.  **Find f(1)**: Substitute x = 1 into the complete function:\n    f(1) = (2*1 + 12) / (1 + 3)\n    f(1) = (2 + 12) / 4\n    f(1) = 14 / 4\n    f(1) = 7/2",
+    "explanation": "We are given the function f(x) = (ax + b) / (x + c) and information about its asymptotes and a point.\n\n1.  Horizontal Asymptote: For a rational function where the degree of the numerator is equal to the degree of the denominator (both are 1 in this case), the horizontal asymptote is y = a/1. Given that the horizontal asymptote is y = 2, we have a/1 = 2, so a = 2.\n    Now, f(x) = (2x + b) / (x + c).\n\n2.  Vertical Asymptote: A vertical asymptote occurs where the denominator is zero and the numerator is non-zero. Given that the vertical asymptote is x = -3, we set the denominator equal to zero:\n    x + c = 0\n    Substitute x = -3:\n    -3 + c = 0\n    c = 3\n    Now, f(x) = (2x + b) / (x + 3).\n\n3.  Use f(0) = 4: We are given that when x = 0, f(x) = 4. Substitute these values into the function:\n    4 = (2*0 + b) / (0 + 3)\n    4 = b / 3\n    b = 12\n    So, the complete function is f(x) = (2x + 12) / (x + 3).\n\n4.  Find f(1): Substitute x = 1 into the complete function:\n    f(1) = (2*1 + 12) / (1 + 3)\n    f(1) = (2 + 12) / 4\n    f(1) = 14 / 4\n    f(1) = 7/2",
     "hint_1": "Recall how to determine horizontal and vertical asymptotes for a rational function of the form f(x) = (ax + b) / (cx + d).",
     "hint_2": "The horizontal asymptote is found by the ratio of the leading coefficients if degrees are equal. The vertical asymptote is found by setting the denominator equal to zero. Use the given point f(0)=4 to find the remaining constant.",
     "tags": [
@@ -28634,7 +28634,7 @@
     ],
     "is_grid_in": 0,
     "grid_in_answer": null,
-    "explanation": "To solve the radical equation sqrt(2x + 1) = x - 1:\n\n1.  **Square both sides** of the equation to eliminate the square root:\n    (sqrt(2x + 1))^2 = (x - 1)^2\n    2x + 1 = x^2 - 2x + 1\n\n2.  **Rearrange the equation** into a standard quadratic form ax^2 + bx + c = 0:\n    0 = x^2 - 2x - 2x + 1 - 1\n    0 = x^2 - 4x\n\n3.  **Factor the quadratic equation**:\n    0 = x(x - 4)\n\n4.  **Find the potential solutions** by setting each factor to zero:\n    x = 0 or x - 4 = 0\n    x = 0 or x = 4\n\n5.  **Check for extraneous solutions** by substituting each potential solution back into the original equation sqrt(2x + 1) = x - 1:\n    *   **Check x = 0:**\n        sqrt(2(0) + 1) = 0 - 1\n        sqrt(1) = -1\n        1 = -1 (This is false)\n        So, x = 0 is an extraneous solution.\n\n    *   **Check x = 4:**\n        sqrt(2(4) + 1) = 4 - 1\n        sqrt(8 + 1) = 3\n        sqrt(9) = 3\n        3 = 3 (This is true)\n        So, x = 4 is a valid solution.\n\nThe solution set is {4}.",
+    "explanation": "To solve the radical equation sqrt(2x + 1) = x - 1:\n\n1.  Square both sides of the equation to eliminate the square root:\n    (sqrt(2x + 1))^2 = (x - 1)^2\n    2x + 1 = x^2 - 2x + 1\n\n2.  Rearrange the equation into a standard quadratic form ax^2 + bx + c = 0:\n    0 = x^2 - 2x - 2x + 1 - 1\n    0 = x^2 - 4x\n\n3.  Factor the quadratic equation:\n    0 = x(x - 4)\n\n4.  Find the potential solutions by setting each factor to zero:\n    x = 0 or x - 4 = 0\n    x = 0 or x = 4\n\n5.  Check for extraneous solutions by substituting each potential solution back into the original equation sqrt(2x + 1) = x - 1:\n    *   Check x = 0:\n        sqrt(2(0) + 1) = 0 - 1\n        sqrt(1) = -1\n        1 = -1 (This is false)\n        So, x = 0 is an extraneous solution.\n\n    *   Check x = 4:\n        sqrt(2(4) + 1) = 4 - 1\n        sqrt(8 + 1) = 3\n        sqrt(9) = 3\n        3 = 3 (This is true)\n        So, x = 4 is a valid solution.\n\nThe solution set is {4}.",
     "hint_1": "When solving radical equations, remember to square both sides to eliminate the radical.",
     "hint_2": "Always check all potential solutions in the original equation to identify and discard any extraneous solutions.",
     "tags": [
@@ -28677,7 +28677,7 @@
     ],
     "is_grid_in": 0,
     "grid_in_answer": null,
-    "explanation": "To simplify the expression, we apply the rules of exponents:\n\n1.  **Apply the power rule to the numerator:** (a^m)^n = a^(mn)\n    (x^3 y^-2)^2 = x^(3*2) y^(-2*2) = x^6 y^-4\n\n2.  **Rewrite the expression with the simplified numerator:**\n    (x^6 y^-4) / (x^-1 y^4)\n\n3.  **Apply the quotient rule for exponents:** a^m / a^n = a^(m-n)\n    For x terms: x^(6 - (-1)) = x^(6 + 1) = x^7\n    For y terms: y^(-4 - 4) = y^-8\n\n4.  **Combine the simplified terms:**\n    x^7 y^-8\n\n5.  **Convert the negative exponent to a positive exponent** using a^-n = 1/a^n:\n    x^7 / y^8\n\nThe equivalent expression is x^7 / y^8.",
+    "explanation": "To simplify the expression, we apply the rules of exponents:\n\n1.  Apply the power rule to the numerator: (a^m)^n = a^(mn)\n    (x^3 y^-2)^2 = x^(3*2) y^(-2*2) = x^6 y^-4\n\n2.  Rewrite the expression with the simplified numerator:\n    (x^6 y^-4) / (x^-1 y^4)\n\n3.  Apply the quotient rule for exponents: a^m / a^n = a^(m-n)\n    For x terms: x^(6 - (-1)) = x^(6 + 1) = x^7\n    For y terms: y^(-4 - 4) = y^-8\n\n4.  Combine the simplified terms:\n    x^7 y^-8\n\n5.  Convert the negative exponent to a positive exponent using a^-n = 1/a^n:\n    x^7 / y^8\n\nThe equivalent expression is x^7 / y^8.",
     "hint_1": "Start by simplifying the expression in the parenthesis in the numerator using the power rule for exponents: (a^m b^n)^p = a^(mp) b^(np).",
     "hint_2": "Then, apply the quotient rule for exponents (a^m / a^n = a^(m-n)) to simplify terms with the same base. Finally, rewrite any terms with negative exponents using a^-n = 1/a^n.",
     "tags": [
@@ -28765,7 +28765,7 @@
     ],
     "is_grid_in": 0,
     "grid_in_answer": null,
-    "explanation": "To find the value of a, we need to expand the product on the left side of the equation and then compare the coefficients with the polynomial on the right side.\n\nExpand (ax + 3)(2x - 5) using the FOIL method (First, Outer, Inner, Last):\n\n**F**irst: (ax)(2x) = 2ax^2\n**O**uter: (ax)(-5) = -5ax\n**I**nner: (3)(2x) = 6x\n**L**ast: (3)(-5) = -15\n\nCombine these terms:\n2ax^2 - 5ax + 6x - 15\n\nGroup the x terms:\n2ax^2 + (-5a + 6)x - 15\n\nNow, we compare this expanded form to the given polynomial 6x^2 - 9x - 15.\n\nCompare the coefficients of the x^2 terms:\n2a = 6\nDivide by 2:\na = 3\n\nWe can also check this with the x terms:\n-5a + 6 = -9\nSubstitute a = 3 into this equation:\n-5(3) + 6 = -15 + 6 = -9\nThis matches the given coefficient for x, confirming that a = 3 is correct.",
+    "explanation": "To find the value of a, we need to expand the product on the left side of the equation and then compare the coefficients with the polynomial on the right side.\n\nExpand (ax + 3)(2x - 5) using the FOIL method (First, Outer, Inner, Last):\n\nFirst: (ax)(2x) = 2ax^2\nOuter: (ax)(-5) = -5ax\nInner: (3)(2x) = 6x\nLast: (3)(-5) = -15\n\nCombine these terms:\n2ax^2 - 5ax + 6x - 15\n\nGroup the x terms:\n2ax^2 + (-5a + 6)x - 15\n\nNow, we compare this expanded form to the given polynomial 6x^2 - 9x - 15.\n\nCompare the coefficients of the x^2 terms:\n2a = 6\nDivide by 2:\na = 3\n\nWe can also check this with the x terms:\n-5a + 6 = -9\nSubstitute a = 3 into this equation:\n-5(3) + 6 = -15 + 6 = -9\nThis matches the given coefficient for x, confirming that a = 3 is correct.",
     "hint_1": "Start by expanding the product of the two binomials on the left side of the equation.",
     "hint_2": "Once expanded, match the coefficients of the corresponding terms (e.g., x^2 terms, x terms) from both sides of the equation to solve for a.",
     "tags": [
@@ -28808,7 +28808,7 @@
     ],
     "is_grid_in": 0,
     "grid_in_answer": null,
-    "explanation": "The standard form for a parabola with a vertical axis of symmetry is y = a(x - h)^2 + k, where (h, k) is the vertex of the parabola.\n\nFor the original function y = x^2, the vertex is (0, 0).\n\nFor the transformed function y = (x - 3)^2 + 5:\n\n*   The term (x - h)^2 indicates a horizontal shift. If h is positive, the shift is to the right. If h is negative (i.e., x + h form), the shift is to the left. Here, h = 3, so the graph is shifted **3 units to the right**.\n*   The term + k indicates a vertical shift. If k is positive, the shift is upwards. If k is negative, the shift is downwards. Here, k = 5, so the graph is shifted **5 units up**.\n\nTherefore, the transformation is a shift of 3 units right and 5 units up.",
+    "explanation": "The standard form for a parabola with a vertical axis of symmetry is y = a(x - h)^2 + k, where (h, k) is the vertex of the parabola.\n\nFor the original function y = x^2, the vertex is (0, 0).\n\nFor the transformed function y = (x - 3)^2 + 5:\n\n*   The term (x - h)^2 indicates a horizontal shift. If h is positive, the shift is to the right. If h is negative (i.e., x + h form), the shift is to the left. Here, h = 3, so the graph is shifted 3 units to the right.\n*   The term + k indicates a vertical shift. If k is positive, the shift is upwards. If k is negative, the shift is downwards. Here, k = 5, so the graph is shifted 5 units up.\n\nTherefore, the transformation is a shift of 3 units right and 5 units up.",
     "hint_1": "Recall the general form of a quadratic function in vertex form: y = a(x - h)^2 + k. The values of h and k directly correspond to horizontal and vertical shifts.",
     "hint_2": "A subtraction inside the parentheses (x - h) means a shift of h units to the right. An addition outside the parentheses + k means a shift of k units upwards.",
     "tags": [
@@ -28852,7 +28852,7 @@
     ],
     "is_grid_in": 0,
     "grid_in_answer": null,
-    "explanation": "To find an equivalent expression, we can factor the given expression x^3 - 9x.\n\n1.  **Look for a common factor:** Both terms x^3 and 9x have x as a common factor.\n    Factor out x: x(x^2 - 9)\n\n2.  **Recognize the difference of squares:** The expression inside the parentheses, x^2 - 9, is a difference of squares. The general form for a difference of squares is a^2 - b^2 = (a - b)(a + b).\n    Here, a = x and b = 3 (since 3^2 = 9).\n    So, x^2 - 9 can be factored as (x - 3)(x + 3).\n\n3.  **Combine the factors:**\n    The completely factored expression is x(x - 3)(x + 3).",
+    "explanation": "To find an equivalent expression, we can factor the given expression x^3 - 9x.\n\n1.  Look for a common factor: Both terms x^3 and 9x have x as a common factor.\n    Factor out x: x(x^2 - 9)\n\n2.  Recognize the difference of squares: The expression inside the parentheses, x^2 - 9, is a difference of squares. The general form for a difference of squares is a^2 - b^2 = (a - b)(a + b).\n    Here, a = x and b = 3 (since 3^2 = 9).\n    So, x^2 - 9 can be factored as (x - 3)(x + 3).\n\n3.  Combine the factors:\n    The completely factored expression is x(x - 3)(x + 3).",
     "hint_1": "Always look for a common monomial factor first before attempting other factoring techniques.",
     "hint_2": "After factoring out the common term, check if the remaining polynomial is a recognizable special form, such as a difference of squares.",
     "tags": [
@@ -30889,7 +30889,7 @@
     ],
     "is_grid_in": 0,
     "grid_in_answer": null,
-    "explanation": "1.  **Calculate the cost of the sand:**\n    Total sand mass = 120,000 kg\n    Cost per kilogram = $0.60/kg\n    Sand cost = 120,000 kg * $0.60/kg = $72,000\n\n2.  **Convert truck capacity to kilograms:**\n    Truck capacity = 15 metric tons\n    1 metric ton = 1,000 kilograms\n    Truck capacity in kg = 15 * 1,000 kg = 15,000 kg\n\n3.  **Calculate the number of truckloads needed:**\n    Number of truckloads = Total sand mass / Truck capacity per load\n    Number of truckloads = 120,000 kg / 15,000 kg/truckload = 8 truckloads\n\n4.  **Calculate the total transportation cost:**\n    Cost per truckload = $120\n    Total transportation cost = Number of truckloads * Cost per truckload\n    Total transportation cost = 8 * $120 = $960\n\n5.  **Calculate the total overall cost:**\n    Total cost = Sand cost + Total transportation cost\n    Total cost = $72,000 + $960 = $72,960",
+    "explanation": "1.  Calculate the cost of the sand:\n    Total sand mass = 120,000 kg\n    Cost per kilogram = $0.60/kg\n    Sand cost = 120,000 kg * $0.60/kg = $72,000\n\n2.  Convert truck capacity to kilograms:\n    Truck capacity = 15 metric tons\n    1 metric ton = 1,000 kilograms\n    Truck capacity in kg = 15 * 1,000 kg = 15,000 kg\n\n3.  Calculate the number of truckloads needed:\n    Number of truckloads = Total sand mass / Truck capacity per load\n    Number of truckloads = 120,000 kg / 15,000 kg/truckload = 8 truckloads\n\n4.  Calculate the total transportation cost:\n    Cost per truckload = $120\n    Total transportation cost = Number of truckloads * Cost per truckload\n    Total transportation cost = 8 * $120 = $960\n\n5.  Calculate the total overall cost:\n    Total cost = Sand cost + Total transportation cost\n    Total cost = $72,000 + $960 = $72,960",
     "hint_1": "Break down the problem into smaller steps: calculate sand cost, then transportation cost, then total cost.",
     "hint_2": "Pay close attention to unit conversions, especially between kilograms and metric tons, to ensure calculations are consistent.",
     "tags": [
@@ -32033,7 +32033,7 @@
     ],
     "is_grid_in": 0,
     "grid_in_answer": null,
-    "explanation": "1.  **Find the slope of the given line:**\n    The slope $m_1$ of a line passing through $(x_1, y_1)$ and $(x_2, y_2)$ is given by $m = \\frac{y_2 - y_1}{x_2 - x_1}$.\n    For points $(1, 5)$ and $(4, 1)$:\n    $m_1 = \\frac{1 - 5}{4 - 1} = \\frac{-4}{3}$.\n\n2.  **Find the slope of the perpendicular line:**\n    Two lines are perpendicular if the product of their slopes is -1. So, if $m_1$ is the slope of the first line, the slope $m_2$ of a perpendicular line is $m_2 = -\\frac{1}{m_1}$.\n    $m_2 = -\\frac{1}{(-4/3)} = \\frac{3}{4}$.\n\n3.  **Find the equation of the perpendicular line:**\n    Use the point-slope form: $y - y_0 = m(x - x_0)$, where $(x_0, y_0)$ is a point the line passes through and $m$ is its slope.\n    The perpendicular line passes through $(2, 3)$ and has a slope of $\\frac{3}{4}$.\n    $y - 3 = \\frac{3}{4}(x - 2)$\n\n    Now, convert to slope-intercept form ($y = mx + b$):\n    $y - 3 = \\frac{3}{4}x - \\frac{3}{4} \\times 2$\n    $y - 3 = \\frac{3}{4}x - \\frac{6}{4}$\n    $y - 3 = \\frac{3}{4}x - \\frac{3}{2}$\n\n    Add 3 to both sides:\n    $y = \\frac{3}{4}x - \\frac{3}{2} + 3$\n    $y = \\frac{3}{4}x + \\frac{6}{2} - \\frac{3}{2}$\n    $y = \\frac{3}{4}x + \\frac{3}{2}$\n\nThe equation of the perpendicular line is $y = \\frac{3}{4}x + \\frac{3}{2}$.",
+    "explanation": "1.  Find the slope of the given line:\n    The slope $m_1$ of a line passing through $(x_1, y_1)$ and $(x_2, y_2)$ is given by $m = \\frac{y_2 - y_1}{x_2 - x_1}$.\n    For points $(1, 5)$ and $(4, 1)$:\n    $m_1 = \\frac{1 - 5}{4 - 1} = \\frac{-4}{3}$.\n\n2.  Find the slope of the perpendicular line:\n    Two lines are perpendicular if the product of their slopes is -1. So, if $m_1$ is the slope of the first line, the slope $m_2$ of a perpendicular line is $m_2 = -\\frac{1}{m_1}$.\n    $m_2 = -\\frac{1}{(-4/3)} = \\frac{3}{4}$.\n\n3.  Find the equation of the perpendicular line:\n    Use the point-slope form: $y - y_0 = m(x - x_0)$, where $(x_0, y_0)$ is a point the line passes through and $m$ is its slope.\n    The perpendicular line passes through $(2, 3)$ and has a slope of $\\frac{3}{4}$.\n    $y - 3 = \\frac{3}{4}(x - 2)$\n\n    Now, convert to slope-intercept form ($y = mx + b$):\n    $y - 3 = \\frac{3}{4}x - \\frac{3}{4} \\times 2$\n    $y - 3 = \\frac{3}{4}x - \\frac{6}{4}$\n    $y - 3 = \\frac{3}{4}x - \\frac{3}{2}$\n\n    Add 3 to both sides:\n    $y = \\frac{3}{4}x - \\frac{3}{2} + 3$\n    $y = \\frac{3}{4}x + \\frac{6}{2} - \\frac{3}{2}$\n    $y = \\frac{3}{4}x + \\frac{3}{2}$\n\nThe equation of the perpendicular line is $y = \\frac{3}{4}x + \\frac{3}{2}$.",
     "hint_1": "First, calculate the slope of the given line.",
     "hint_2": "Remember that the slopes of perpendicular lines are negative reciprocals of each other. Then, use the point-slope form to find the equation of the new line.",
     "tags": [
@@ -32076,7 +32076,7 @@
     ],
     "is_grid_in": 0,
     "grid_in_answer": null,
-    "explanation": "When the spherical solid is submerged, it displaces a volume of water equal to its own volume. This displaced water causes the water level in the cylindrical tank to rise.\n\n1.  **Calculate the volume of the spherical solid:**\n    The formula for the volume of a sphere is $V_s = \\frac{4}{3}\\pi r_s^3$.\n    Given radius of sphere $r_s = 3$ cm.\n    $V_s = \\frac{4}{3}\\pi (3)^3 = \\frac{4}{3}\\pi (27) = 4 \\times 9\\pi = 36\\pi$ cubic cm.\n\n2.  **Relate the displaced volume to the rise in water level in the cylinder:**\n    The volume of the displaced water is equal to the volume of a cylinder with the same base radius as the tank and a height equal to the rise in water level.\n    The formula for the volume of a cylinder is $V_c = \\pi r_c^2 h$, where $r_c$ is the radius of the cylinder and $h$ is the height (rise in water level).\n    Given radius of cylindrical tank $r_c = 6$ cm.\n\n3.  **Set the volumes equal and solve for the rise in water level ($h$):**\n    $V_s = V_c$\n    $36\\pi = \\pi (6)^2 h$\n    $36\\pi = 36\\pi h$\n\n    Divide both sides by $36\\pi$:\n    $h = 1$ cm.\n\nTherefore, the water level in the tank rises by 1 cm.",
+    "explanation": "When the spherical solid is submerged, it displaces a volume of water equal to its own volume. This displaced water causes the water level in the cylindrical tank to rise.\n\n1.  Calculate the volume of the spherical solid:\n    The formula for the volume of a sphere is $V_s = \\frac{4}{3}\\pi r_s^3$.\n    Given radius of sphere $r_s = 3$ cm.\n    $V_s = \\frac{4}{3}\\pi (3)^3 = \\frac{4}{3}\\pi (27) = 4 \\times 9\\pi = 36\\pi$ cubic cm.\n\n2.  Relate the displaced volume to the rise in water level in the cylinder:\n    The volume of the displaced water is equal to the volume of a cylinder with the same base radius as the tank and a height equal to the rise in water level.\n    The formula for the volume of a cylinder is $V_c = \\pi r_c^2 h$, where $r_c$ is the radius of the cylinder and $h$ is the height (rise in water level).\n    Given radius of cylindrical tank $r_c = 6$ cm.\n\n3.  Set the volumes equal and solve for the rise in water level ($h$):\n    $V_s = V_c$\n    $36\\pi = \\pi (6)^2 h$\n    $36\\pi = 36\\pi h$\n\n    Divide both sides by $36\\pi$:\n    $h = 1$ cm.\n\nTherefore, the water level in the tank rises by 1 cm.",
     "hint_1": "The volume of water displaced by the submerged sphere is equal to the volume of the sphere itself.",
     "hint_2": "The rise in water level in the cylindrical tank, multiplied by the tank's base area, gives the volume of the displaced water.",
     "tags": [
@@ -32163,7 +32163,7 @@
     ],
     "is_grid_in": 0,
     "grid_in_answer": null,
-    "explanation": "Let $x$ be the distance from the person to the base of the building, so $x = 150$ feet.\nLet $h_B$ be the height of the building.\nLet $h_F$ be the length of the flagpole.\nLet $h_T$ be the total height from the ground to the top of the flagpole ($h_T = h_B + h_F$).\n\nWe have two right triangles formed:\n\n1.  **Triangle for the building:**\n    The angle of elevation to the top of the building is $30^\\circ$.\n    $\\tan(30^\\circ) = \\frac{\\text{opposite}}{\\text{adjacent}} = \\frac{h_B}{x}$\n    $h_B = x \\cdot \\tan(30^\\circ)$\n    $h_B = 150 \\cdot \\frac{1}{\\sqrt{3}} = \\frac{150}{\\sqrt{3}} = \\frac{150\\sqrt{3}}{3} = 50\\sqrt{3}$ feet.\n    Using $\\sqrt{3} \\approx 1.732$, $h_B \\approx 50 \\times 1.732 = 86.6$ feet.\n\n2.  **Triangle for the building plus flagpole:**\n    The angle of elevation to the top of the flagpole is $45^\\circ$.\n    $\\tan(45^\\circ) = \\frac{\\text{opposite}}{\\text{adjacent}} = \\frac{h_T}{x}$\n    $h_T = x \\cdot \\tan(45^\\circ)$\n    $h_T = 150 \\cdot 1 = 150$ feet.\n\n3.  **Calculate the length of the flagpole:**\n    The length of the flagpole is the total height minus the height of the building:\n    $h_F = h_T - h_B$\n    $h_F = 150 - 50\\sqrt{3}$\n    $h_F \\approx 150 - 86.6 = 63.4$ feet.\n\nTo the nearest foot, the length of the flagpole is $63$ feet.",
+    "explanation": "Let $x$ be the distance from the person to the base of the building, so $x = 150$ feet.\nLet $h_B$ be the height of the building.\nLet $h_F$ be the length of the flagpole.\nLet $h_T$ be the total height from the ground to the top of the flagpole ($h_T = h_B + h_F$).\n\nWe have two right triangles formed:\n\n1.  Triangle for the building:\n    The angle of elevation to the top of the building is $30^\\circ$.\n    $\\tan(30^\\circ) = \\frac{\\text{opposite}}{\\text{adjacent}} = \\frac{h_B}{x}$\n    $h_B = x \\cdot \\tan(30^\\circ)$\n    $h_B = 150 \\cdot \\frac{1}{\\sqrt{3}} = \\frac{150}{\\sqrt{3}} = \\frac{150\\sqrt{3}}{3} = 50\\sqrt{3}$ feet.\n    Using $\\sqrt{3} \\approx 1.732$, $h_B \\approx 50 \\times 1.732 = 86.6$ feet.\n\n2.  Triangle for the building plus flagpole:\n    The angle of elevation to the top of the flagpole is $45^\\circ$.\n    $\\tan(45^\\circ) = \\frac{\\text{opposite}}{\\text{adjacent}} = \\frac{h_T}{x}$\n    $h_T = x \\cdot \\tan(45^\\circ)$\n    $h_T = 150 \\cdot 1 = 150$ feet.\n\n3.  Calculate the length of the flagpole:\n    The length of the flagpole is the total height minus the height of the building:\n    $h_F = h_T - h_B$\n    $h_F = 150 - 50\\sqrt{3}$\n    $h_F \\approx 150 - 86.6 = 63.4$ feet.\n\nTo the nearest foot, the length of the flagpole is $63$ feet.",
     "hint_1": "Draw two right triangles. One for the building's height and another for the total height including the flagpole.",
     "hint_2": "Use the tangent function (SOH CAH TOA) to relate the angle of elevation, the distance from the building, and the heights. Remember $\\tan(30^\\circ) = \\frac{1}{\\sqrt{3}}$ and $\\tan(45^\\circ) = 1$.",
     "tags": [
@@ -37275,7 +37275,7 @@
     "skill": "Transitions",
     "difficulty": "easy",
     "question_text": "The writer is considering adding the following sentence to the passage:\n\n*The initial investment required for solar panel installation can be substantial.*\n\nWhich of the following choices, if placed at the blank, most logically connects the preceding sentence to the new sentence?",
-    "passage_text": "Harnessing solar energy offers numerous environmental benefits, primarily by reducing reliance on fossil fuels and lowering carbon emissions. It also presents a long-term solution for energy independence, as sunlight is a virtually limitless resource. _______, the financial outlay for setting up such systems often deters potential adopters, especially in residential contexts.",
+    "passage_text": "Harnessing solar energy offers numerous environmental benefits, primarily by reducing reliance on fossil fuels and lowering carbon emissions. It also presents a long-term solution for energy independence, as sunlight is a virtually limitless resource. ___, the financial outlay for setting up such systems often deters potential adopters, especially in residential contexts.",
     "choices": [
       {
         "label": "A",
@@ -37444,7 +37444,7 @@
     "skill": "Transitions",
     "difficulty": "medium",
     "question_text": "Which choice provides the most effective transition between the first sentence and the second sentence?",
-    "passage_text": "The deep-sea environment, characterized by extreme pressure, total darkness, and near-freezing temperatures, poses immense challenges for life. __________, many organisms have evolved remarkable adaptations to thrive in these harsh conditions, such as bioluminescence for communication and specialized enzymes that function under high pressure.",
+    "passage_text": "The deep-sea environment, characterized by extreme pressure, total darkness, and near-freezing temperatures, poses immense challenges for life. __, many organisms have evolved remarkable adaptations to thrive in these harsh conditions, such as bioluminescence for communication and specialized enzymes that function under high pressure.",
     "choices": [
       {
         "label": "A",
@@ -37486,7 +37486,7 @@
     "skill": "Transitions",
     "difficulty": "hard",
     "question_text": "The writer wants to create a smooth and logical transition between the first paragraph, which discusses the widely accepted view of a phenomenon, and the second paragraph, which introduces a new perspective. Which choice best accomplishes this goal?",
-    "passage_text": "For decades, the prevailing theory held that the rapid decline of megafauna at the end of the last ice age was primarily driven by human overhunting. Archaeological evidence consistently pointed to a correlation between early human expansion and the disappearance of large mammal species.\n\n_______, recent interdisciplinary studies, integrating paleoclimatology and genomics, suggest that abrupt climate shifts played a more significant, if not primary, role. These studies indicate that human impact, while present, might have been secondary to environmental pressures.",
+    "passage_text": "For decades, the prevailing theory held that the rapid decline of megafauna at the end of the last ice age was primarily driven by human overhunting. Archaeological evidence consistently pointed to a correlation between early human expansion and the disappearance of large mammal species.\n\n___, recent interdisciplinary studies, integrating paleoclimatology and genomics, suggest that abrupt climate shifts played a more significant, if not primary, role. These studies indicate that human impact, while present, might have been secondary to environmental pressures.",
     "choices": [
       {
         "label": "A",
@@ -37572,7 +37572,7 @@
     "skill": "Transitions",
     "difficulty": "easy",
     "question_text": "Which choice provides the most logical transition between the first sentence and the second sentence?",
-    "passage_text": "Regular exercise is crucial for maintaining cardiovascular health, strengthening muscles, and improving mood. __________, a sedentary lifestyle contributes significantly to various chronic diseases, including obesity, type 2 diabetes, and heart conditions.",
+    "passage_text": "Regular exercise is crucial for maintaining cardiovascular health, strengthening muscles, and improving mood. __, a sedentary lifestyle contributes significantly to various chronic diseases, including obesity, type 2 diabetes, and heart conditions.",
     "choices": [
       {
         "label": "A",
@@ -37657,7 +37657,7 @@
     "skill": "Transitions",
     "difficulty": "easy",
     "question_text": "Which choice completes the text with the most logical transition?",
-    "passage_text": "The monarch butterfly undertakes an extraordinary annual migration, traveling thousands of miles from Canada and the U.S. to warmer climates in Mexico and California. This journey is completed by multiple generations, with no single butterfly making the entire round trip. ______, the first generation of butterflies lays eggs in the northern regions, and their offspring continue the southward journey.",
+    "passage_text": "The monarch butterfly undertakes an extraordinary annual migration, traveling thousands of miles from Canada and the U.S. to warmer climates in Mexico and California. This journey is completed by multiple generations, with no single butterfly making the entire round trip. __, the first generation of butterflies lays eggs in the northern regions, and their offspring continue the southward journey.",
     "choices": [
       {
         "label": "A",
@@ -37821,7 +37821,7 @@
     "skill": "Rhetorical synthesis",
     "difficulty": "hard",
     "question_text": "The writer wants to add a sentence that further emphasizes the difficulty in ensuring ethical and fair use of AI. Which choice, when placed at the blank, best accomplishes this goal?",
-    "passage_text": "Artificial intelligence (AI) systems are increasingly deployed in critical domains, from medical diagnostics to autonomous vehicles. While the potential benefits in efficiency and accuracy are substantial, their implementation raises complex ethical concerns. Issues such as algorithmic bias, data privacy, and accountability for AI decisions require careful consideration and robust regulatory frameworks. ______, the black-box nature of some advanced AI models makes it challenging to understand and audit their decision-making processes, further complicating efforts to ensure fairness and transparency.",
+    "passage_text": "Artificial intelligence (AI) systems are increasingly deployed in critical domains, from medical diagnostics to autonomous vehicles. While the potential benefits in efficiency and accuracy are substantial, their implementation raises complex ethical concerns. Issues such as algorithmic bias, data privacy, and accountability for AI decisions require careful consideration and robust regulatory frameworks. __, the black-box nature of some advanced AI models makes it challenging to understand and audit their decision-making processes, further complicating efforts to ensure fairness and transparency.",
     "choices": [
       {
         "label": "A",
@@ -37862,8 +37862,8 @@
     "domain": "Expression of Ideas",
     "skill": "Transitions",
     "difficulty": "easy",
-    "question_text": "The student wants to ensure the second sentence provides additional information that elaborates on the concept introduced in the first sentence. Which choice best accomplishes this goal?\n\n[1] Many deep-sea organisms exhibit bioluminescence, producing their own light. [2] _______________, the anglerfish uses a glowing lure to attract prey in the perpetual darkness of the abyssal zone.",
-    "passage_text": "Many deep-sea organisms exhibit bioluminescence, producing their own light. _______________, the anglerfish uses a glowing lure to attract prey in the perpetual darkness of the abyssal zone.",
+    "question_text": "The student wants to ensure the second sentence provides additional information that elaborates on the concept introduced in the first sentence. Which choice best accomplishes this goal?\n\n[1] Many deep-sea organisms exhibit bioluminescence, producing their own light. [2] ___, the anglerfish uses a glowing lure to attract prey in the perpetual darkness of the abyssal zone.",
+    "passage_text": "Many deep-sea organisms exhibit bioluminescence, producing their own light. ___, the anglerfish uses a glowing lure to attract prey in the perpetual darkness of the abyssal zone.",
     "choices": [
       {
         "label": "A",
@@ -37946,8 +37946,8 @@
     "domain": "Expression of Ideas",
     "skill": "Transitions",
     "difficulty": "medium",
-    "question_text": "The student wants to show a cause-and-effect relationship between the increasing atmospheric carbon dioxide levels and ocean acidification. Which choice best accomplishes this goal?\n\n[1] Since the Industrial Revolution, human activities have significantly increased the concentration of carbon dioxide in Earth's atmosphere. [2] _______________, a substantial portion of this excess carbon dioxide is absorbed by the oceans, leading to a decrease in seawater pH.",
-    "passage_text": "Since the Industrial Revolution, human activities have significantly increased the concentration of carbon dioxide in Earth's atmosphere. _______________, a substantial portion of this excess carbon dioxide is absorbed by the oceans, leading to a decrease in seawater pH.",
+    "question_text": "The student wants to show a cause-and-effect relationship between the increasing atmospheric carbon dioxide levels and ocean acidification. Which choice best accomplishes this goal?\n\n[1] Since the Industrial Revolution, human activities have significantly increased the concentration of carbon dioxide in Earth's atmosphere. [2] ___, a substantial portion of this excess carbon dioxide is absorbed by the oceans, leading to a decrease in seawater pH.",
+    "passage_text": "Since the Industrial Revolution, human activities have significantly increased the concentration of carbon dioxide in Earth's atmosphere. ___, a substantial portion of this excess carbon dioxide is absorbed by the oceans, leading to a decrease in seawater pH.",
     "choices": [
       {
         "label": "A",
@@ -38030,8 +38030,8 @@
     "domain": "Expression of Ideas",
     "skill": "Transitions",
     "difficulty": "hard",
-    "question_text": "The student wants to present a counterpoint that qualifies the seemingly straightforward benefit mentioned in the first sentence. Which choice best accomplishes this goal?\n\n[1] The advent of artificial intelligence (AI) promises to revolutionize numerous industries, offering unprecedented efficiencies and innovative solutions. [2] _______________, the widespread adoption of AI technologies also introduces complex ethical dilemmas concerning data privacy, algorithmic bias, and job displacement.",
-    "passage_text": "The advent of artificial intelligence (AI) promises to revolutionize numerous industries, offering unprecedented efficiencies and innovative solutions. _______________, the widespread adoption of AI technologies also introduces complex ethical dilemmas concerning data privacy, algorithmic bias, and job displacement.",
+    "question_text": "The student wants to present a counterpoint that qualifies the seemingly straightforward benefit mentioned in the first sentence. Which choice best accomplishes this goal?\n\n[1] The advent of artificial intelligence (AI) promises to revolutionize numerous industries, offering unprecedented efficiencies and innovative solutions. [2] ___, the widespread adoption of AI technologies also introduces complex ethical dilemmas concerning data privacy, algorithmic bias, and job displacement.",
+    "passage_text": "The advent of artificial intelligence (AI) promises to revolutionize numerous industries, offering unprecedented efficiencies and innovative solutions. ___, the widespread adoption of AI technologies also introduces complex ethical dilemmas concerning data privacy, algorithmic bias, and job displacement.",
     "choices": [
       {
         "label": "A",
@@ -38115,8 +38115,8 @@
     "domain": "Expression of Ideas",
     "skill": "Transitions",
     "difficulty": "medium",
-    "question_text": "The student is describing a historical sequence of events. Which choice best connects the two sentences by showing a logical progression?\n\n[1] In the mid-19th century, increased industrialization led to a significant migration of populations from rural areas to burgeoning urban centers. [2] _______________, cities faced unprecedented challenges in public health, housing, and infrastructure, necessitating new forms of municipal governance.",
-    "passage_text": "In the mid-19th century, increased industrialization led to a significant migration of populations from rural areas to burgeoning urban centers. _______________, cities faced unprecedented challenges in public health, housing, and infrastructure, necessitating new forms of municipal governance.",
+    "question_text": "The student is describing a historical sequence of events. Which choice best connects the two sentences by showing a logical progression?\n\n[1] In the mid-19th century, increased industrialization led to a significant migration of populations from rural areas to burgeoning urban centers. [2] ___, cities faced unprecedented challenges in public health, housing, and infrastructure, necessitating new forms of municipal governance.",
+    "passage_text": "In the mid-19th century, increased industrialization led to a significant migration of populations from rural areas to burgeoning urban centers. ___, cities faced unprecedented challenges in public health, housing, and infrastructure, necessitating new forms of municipal governance.",
     "choices": [
       {
         "label": "A",
@@ -38199,8 +38199,8 @@
     "domain": "Expression of Ideas",
     "skill": "Transitions",
     "difficulty": "hard",
-    "question_text": "The student wants to introduce a significant distinction or limitation to the idea presented in the first sentence. Which choice best accomplishes this goal?\n\n[1] The human brain is often likened to a computer, processing information through complex neural networks. [2] _______________, this analogy has significant limitations, as the brain exhibits emergent properties and parallel processing capabilities that far exceed current computational models.",
-    "passage_text": "The human brain is often likened to a computer, processing information through complex neural networks. _______________, this analogy has significant limitations, as the brain exhibits emergent properties and parallel processing capabilities that far exceed current computational models.",
+    "question_text": "The student wants to introduce a significant distinction or limitation to the idea presented in the first sentence. Which choice best accomplishes this goal?\n\n[1] The human brain is often likened to a computer, processing information through complex neural networks. [2] ___, this analogy has significant limitations, as the brain exhibits emergent properties and parallel processing capabilities that far exceed current computational models.",
+    "passage_text": "The human brain is often likened to a computer, processing information through complex neural networks. ___, this analogy has significant limitations, as the brain exhibits emergent properties and parallel processing capabilities that far exceed current computational models.",
     "choices": [
       {
         "label": "A",
@@ -40013,7 +40013,7 @@
     "skill": "Subject-verb agreement",
     "difficulty": "medium",
     "question_text": "Which choice best completes the text so that it conforms to the conventions of Standard English?",
-    "passage_text": "The collective data from various telescopes and the sophisticated algorithms used to analyze it ______ a remarkable window into the universe's past. This information, often gathered over many years, helps astronomers piece together the complex story of galaxy formation. Analyzing these vast datasets requires immense computational power and careful interpretation.",
+    "passage_text": "The collective data from various telescopes and the sophisticated algorithms used to analyze it __ a remarkable window into the universe's past. This information, often gathered over many years, helps astronomers piece together the complex story of galaxy formation. Analyzing these vast datasets requires immense computational power and careful interpretation.",
     "choices": [
       {
         "label": "A",

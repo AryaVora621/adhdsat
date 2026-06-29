@@ -99,6 +99,7 @@ Requirements:
 - Exactly one of the 4 choices is correct. The other three must be plausible distractors.
 - The marked correct answer MUST be genuinely correct. Double-check math.
 - Explanations are step-by-step and accurate.
+- Use plain text only: NO markdown (no **bold**, _italics_, # headers, or backticks). Write math inline (x^2, sqrt(9), (a/b)) or in $...$ for fractions.
 
 Return ONLY a JSON array. Each object:
 {"section":"${section}","domain":"${domain}","skill":"<one skill>","difficulty":"easy|medium|hard","question_text":"...","passage_text":${isEng ? '"..."' : 'null'},"choices":[{"label":"A","text":"...","is_correct":false},{"label":"B","text":"...","is_correct":false},{"label":"C","text":"...","is_correct":false},{"label":"D","text":"...","is_correct":false}],"is_grid_in":0,"grid_in_answer":null,"explanation":"...","hint_1":"...","hint_2":"...","tags":["..."],"source":"generated"}

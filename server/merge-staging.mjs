@@ -13,7 +13,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const QUESTIONS_PATH = path.join(__dirname, 'data', 'questions.json');
 const STAGING_PATH = path.join(__dirname, 'data', 'generated-staging.json');
 
-const stripTicks = (s) => typeof s === 'string' ? s.replace(/`/g, '').trim() : s;
+// Strip code-span backticks and markdown bold/italic markers (MathText renders
+// them literally). KaTeX math stays inside $...$, which is untouched here.
+const stripTicks = (s) => typeof s === 'string'
+  ? s.replace(/`/g, '').replace(/\*\*(.+?)\*\*/g, '$1').replace(/__(.+?)__/g, '$1').trim()
+  : s;
 const normText = (s) => (s || '').toLowerCase().replace(/\s+/g, ' ').replace(/[^a-z0-9 ]/g, '').trim().slice(0, 120);
 
 function clean(q) {
