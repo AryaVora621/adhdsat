@@ -24067,5 +24067,660 @@
       "context"
     ],
     "source": "authored"
+  },
+  {
+    "id": "auth4_001",
+    "section": "Math",
+    "domain": "Algebra",
+    "skill": "Linear inequalities",
+    "difficulty": "medium",
+    "question_text": "If 3x + 5 > 20, which of the following is a possible value of x?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "6",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "5",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "4",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "0",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "Subtract 5: 3x > 15. Divide by 3: x > 5. Only 6 is greater than 5.",
+    "hint_1": "Solve the inequality the way you would an equation.",
+    "hint_2": "x > 5, so pick a value strictly greater than 5.",
+    "tags": [
+      "inequality",
+      "linear"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth4_002",
+    "section": "Math",
+    "domain": "Algebra",
+    "skill": "Modeling with linear equations",
+    "difficulty": "medium",
+    "question_text": "A taxi charges a flat fee of $3 plus $2 for each mile traveled. Which equation gives the total cost c, in dollars, for a ride of m miles?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "c = 2m + 3",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "c = 3m + 2",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "c = 5m",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "c = 2m",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "The per-mile cost 2 multiplies the number of miles m, and the flat fee 3 is added once: c = 2m + 3.",
+    "hint_1": "Which number depends on how far you travel?",
+    "hint_2": "The $2 is per mile; the $3 is charged once.",
+    "tags": [
+      "modeling",
+      "linear"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth4_003",
+    "section": "Math",
+    "domain": "Algebra",
+    "skill": "Linear equations: finding intercept",
+    "difficulty": "hard",
+    "question_text": "The line y = 2x + b passes through the point (3, 10). What is the value of b?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "4",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "10",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "-4",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "16",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "Substitute the point: 10 = 2(3) + b, so 10 = 6 + b and b = 4.",
+    "hint_1": "Plug x = 3 and y = 10 into the equation.",
+    "hint_2": "10 = 6 + b.",
+    "tags": [
+      "linear",
+      "substitution"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth4_004",
+    "section": "Math",
+    "domain": "Advanced Math",
+    "skill": "Quadratic equations: factoring",
+    "difficulty": "medium",
+    "question_text": "What are the solutions to the equation x^2 + 5x + 6 = 0?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "x = -2 and x = -3",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "x = 2 and x = 3",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "x = -1 and x = -6",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "x = 1 and x = 6",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "Factor: x^2 + 5x + 6 = (x + 2)(x + 3) = 0. So x = -2 or x = -3.",
+    "hint_1": "Find two numbers that multiply to 6 and add to 5.",
+    "hint_2": "Those numbers are 2 and 3, giving (x+2)(x+3).",
+    "tags": [
+      "quadratic",
+      "factoring"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth4_005",
+    "section": "Math",
+    "domain": "Advanced Math",
+    "skill": "Radical equations",
+    "difficulty": "hard",
+    "question_text": "If the square root of (x + 7) equals 5, what is the value of x?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "18",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "25",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "32",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "-2",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "Square both sides: x + 7 = 25. Subtract 7: x = 18.",
+    "hint_1": "Undo a square root by squaring both sides.",
+    "hint_2": "x + 7 = 25.",
+    "tags": [
+      "radical",
+      "solve"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth4_006",
+    "section": "Math",
+    "domain": "Advanced Math",
+    "skill": "Simplifying expressions",
+    "difficulty": "medium",
+    "question_text": "Which expression is equivalent to 3(x + 2) - 2(x - 1)?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "x + 8",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "x + 4",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "5x + 4",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "x + 5",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "Distribute: 3x + 6 - 2x + 2. Combine like terms: (3x - 2x) + (6 + 2) = x + 8.",
+    "hint_1": "Distribute both products carefully, watching the minus sign.",
+    "hint_2": "-2(x - 1) = -2x + 2.",
+    "tags": [
+      "simplify",
+      "distribute"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth4_007",
+    "section": "Math",
+    "domain": "Problem Solving & Data Analysis",
+    "skill": "Probability",
+    "difficulty": "medium",
+    "question_text": "A bag contains 4 red marbles and 6 blue marbles. If one marble is drawn at random, what is the probability that it is red?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "0.4",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "0.6",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "4",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "0.04",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "There are 4 + 6 = 10 marbles total, 4 of them red. P(red) = 4/10 = 0.4.",
+    "hint_1": "Probability = favorable outcomes / total outcomes.",
+    "hint_2": "4 red out of 10 total.",
+    "tags": [
+      "probability"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth4_008",
+    "section": "Math",
+    "domain": "Problem Solving & Data Analysis",
+    "skill": "Percentages: reverse",
+    "difficulty": "hard",
+    "question_text": "15 is 25 percent of what number?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "60",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "3.75",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "40",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "375",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "Let the number be n. Then 0.25n = 15, so n = 15 / 0.25 = 60.",
+    "hint_1": "Write '25 percent of n' as 0.25n and set it equal to 15.",
+    "hint_2": "n = 15 / 0.25.",
+    "tags": [
+      "percent",
+      "reverse"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth4_009",
+    "section": "Math",
+    "domain": "Problem Solving & Data Analysis",
+    "skill": "Rates",
+    "difficulty": "easy",
+    "question_text": "A car travels 150 miles in 3 hours. What is its average speed, in miles per hour?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "50",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "450",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "45",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "153",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "Average speed = distance / time = 150 / 3 = 50 miles per hour.",
+    "hint_1": "Speed is distance divided by time.",
+    "hint_2": "150 / 3.",
+    "tags": [
+      "rate",
+      "speed"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth4_010",
+    "section": "Math",
+    "domain": "Geometry & Trig",
+    "skill": "Area of circles",
+    "difficulty": "medium",
+    "question_text": "A circle has a radius of 3. What is the area of the circle?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "9 pi",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "6 pi",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "3 pi",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "9",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "Area of a circle = pi r^2 = pi (3)^2 = 9 pi.",
+    "hint_1": "Area of a circle is pi times the radius squared.",
+    "hint_2": "pi x 3^2.",
+    "tags": [
+      "circle",
+      "area"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth4_011",
+    "section": "Math",
+    "domain": "Geometry & Trig",
+    "skill": "Right triangle trigonometry",
+    "difficulty": "hard",
+    "question_text": "In a right triangle, one of the acute angles measures 30 degrees and the hypotenuse has length 10. What is the length of the side opposite the 30-degree angle?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "5",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "10",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "8.66",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "20",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "The side opposite an angle equals the hypotenuse times the sine of that angle: 10 x sin(30 degrees) = 10 x 0.5 = 5.",
+    "hint_1": "Opposite side = hypotenuse x sine of the angle.",
+    "hint_2": "sin(30 degrees) = 1/2.",
+    "tags": [
+      "trigonometry",
+      "right-triangle"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth4_012",
+    "section": "Math",
+    "domain": "Geometry & Trig",
+    "skill": "Volume of a cube",
+    "difficulty": "medium",
+    "question_text": "A cube has an edge length of 4. What is the volume of the cube?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "64",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "16",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "48",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "12",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "Volume of a cube = edge^3 = 4^3 = 64.",
+    "hint_1": "Volume of a cube is the edge length cubed.",
+    "hint_2": "4 x 4 x 4.",
+    "tags": [
+      "volume",
+      "cube"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth4_013",
+    "section": "English",
+    "domain": "Standard English Conventions",
+    "skill": "Sentence boundaries",
+    "difficulty": "medium",
+    "question_text": "Which choice completes the text so that it conforms to the conventions of Standard English? The museum's new exhibit features rare manuscripts ______ draws visitors from across the country.",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": ", it",
+        "is_correct": false
+      },
+      {
+        "label": "B",
+        "text": "; it",
+        "is_correct": true
+      },
+      {
+        "label": "C",
+        "text": " it",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": ", it,",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "Both halves are independent clauses ('The museum's new exhibit features rare manuscripts' and 'it draws visitors from across the country'). A semicolon correctly joins two independent clauses; a comma alone (A) is a splice and no punctuation (C) is a run-on.",
+    "hint_1": "Both sides of the blank are complete sentences.",
+    "hint_2": "A semicolon joins two complete sentences without a conjunction.",
+    "tags": [
+      "semicolon",
+      "clauses"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth4_014",
+    "section": "English",
+    "domain": "Expression of Ideas",
+    "skill": "Transitions",
+    "difficulty": "medium",
+    "question_text": "Which choice best completes the text with a logical transition? The new filing policy reduced paperwork significantly. ______, it cut the average processing time for each request nearly in half.",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "In addition,",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "However,",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "Nevertheless,",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "In contrast,",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "The second sentence presents a further benefit of the same policy, so an additive transition fits. 'However,' 'Nevertheless,' and 'In contrast,' all signal opposition, which does not match.",
+    "hint_1": "Is the second sentence adding to the first or contrasting with it?",
+    "hint_2": "Two benefits stacked together call for an additive transition.",
+    "tags": [
+      "transition",
+      "addition"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth4_015",
+    "section": "English",
+    "domain": "Information & Ideas",
+    "skill": "Inferences",
+    "difficulty": "medium",
+    "question_text": "Unlike most owls, which hunt at night, the burrowing owl is frequently active during the day, foraging for insects in open grassland. Which choice is best supported by the text?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "The burrowing owl differs from most owls in when it is active.",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "Burrowing owls are unable to see in the dark.",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "All owls feed primarily on insects.",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "Burrowing owls are found only in grasslands.",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "The text says, unlike most owls that hunt at night, the burrowing owl is active during the day, directly supporting choice A. The other choices state claims the passage does not make.",
+    "hint_1": "Choose the statement the text directly supports.",
+    "hint_2": "The contrast is about WHEN the owl is active, not its eyesight or range.",
+    "tags": [
+      "inference",
+      "evidence"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth4_016",
+    "section": "English",
+    "domain": "Craft & Structure",
+    "skill": "Words in context",
+    "difficulty": "medium",
+    "question_text": "Which choice completes the text with the most logical and precise word? The outcome of the vote was ______; despite hours of debate, no one could predict which way it would go.",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "certain",
+        "is_correct": false
+      },
+      {
+        "label": "B",
+        "text": "unpredictable",
+        "is_correct": true
+      },
+      {
+        "label": "C",
+        "text": "unanimous",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "final",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "'No one could predict which way it would go' defines the blank: the outcome was unpredictable. 'Certain' and 'unanimous' contradict that, and 'final' does not address predictability.",
+    "hint_1": "The clause after the semicolon explains the blank.",
+    "hint_2": "'No one could predict' points to a word meaning hard to predict.",
+    "tags": [
+      "vocabulary",
+      "context"
+    ],
+    "source": "authored"
   }
 ]

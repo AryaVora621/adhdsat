@@ -44,7 +44,7 @@ cp .env.example .env   # then fill in DATABASE_URL (and optionally GEMINI_API_KE
 npm run dev            # vite + express together
 ```
 
-On first boot the server seeds the 583-question bank from
+On first boot the server seeds the 599-question bank from
 `server/data/questions.json` into Postgres (idempotent — it only runs when the
 `questions` table is empty).
 
