@@ -109,7 +109,9 @@ function AppInner() {
       .catch(() => { setApiError(true); setLoading(false); });
   };
 
-  // Load an existing anonymous guest (returning visitor with a stored id).
+  // Load an existing anonymous guest (returning visitor with a stored id). Does
+  // NOT redirect: the root route decides between Landing and Dashboard, so a
+  // returning-but-not-onboarded guest still lands on the homescreen.
   const loadGuest = (userId) =>
     fetch('/api/users', {
       method: 'POST',
@@ -121,16 +123,23 @@ function AppInner() {
         if (!data || !data.id) throw new Error('invalid user payload');
         setUserWithLevelCheck(data);
         setLoading(false);
-        if (!data.onboarding_completed) navigate('/onboarding');
       })
       .catch(() => { setApiError(true); setLoading(false); });
 
-  // Create a fresh guest account on demand (the Landing "Start free" CTA).
+  // Create a fresh guest account, then send them into onboarding (the Landing
+  // "Start free" CTA for a brand-new visitor).
   const createGuest = () => {
     const id = crypto.randomUUID();
     localStorage.setItem('userId', id);
     setLoading(true);
-    loadGuest(id);
+    loadGuest(id).then(() => navigate('/onboarding'));
+  };
+
+  // "Start free" / "Begin" from the homescreen: continue an existing guest's
+  // setup, or spin up a new guest for a first-time visitor.
+  const startOnboarding = () => {
+    if (user) navigate('/onboarding');
+    else createGuest();
   };
 
   const signOut = async () => {
@@ -202,7 +211,7 @@ function AppInner() {
 
   // Brand-new visitor (no session, no stored guest): show the marketing landing.
   if (!user) {
-    return <Landing onGuest={createGuest} />;
+    return <Landing onGuest={startOnboarding} />;
   }
 
   const showNav = user?.onboarding_completed;
@@ -218,7 +227,7 @@ function AppInner() {
         }>
           <Routes>
             <Route path="/onboarding" element={<Onboarding user={user} setUser={setUserWithLevelCheck} />} />
-            <Route path="/" element={user?.onboarding_completed ? <Dashboard user={user} isMobile={isMobile} /> : <Navigate to="/onboarding" />} />
+            <Route path="/" element={user?.onboarding_completed ? <Dashboard user={user} isMobile={isMobile} /> : <Landing onGuest={startOnboarding} />} />
             <Route path="/sprint" element={user?.onboarding_completed ? <Sprint user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
             <Route path="/profile" element={user?.onboarding_completed ? <Profile user={user} setUser={setUserWithLevelCheck} onSignOut={signOut} /> : <Navigate to="/onboarding" />} />
             <Route path="/review" element={user?.onboarding_completed ? <ReviewSprint user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
