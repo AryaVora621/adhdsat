@@ -83,6 +83,51 @@ function parseSegments(text) {
   return segments;
 }
 
+// Render a plain string as inline text + math nodes (the original behavior).
+function renderInline(text, keyBase) {
+  return parseSegments(text).map((seg, i) =>
+    seg.type === 'math'
+      ? renderMathSegment(seg.content, `${keyBase}-${i}`)
+      : <span key={`${keyBase}-${i}`}>{seg.content}</span>
+  );
+}
+
+const isPipeRow = (l) => /^\s*\|.*\|\s*$/.test(l);
+// Separator row: only pipes, dashes, colons and spaces, and contains a dash.
+const isSeparatorRow = (l) => /-/.test(l) && /^\s*\|?[\s:|-]+\|[\s:|-]*$/.test(l);
+
+const toCells = (l) =>
+  l.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
+
+// Split text into text blocks and GitHub-flavored markdown tables (header row +
+// dash separator + data rows). Returns a single text block when no table exists,
+// so non-table content renders exactly as before.
+function splitTableBlocks(text) {
+  const lines = String(text).split('\n');
+  const blocks = [];
+  let buf = [];
+  const flush = () => {
+    if (buf.length) { blocks.push({ type: 'text', content: buf.join('\n') }); buf = []; }
+  };
+  let i = 0;
+  while (i < lines.length) {
+    if (isPipeRow(lines[i]) && i + 1 < lines.length && isSeparatorRow(lines[i + 1])) {
+      flush();
+      const header = toCells(lines[i]);
+      let j = i + 2;
+      const body = [];
+      while (j < lines.length && isPipeRow(lines[j])) { body.push(toCells(lines[j])); j++; }
+      blocks.push({ type: 'table', header, body });
+      i = j;
+    } else {
+      buf.push(lines[i]);
+      i++;
+    }
+  }
+  flush();
+  return blocks;
+}
+
 function renderMathSegment(latex, key) {
   try {
     const html = katex.renderToString(latex, {
@@ -97,16 +142,61 @@ function renderMathSegment(latex, key) {
   }
 }
 
+const cellStyle = {
+  border: '1px solid #2a2a46',
+  padding: '7px 12px',
+  textAlign: 'left',
+  fontSize: '0.9em',
+  whiteSpace: 'nowrap',
+};
+
+function renderTable(block, key) {
+  return (
+    <div key={key} style={{ overflowX: 'auto', maxWidth: '100%', margin: '12px 0' }}>
+      <table style={{ borderCollapse: 'collapse', minWidth: 'min(100%, 280px)' }}>
+        <thead>
+          <tr>
+            {block.header.map((c, ci) => (
+              <th key={ci} style={{ ...cellStyle, fontWeight: 700, color: 'var(--primary)', backgroundColor: 'rgba(0,212,255,0.06)' }}>
+                {renderInline(c, `h-${ci}`)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {block.body.map((row, ri) => (
+            <tr key={ri}>
+              {row.map((c, ci) => (
+                <td key={ci} style={cellStyle}>{renderInline(c, `c-${ri}-${ci}`)}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function MathText({ children, style, className }) {
   const text = typeof children === 'string' ? children : String(children ?? '');
-  const segments = parseSegments(text);
+  const blocks = splitTableBlocks(text);
 
+  // Fast path: no tables -> render inline exactly as before (zero regression risk).
+  if (blocks.length === 1 && blocks[0].type === 'text') {
+    return (
+      <span style={style} className={className}>
+        {renderInline(text, 'r')}
+      </span>
+    );
+  }
+
+  // Mixed content: render as a block so tables can sit between text runs.
   return (
-    <span style={style} className={className}>
-      {segments.map((seg, i) =>
-        seg.type === 'math'
-          ? renderMathSegment(seg.content, i)
-          : <span key={i}>{seg.content}</span>
+    <span style={{ display: 'block', ...style }} className={className}>
+      {blocks.map((b, bi) =>
+        b.type === 'table'
+          ? renderTable(b, `t-${bi}`)
+          : <span key={`b-${bi}`} style={{ whiteSpace: 'pre-line' }}>{renderInline(b.content, `b-${bi}`)}</span>
       )}
     </span>
   );
