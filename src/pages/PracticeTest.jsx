@@ -135,7 +135,22 @@ export default function PracticeTest({ user }) {
         math_correct: math?.correct, math_total: math?.total,
       }),
     }).then(() => loadHistory()).catch(() => {});
-  }, [phase, sectionResults, user.id, loadHistory]);
+    // Record every answered question so missed ones enter the SM-2 review queue
+    // and the results inform domain stats. Fire-and-forget; never block results.
+    if (reviewItems.length) {
+      fetch('/api/answers/batch', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.id,
+          answers: reviewItems.map(it => ({
+            question_id: it.q.id,
+            selected_choice: it.selected,
+            is_correct: it.correct,
+          })),
+        }),
+      }).catch(() => {});
+    }
+  }, [phase, sectionResults, user.id, loadHistory, reviewItems]);
 
   const loadModule = useCallback(async (idx) => {
     const mod = MODULES[idx];

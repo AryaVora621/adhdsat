@@ -335,6 +335,34 @@ app.post('/api/answers', async (req, res) => {
   }
 });
 
+// Batch-record answers (used by the full practice test). Recording them in
+// user_answers means missed questions flow into the SM-2 review queue via
+// syncReviewCards, and the questions inform domain stats / predicted score.
+app.post('/api/answers/batch', async (req, res) => {
+  const { user_id, answers } = req.body;
+  if (!user_id || !Array.isArray(answers) || !answers.length) {
+    return res.status(400).json({ error: 'user_id and a non-empty answers array are required' });
+  }
+  try {
+    const now = new Date().toISOString();
+    const values = [];
+    const params = [];
+    let p = 0;
+    for (const a of answers) {
+      values.push(`($${++p}, $${++p}, $${++p}, $${++p}, $${++p}, 0, $${++p}, NULL, $${++p})`);
+      params.push(crypto.randomUUID(), user_id, a.question_id, a.selected_choice ?? null, toInt(a.is_correct), a.time_spent_seconds || 0, now);
+    }
+    await query(
+      `INSERT INTO adhdsat.user_answers (id, user_id, question_id, selected_choice, is_correct, hints_used, time_spent_seconds, sprint_id, created_at)
+       VALUES ${values.join(',')}`,
+      params
+    );
+    res.json({ success: true, inserted: answers.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // --- Progress ---
 
 app.get('/api/progress', async (req, res) => {
