@@ -76,8 +76,15 @@ function AppInner() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: userId, display_name: 'Learner' })
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`users ${res.status}`);
+        return res.json();
+      })
       .then(data => {
+        // A valid user always has an id. A 200 with an error body, or any
+        // malformed payload, must surface as a connection error rather than
+        // dropping the user into a broken onboarding with no id.
+        if (!data || !data.id) throw new Error('invalid user payload');
         setUserWithLevelCheck(data);
         setLoading(false);
         if (!data.onboarding_completed) {
