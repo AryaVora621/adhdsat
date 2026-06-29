@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Component } from 'react';
+import React, { useState, useEffect, useRef, Component, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Zap } from 'lucide-react';
 import { supabase } from './lib/supabase';
@@ -27,15 +27,18 @@ class ErrorBoundary extends Component {
 }
 import Sidebar from './components/Sidebar';
 import BottomNav from './components/BottomNav';
-import Dashboard from './pages/Dashboard';
-import Sprint from './pages/Sprint';
-import Onboarding from './pages/Onboarding';
-import Profile from './pages/Profile';
-import ReviewSprint from './pages/ReviewSprint';
-import PracticeTest from './pages/PracticeTest';
-import Upgrade from './pages/Upgrade';
 import Landing from './pages/Landing';
 import LevelUpToast from './components/LevelUpToast';
+
+// Route-split the in-app pages so newcomers only download the landing shell
+// first; the heavier authed screens load on demand.
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Sprint = lazy(() => import('./pages/Sprint'));
+const Onboarding = lazy(() => import('./pages/Onboarding'));
+const Profile = lazy(() => import('./pages/Profile'));
+const ReviewSprint = lazy(() => import('./pages/ReviewSprint'));
+const PracticeTest = lazy(() => import('./pages/PracticeTest'));
+const Upgrade = lazy(() => import('./pages/Upgrade'));
 import './index.css';
 
 const useIsMobile = () => {
@@ -182,16 +185,23 @@ function AppInner() {
   return (
     <div style={{ display: 'flex', width: '100%', height: '100vh' }}>
       <div style={{ flex: '1', display: 'flex', flexDirection: 'column', overflowY: 'auto', paddingBottom: isMobile && showNav && !focusRoute ? '64px' : 0 }}>
-        <Routes>
-          <Route path="/onboarding" element={<Onboarding user={user} setUser={setUserWithLevelCheck} />} />
-          <Route path="/" element={user?.onboarding_completed ? <Dashboard user={user} isMobile={isMobile} /> : <Navigate to="/onboarding" />} />
-          <Route path="/sprint" element={user?.onboarding_completed ? <Sprint user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
-          <Route path="/profile" element={user?.onboarding_completed ? <Profile user={user} setUser={setUserWithLevelCheck} onSignOut={signOut} /> : <Navigate to="/onboarding" />} />
-          <Route path="/review" element={user?.onboarding_completed ? <ReviewSprint user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
-          <Route path="/practice-test" element={user?.onboarding_completed ? <PracticeTest user={user} /> : <Navigate to="/onboarding" />} />
-          <Route path="/upgrade" element={user?.onboarding_completed ? <Upgrade user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+        <Suspense fallback={
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1, minHeight: '60vh' }}>
+            <div style={{ width: '22px', height: '22px', borderRadius: '50%', border: '2px solid var(--primary)', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        }>
+          <Routes>
+            <Route path="/onboarding" element={<Onboarding user={user} setUser={setUserWithLevelCheck} />} />
+            <Route path="/" element={user?.onboarding_completed ? <Dashboard user={user} isMobile={isMobile} /> : <Navigate to="/onboarding" />} />
+            <Route path="/sprint" element={user?.onboarding_completed ? <Sprint user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
+            <Route path="/profile" element={user?.onboarding_completed ? <Profile user={user} setUser={setUserWithLevelCheck} onSignOut={signOut} /> : <Navigate to="/onboarding" />} />
+            <Route path="/review" element={user?.onboarding_completed ? <ReviewSprint user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
+            <Route path="/practice-test" element={user?.onboarding_completed ? <PracticeTest user={user} /> : <Navigate to="/onboarding" />} />
+            <Route path="/upgrade" element={user?.onboarding_completed ? <Upgrade user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </Suspense>
       </div>
       {showNav && !isMobile && <Sidebar user={user} onSignOut={signOut} />}
       {showNav && isMobile && !focusRoute && <BottomNav userId={user?.id} />}
