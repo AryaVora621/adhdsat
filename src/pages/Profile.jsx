@@ -223,6 +223,7 @@ export default function Profile({ user, setUser }) {
             </div>
           </div>
         ) : (
+          <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
             {[
               { label: 'Baseline R&W', value: user.baseline_english || '--' },
@@ -235,6 +236,20 @@ export default function Profile({ user, setUser }) {
               </div>
             ))}
           </div>
+          {(() => {
+            const baseline = (user.baseline_english || 0) + (user.baseline_math || 0);
+            const predicted = progress?.predictedScore?.total;
+            const gain = predicted && baseline > 0 ? predicted - baseline : null;
+            if (gain === null || gain === 0) return null;
+            return (
+              <div style={{ marginTop: '12px', textAlign: 'center', padding: '10px 16px', backgroundColor: gain > 0 ? 'rgba(0,230,118,0.07)' : 'rgba(255,82,82,0.07)', borderRadius: '10px', border: `1px solid ${gain > 0 ? 'rgba(0,230,118,0.25)' : 'rgba(255,82,82,0.25)'}` }}>
+                <span style={{ color: gain > 0 ? 'var(--success)' : 'var(--error)', fontWeight: '700', fontSize: '0.9rem' }}>
+                  {gain > 0 ? `+${gain} points above your baseline` : `${gain} points below baseline -- keep practicing!`}
+                </span>
+              </div>
+            );
+          })()}
+          </>
         )}
       </div>
 

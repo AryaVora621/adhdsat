@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlayCircle, BookOpen, TrendingUp, TrendingDown, Minus, Target, Calendar, Zap, Calculator, AlertCircle, Shuffle, BarChart2 } from 'lucide-react';
+import { PlayCircle, BookOpen, TrendingUp, TrendingDown, Minus, Target, Calendar, Zap, Calculator, AlertCircle, Shuffle, BarChart2, Flame } from 'lucide-react';
 
 const DOMAINS = [
   { name: 'Algebra', section: 'Math' },
@@ -114,12 +114,22 @@ function QuickStartCard({ navigate, user }) {
   const done = today?.sprints_today || 0;
   const allDone = done >= DAILY_GOAL;
 
+  // Streak-at-risk: user has a streak but hasn't studied today
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const streakAtRisk = user.current_streak > 0 && user.last_active_date !== todayStr && done === 0;
+
   return (
     <div style={{
       backgroundImage: 'linear-gradient(135deg, rgba(0,212,255,0.12), rgba(0,230,118,0.08))',
       padding: '28px', borderRadius: '16px', border: '1px solid rgba(0,212,255,0.25)',
       textAlign: 'center', marginBottom: '28px'
     }}>
+      {streakAtRisk && (
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(255,82,82,0.1)', border: '1px solid rgba(255,82,82,0.35)', borderRadius: '20px', padding: '5px 14px', marginBottom: '14px' }}>
+          <Flame size={13} color="var(--error)" />
+          <span style={{ color: 'var(--error)', fontSize: '0.78rem', fontWeight: '700' }}>{user.current_streak}-day streak at risk -- study now to keep it!</span>
+        </div>
+      )}
       <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '600' }}>
         {allDone ? 'Goal Reached!' : "Let's Go!"}
       </div>

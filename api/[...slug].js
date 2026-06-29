@@ -14,10 +14,9 @@ export default (req, res) => {
 
   // Route to Express app
   try {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
     app(req, res);
   } catch (err) {
     console.error('[API Critical Error]', err.stack || err);
-    res.status(500).json({ error: err.message, stack: err.stack });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
