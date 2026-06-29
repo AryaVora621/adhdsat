@@ -8,13 +8,17 @@
   --bg-main: #0f0f1a;
   --bg-card: #1a1a2e;
   --bg-sidebar: #16162a;
+  --bg-elevated: #20203a;
+  --border: #2a2a46;
   --primary: #00d4ff;
+  --primary-hover: #00b5d9;
+  --primary-contrast: #001016;
   --success: #00e676;
   --error: #ff5252;
   --xp-gold: #ffd740;
   --text-primary: #e8e8e8;
   --text-secondary: #8888aa;
-  
+
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -26,6 +30,27 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Light theme: opt-in via <html data-theme="light">. Surfaces that use the CSS
+   variables below adapt automatically; the landing and auth pages are fully
+   variable-driven so they flip cleanly. */
+:root[data-theme='light'] {
+  --bg-main: #f7f9fc;
+  --bg-card: #ffffff;
+  --bg-sidebar: #ffffff;
+  --bg-elevated: #eef2f8;
+  --border: #dce3ec;
+  --primary: #0091b3;
+  --primary-hover: #007a98;
+  --primary-contrast: #ffffff;
+  --success: #00b257;
+  --error: #d83a3a;
+  --xp-gold: #d99e00;
+  --text-primary: #16213a;
+  --text-secondary: #5a6781;
+
+  color-scheme: light;
 }
 
 body {
@@ -59,7 +84,7 @@ button {
   transition: border-color 0.25s, background-color 0.2s, transform 0.1s;
 }
 button:hover {
-  background-color: #2a2a46;
+  background-color: var(--bg-elevated);
   border-color: var(--primary);
 }
 button:active {
@@ -67,10 +92,10 @@ button:active {
 }
 button.primary {
   background-color: var(--primary);
-  color: #000;
+  color: var(--primary-contrast);
 }
 button.primary:hover {
-  background-color: #00b5d9;
+  background-color: var(--primary-hover);
 }
 
 /* Animations */

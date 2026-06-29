@@ -1,6 +1,7 @@
-import React, { useState, useEffect, Component } from 'react';
+import React, { useState, useEffect, useRef, Component } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Zap } from 'lucide-react';
+import { supabase } from './lib/supabase';
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null }; }
@@ -33,6 +34,7 @@ import Profile from './pages/Profile';
 import ReviewSprint from './pages/ReviewSprint';
 import PracticeTest from './pages/PracticeTest';
 import Upgrade from './pages/Upgrade';
+import Landing from './pages/Landing';
 import LevelUpToast from './components/LevelUpToast';
 import './index.css';
 
@@ -71,34 +73,80 @@ function AppInner() {
     });
   };
 
-  useEffect(() => {
-    let userId = localStorage.getItem('userId');
-    if (!userId) {
-      userId = crypto.randomUUID();
-      localStorage.setItem('userId', userId);
-    }
+  // Tracks the last identity we resolved so repeated auth events (INITIAL_SESSION,
+  // TOKEN_REFRESHED) don't re-run navigation or re-claim.
+  const resolvedKey = useRef(null);
 
+  // Load (or migrate) the backend user row for an authenticated Supabase session.
+  const claimAuthUser = (session) => {
+    const guestId = localStorage.getItem('userId');
+    return fetch('/api/users/claim', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ authId: session.user.id, email: session.user.email, guestId }),
+    })
+      .then(res => { if (!res.ok) throw new Error(`claim ${res.status}`); return res.json(); })
+      .then(data => {
+        if (!data || !data.id) throw new Error('invalid user payload');
+        localStorage.setItem('userId', data.id);
+        setUserWithLevelCheck(data);
+        setLoading(false);
+        if (!data.onboarding_completed) navigate('/onboarding');
+      })
+      .catch(() => { setApiError(true); setLoading(false); });
+  };
+
+  // Load an existing anonymous guest (returning visitor with a stored id).
+  const loadGuest = (userId) =>
     fetch('/api/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: userId, display_name: 'Learner' })
+      body: JSON.stringify({ id: userId, display_name: 'Learner' }),
     })
-      .then(res => {
-        if (!res.ok) throw new Error(`users ${res.status}`);
-        return res.json();
-      })
+      .then(res => { if (!res.ok) throw new Error(`users ${res.status}`); return res.json(); })
       .then(data => {
-        // A valid user always has an id. A 200 with an error body, or any
-        // malformed payload, must surface as a connection error rather than
-        // dropping the user into a broken onboarding with no id.
         if (!data || !data.id) throw new Error('invalid user payload');
         setUserWithLevelCheck(data);
         setLoading(false);
-        if (!data.onboarding_completed) {
-          navigate('/onboarding');
-        }
+        if (!data.onboarding_completed) navigate('/onboarding');
       })
       .catch(() => { setApiError(true); setLoading(false); });
+
+  // Create a fresh guest account on demand (the Landing "Start free" CTA).
+  const createGuest = () => {
+    const id = crypto.randomUUID();
+    localStorage.setItem('userId', id);
+    setLoading(true);
+    loadGuest(id);
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem('userId');
+    resolvedKey.current = null;
+    setUser(null);
+    navigate('/');
+  };
+
+  useEffect(() => {
+    // Supabase fires onAuthStateChange immediately with INITIAL_SESSION, so this
+    // single listener covers both first load and later sign-in / sign-out.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const key = session?.user?.id || 'anon';
+      if (key === resolvedKey.current) return; // ignore duplicate/token-refresh events
+      resolvedKey.current = key;
+
+      if (session?.user) {
+        setLoading(true);
+        claimAuthUser(session);
+      } else {
+        // No session: returning guest keeps their progress; true newcomers see Landing.
+        const guestId = localStorage.getItem('userId');
+        if (guestId) loadGuest(guestId);
+        else { setUser(null); setLoading(false); }
+      }
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   if (loading) {
@@ -124,6 +172,11 @@ function AppInner() {
     );
   }
 
+  // Brand-new visitor (no session, no stored guest): show the marketing landing.
+  if (!user) {
+    return <Landing onGuest={createGuest} />;
+  }
+
   const showNav = user?.onboarding_completed;
 
   return (
@@ -140,7 +193,7 @@ function AppInner() {
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
-      {showNav && !isMobile && <Sidebar user={user} />}
+      {showNav && !isMobile && <Sidebar user={user} onSignOut={signOut} />}
       {showNav && isMobile && !focusRoute && <BottomNav userId={user?.id} />}
       {levelUpToast && <LevelUpToast level={levelUpToast} onDone={() => setLevelUpToast(null)} />}
     </div>

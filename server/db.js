@@ -48,6 +48,8 @@ CREATE TABLE IF NOT EXISTS adhdsat.users (
   plan TEXT DEFAULT 'free'
 );
 ALTER TABLE adhdsat.users ADD COLUMN IF NOT EXISTS plan TEXT DEFAULT 'free';
+ALTER TABLE adhdsat.users ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE adhdsat.users ADD COLUMN IF NOT EXISTS is_guest INTEGER DEFAULT 1;
 CREATE TABLE IF NOT EXISTS adhdsat.questions (
   id TEXT PRIMARY KEY, section TEXT, domain TEXT, skill TEXT, difficulty TEXT,
   question_text TEXT, passage_text TEXT, choices TEXT, is_grid_in INTEGER DEFAULT 0,

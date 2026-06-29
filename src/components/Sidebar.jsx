@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Flame, Star, LayoutDashboard, Zap, User, BookOpen } from 'lucide-react';
+import { Flame, Star, LayoutDashboard, Zap, User, BookOpen, Moon, Sun, LogOut } from 'lucide-react';
+import { useTheme } from '../lib/theme';
 
 function WeekCalendar({ userId }) {
   const [activeDays, setActiveDays] = useState(new Set());
@@ -42,9 +43,11 @@ function WeekCalendar({ userId }) {
   );
 }
 
-export default function Sidebar({ user }) {
+export default function Sidebar({ user, onSignOut }) {
   const location = useLocation();
   const [reviewCount, setReviewCount] = useState(0);
+  const { theme, toggle } = useTheme();
+  const dark = theme !== 'light';
 
   useEffect(() => {
     if (!user?.id) return;
@@ -132,6 +135,26 @@ export default function Sidebar({ user }) {
 
       {/* 7-day activity calendar */}
       <WeekCalendar userId={user.id} />
+
+      {/* Footer: theme + account */}
+      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <button onClick={toggle} style={{
+          display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 14px', borderRadius: '10px',
+          background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-secondary)',
+          fontSize: '0.85rem', fontWeight: 500,
+        }}>
+          {dark ? <Sun size={16} /> : <Moon size={16} />} {dark ? 'Light mode' : 'Dark mode'}
+        </button>
+        {onSignOut && user.email && (
+          <button onClick={onSignOut} style={{
+            display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 14px', borderRadius: '10px',
+            background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-secondary)',
+            fontSize: '0.85rem', fontWeight: 500,
+          }}>
+            <LogOut size={16} /> Sign out
+          </button>
+        )}
+      </div>
     </div>
   );
 }

@@ -61,6 +61,61 @@ app.post('/api/users', async (req, res) => {
   }
 });
 
+// Link a Supabase-authenticated identity to a backend user row. If the visitor
+// was previously a guest (anonymous localStorage id) with progress, that progress
+// is migrated into the real account on first sign-in. Idempotent: returning users
+// just get their existing row back.
+const CHILD_TABLES = ['user_answers', 'sprints', 'review_cards', 'practice_test_results'];
+
+app.post('/api/users/claim', async (req, res) => {
+  const { authId, email, guestId, display_name } = req.body;
+  if (!authId) return res.status(400).json({ error: 'authId required' });
+  try {
+    let existing = await row('SELECT * FROM adhdsat.users WHERE id = $1', [authId]);
+
+    // First-time sign-in: if a guest row carries progress, adopt it under the real id.
+    const guestUsable = guestId && guestId !== authId
+      ? await row('SELECT * FROM adhdsat.users WHERE id = $1', [guestId])
+      : null;
+
+    if (!existing) {
+      if (guestUsable) {
+        // Promote the guest row to the authenticated identity, then re-point children.
+        await query(
+          `INSERT INTO adhdsat.users
+             (id, display_name, total_xp, current_level, current_streak, longest_streak,
+              last_active_date, created_at, study_plan, baseline_english, baseline_math,
+              weak_areas, onboarding_completed, subscores, plan, email, is_guest)
+           SELECT $1, display_name, total_xp, current_level, current_streak, longest_streak,
+              last_active_date, created_at, study_plan, baseline_english, baseline_math,
+              weak_areas, onboarding_completed, subscores, plan, $2, 0
+           FROM adhdsat.users WHERE id = $3`,
+          [authId, email || null, guestId]
+        );
+        for (const t of CHILD_TABLES) {
+          await query(`UPDATE adhdsat.${t} SET user_id = $1 WHERE user_id = $2`, [authId, guestId]);
+        }
+        await query('DELETE FROM adhdsat.users WHERE id = $1', [guestId]);
+      } else {
+        await query(
+          `INSERT INTO adhdsat.users (id, display_name, email, is_guest, created_at)
+           VALUES ($1, $2, $3, 0, $4) ON CONFLICT (id) DO NOTHING`,
+          [authId, display_name || 'Learner', email || null, new Date().toISOString()]
+        );
+      }
+      existing = await row('SELECT * FROM adhdsat.users WHERE id = $1', [authId]);
+    } else if (email && existing.email !== email) {
+      await query('UPDATE adhdsat.users SET email = $1, is_guest = 0 WHERE id = $2', [email, authId]);
+      existing = await row('SELECT * FROM adhdsat.users WHERE id = $1', [authId]);
+    }
+
+    existing.weak_areas = JSON.parse(existing.weak_areas || '[]');
+    res.json(existing);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.put('/api/users/:id', async (req, res) => {
   const { display_name, weak_areas, baseline_english, baseline_math } = req.body;
   try {
