@@ -1,35 +1,32 @@
-# Checkpoint - ADHDSat (CODE-COMPLETE, awaiting Vercel env var)
+# Checkpoint - ADHDSat (SHIPPED & LIVE)
 
-## State: code-complete + verified end-to-end. One user action left.
+## Status: LIVE in production at https://adhdsat.vercel.app
 
-## Shipped & pushed (HEAD 55bd664)
-- Postgres migration (Supabase): fixes prod data loss + onboarding 500.
-- All table refs schema-qualified (transaction pooler resets search_path).
-- Graceful error screen when /api/users fails (was broken onboarding).
-- Fixed 7-day stats query; Sprint no-question retry state.
-- ingest.js ported to Postgres upsert sync; seed.js removed; README + .env.example;
-  bank-expansion pipeline (generate -> ingest) documented.
+Verified the full flow on the LIVE site in a real browser:
+onboarding -> adaptive sprint -> correct answer -> +20 XP -> persisted.
+Zero console errors. All API routes 200.
 
-## Verified
-- Backend flow test vs LIVE Supabase: predicted score, SM-2 review, streak, XP.
-- Full app driven in a real BROWSER vs Postgres: onboarding -> sprint -> correct
-  answer -> +20 XP -> streak; Profile + Review pages. Zero console errors.
-- HEAD smoke test: build green, health 200, fresh onboarding 200 + persists.
-- ingest.js: synced 529 questions, bank holds 529.
+## What it took (this session)
+1. Root-caused prod 500s: SQLite-in-/tmp (ephemeral, per-instance) -> migrated
+   the entire backend to shared Supabase Postgres (project rhhpshsyrvckouqtyeov).
+2. Rewrote server to async pg; onboarding upsert; schema-qualified all tables
+   (Supabase transaction pooler resets search_path).
+3. Fixed broken 7-day stats query; graceful /api/users error screen; Sprint retry.
+4. Ported ingest.js to Postgres upsert; removed seed.js; README + .env.example.
+5. Vercel env: DATABASE_URL was saved EMPTY -> reset it correctly via CLI
+   (--value, sensitive) for prod/preview/dev. GEMINI_API_KEY present.
+6. Vercel routing: nested /api/x/y returned NOT_FOUND (catch-all only matched
+   single segment with version:2 + static output). Fixed with rewrite
+   /api/:path* -> /api/[...slug]. All nested routes now 200.
+7. Deployed via CLI (vercel --prod). Cleaned 15 test users from the DB.
 
-## THE ONLY BLOCKER (user action - cannot be done by Claude)
-Production has no DATABASE_URL. Confirmed via prod: ECONNREFUSED 127.0.0.1:5432.
-Vercel MCP has no env-write tool; it's the user's account.
-Fix (either):
-  A. Vercel dashboard -> adhdsat -> Settings -> Environment Variables ->
-     add DATABASE_URL (Supabase transaction-pooler string) to all 3 envs -> Redeploy.
-  B. User runs `npm i -g vercel && vercel login`, then Claude runs
-     `vercel env add DATABASE_URL` + GEMINI_API_KEY + `vercel --prod`.
+## Repo state
+All committed + pushed to main (HEAD has vercel.json routing fix b4e972f).
+Env vars live in Vercel project. DB shared + persistent.
 
-## Notes
-- Reviewer peer (1jowzo8v) went offline mid-session; peer messaging errors.
-  It landed commit 7b73900 (safe). Shared-repo: a concurrent actor reset a commit
-  once; re-pushed cleanly.
-- DB is in Sydney (ap-southeast-2); trans-Pacific latency. Optional: set Vercel
-  region syd1 or move DB.
-- DB password was pasted in chat; rotate after setup if this is real-user.
+## Follow-ups (optional, non-blocking)
+- DB region is Sydney (ap-southeast-2): trans-Pacific latency if users/functions
+  are elsewhere. Consider Vercel region syd1 or a closer DB.
+- DB password was pasted in chat: rotate it for a real-user launch.
+- 11 leftover test users in DB (browser test UUIDs); harmless.
+- Reviewer peer went offline mid-session.
