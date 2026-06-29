@@ -364,7 +364,7 @@ export default function Dashboard({ user, isMobile }) {
           ? 'Loading your progress...'
           : progress.totalAnswered === 0
           ? 'Start your first sprint to see progress here.'
-          : `${progress.totalAnswered} questions answered total.`
+          : `${progress.totalAnswered} question${progress.totalAnswered === 1 ? '' : 's'} answered total.`
         }
       </p>
 

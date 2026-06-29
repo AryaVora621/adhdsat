@@ -596,7 +596,7 @@ app.get('/api/insights/:userId', async (req, res) => {
   if (totalAnswered === 0) {
     insights.push({ type: 'start', priority: 0, text: 'Welcome! Start your first sprint to get a baseline and unlock personalized insights.' });
   } else if (totalAnswered < 10) {
-    insights.push({ type: 'start', priority: 3, text: `You've answered ${totalAnswered} questions. Do ${10 - totalAnswered} more to unlock your predicted score.` });
+    insights.push({ type: 'start', priority: 3, text: `You've answered ${totalAnswered} question${totalAnswered === 1 ? '' : 's'}. Do ${10 - totalAnswered} more to unlock your predicted score.` });
   }
 
   if (weakAreas.length > 0 && Object.keys(domainAccuracy).length === 0) {

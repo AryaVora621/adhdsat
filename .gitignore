@@ -35,3 +35,5 @@ dist-ssr
 *.sln
 *.sw?
 *.png
+.vercel
+.env*
