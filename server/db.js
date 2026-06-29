@@ -68,6 +68,13 @@ CREATE TABLE IF NOT EXISTS adhdsat.review_cards (
   ease_factor DOUBLE PRECISION DEFAULT 2.5, rep_count INTEGER DEFAULT 0,
   last_reviewed_at TEXT, UNIQUE(user_id, question_id)
 );
+CREATE TABLE IF NOT EXISTS adhdsat.practice_test_results (
+  id TEXT PRIMARY KEY, user_id TEXT NOT NULL,
+  rw_score INTEGER, math_score INTEGER, total_score INTEGER,
+  rw_correct INTEGER, rw_total INTEGER, math_correct INTEGER, math_total INTEGER,
+  taken_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_ptr_user ON adhdsat.practice_test_results(user_id, taken_at DESC);
 CREATE INDEX IF NOT EXISTS idx_ua_user ON adhdsat.user_answers(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_ua_sprint ON adhdsat.user_answers(sprint_id);
 CREATE INDEX IF NOT EXISTS idx_sprints_user ON adhdsat.sprints(user_id, started_at DESC);

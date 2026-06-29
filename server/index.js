@@ -260,6 +260,40 @@ app.get('/api/practice-test', async (req, res) => {
   res.json({ section: section || 'mixed', count: out.length, questions: out });
 });
 
+// Save a completed practice-test result so students can track score trends.
+app.post('/api/practice-test/result', async (req, res) => {
+  const { userId, rw_score, math_score, rw_correct, rw_total, math_correct, math_total } = req.body;
+  if (!userId) return res.status(400).json({ error: 'userId required' });
+  try {
+    const id = crypto.randomUUID();
+    const total = (rw_score || 0) + (math_score || 0);
+    await query(
+      `INSERT INTO adhdsat.practice_test_results
+        (id, user_id, rw_score, math_score, total_score, rw_correct, rw_total, math_correct, math_total, taken_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+      [id, userId, rw_score || 0, math_score || 0, total, rw_correct || 0, rw_total || 0, math_correct || 0, math_total || 0, new Date().toISOString()]
+    );
+    res.json({ id, total_score: total });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Past practice-test results (most recent first), for the score-trend view.
+app.get('/api/practice-test/history/:userId', async (req, res) => {
+  try {
+    const results = await rows(
+      `SELECT total_score, rw_score, math_score, taken_at
+       FROM adhdsat.practice_test_results WHERE user_id = $1
+       ORDER BY taken_at DESC LIMIT 20`,
+      [req.params.userId]
+    );
+    res.json({ results });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // --- Sprints ---
 
 app.post('/api/sprints', async (req, res) => {

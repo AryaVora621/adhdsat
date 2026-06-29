@@ -47,10 +47,41 @@ export default function PracticeTest({ user }) {
   const [timeLeft, setTimeLeft] = useState(0);
   const [sectionResults, setSectionResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [prevBest, setPrevBest] = useState(null);
 
   const timerRef = useRef(null);
   const answersRef = useRef({});
   answersRef.current = answers;
+  const savedRef = useRef(false);
+
+  const loadHistory = useCallback(() => {
+    fetch(`/api/practice-test/history/${user.id}`)
+      .then(r => r.ok ? r.json() : { results: [] })
+      .then(d => setHistory(d.results || []))
+      .catch(() => {});
+  }, [user.id]);
+
+  useEffect(() => { loadHistory(); }, [loadHistory]);
+
+  // Persist the completed test once, then refresh the trend.
+  useEffect(() => {
+    if (phase !== 'results' || savedRef.current || sectionResults.length < 2) return;
+    savedRef.current = true;
+    // Snapshot the best score from BEFORE this attempt (history is still pre-save here).
+    setPrevBest(history.length ? Math.max(...history.map(h => h.total_score)) : 0);
+    const rw = sectionResults.find(r => r.section === 'english');
+    const math = sectionResults.find(r => r.section === 'math');
+    fetch('/api/practice-test/result', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: user.id,
+        rw_score: rw?.scaled, math_score: math?.scaled,
+        rw_correct: rw?.correct, rw_total: rw?.total,
+        math_correct: math?.correct, math_total: math?.total,
+      }),
+    }).then(() => loadHistory()).catch(() => {});
+  }, [phase, sectionResults, user.id, loadHistory]);
 
   const loadModule = useCallback(async (idx) => {
     const mod = MODULES[idx];
@@ -159,6 +190,27 @@ export default function PracticeTest({ user }) {
             </div>
           ))}
         </div>
+        {history.length > 0 && (() => {
+          const best = Math.max(...history.map(h => h.total_score));
+          const recent = history.slice(0, 6).reverse(); // oldest -> newest for a left-to-right trend
+          const max = Math.max(...recent.map(h => h.total_score), 1);
+          return (
+            <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '14px', border: '1px solid #2a2a46', padding: '16px 18px', marginBottom: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '12px' }}>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Your Scores</span>
+                <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Best <strong style={{ color: 'var(--xp-gold)' }}>{best}</strong></span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '64px' }}>
+                {recent.map((h, i) => (
+                  <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{h.total_score}</div>
+                    <div style={{ width: '100%', maxWidth: '34px', height: `${Math.max(8, (h.total_score / max) * 44)}px`, backgroundColor: h.total_score === best ? 'var(--xp-gold)' : 'var(--primary)', borderRadius: '4px 4px 0 0' }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
         <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '20px' }}>
           No hints or explanations during the test, just like the real thing. There is a short break between sections.
         </p>
@@ -210,6 +262,11 @@ export default function PracticeTest({ user }) {
       <div style={{ ...wrap, textAlign: 'center' }}>
         <Trophy size={44} color="var(--xp-gold)" style={{ marginBottom: '12px' }} />
         <h1 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '4px' }}>Practice Test Complete</h1>
+        {prevBest > 0 && total > prevBest && (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(255,215,64,0.12)', border: '1px solid rgba(255,215,64,0.35)', borderRadius: '20px', padding: '5px 14px', margin: '6px 0', color: 'var(--xp-gold)', fontWeight: 700, fontSize: '0.85rem' }}>
+            <Trophy size={15} /> New Personal Best! (+{total - prevBest})
+          </div>
+        )}
         <div style={{ fontSize: '3.4rem', fontWeight: 800, color: 'var(--primary)', margin: '8px 0' }}>{total}</div>
         <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', letterSpacing: '1px', marginBottom: '24px' }}>ESTIMATED SCORE (400&ndash;1600)</div>
         <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
@@ -225,7 +282,7 @@ export default function PracticeTest({ user }) {
           This is a difficulty-weighted estimate from a single module per section, not an official score. Use it to track progress over time.
         </p>
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-          <button className="primary" onClick={() => { setSectionResults([]); setAnswers({}); setPhase('intro'); }}
+          <button className="primary" onClick={() => { savedRef.current = false; setSectionResults([]); setAnswers({}); setPhase('intro'); }}
             style={{ padding: '13px 24px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
             <RotateCcw size={16} /> Retake
           </button>
