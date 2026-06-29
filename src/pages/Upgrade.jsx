@@ -98,7 +98,12 @@ export default function Upgrade({ user, setUser }) {
         </div>
 
         {/* Pro */}
-        <div style={{ backgroundImage: 'linear-gradient(135deg, rgba(0,212,255,0.1), rgba(124,77,255,0.08))', borderRadius: '16px', border: '1px solid rgba(0,212,255,0.4)', padding: '24px', position: 'relative' }}>
+        <div style={{ backgroundImage: 'linear-gradient(135deg, rgba(0,212,255,0.1), rgba(255,215,64,0.07))', borderRadius: '16px', border: '1px solid rgba(0,212,255,0.4)', padding: '24px', position: 'relative' }}>
+          {!isPro && (
+            <div style={{ position: 'absolute', top: '-10px', right: '18px', background: 'linear-gradient(90deg, var(--primary), var(--xp-gold))', color: 'var(--primary-contrast)', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1px', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase' }}>
+              Recommended
+            </div>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
             <Zap size={15} color="var(--primary)" />
             <span style={{ fontSize: '0.78rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 700 }}>Pro</span>

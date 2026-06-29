@@ -338,7 +338,7 @@ function PracticeTestCard({ user, navigate }) {
 
   return (
     <div onClick={() => navigate(isPro ? '/practice-test' : '/upgrade', isPro ? undefined : { state: { reason: 'Full practice tests' } })}
-      style={{ backgroundImage: 'linear-gradient(135deg, rgba(0,212,255,0.08), rgba(124,77,255,0.06))', padding: '18px 24px', borderRadius: '14px', border: '1px solid rgba(0,212,255,0.25)', marginBottom: '36px', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'border-color 0.15s' }}
+      style={{ backgroundImage: 'linear-gradient(135deg, rgba(0,212,255,0.08), rgba(255,215,64,0.05))', padding: '18px 24px', borderRadius: '14px', border: '1px solid rgba(0,212,255,0.25)', marginBottom: '36px', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'border-color 0.15s' }}
       onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,212,255,0.6)'; }}
       onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,212,255,0.25)'; }}>
       <FileText size={24} color="var(--primary)" />
