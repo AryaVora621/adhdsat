@@ -2,6 +2,13 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, ChevronRight, FileText, Coffee, Trophy, AlertCircle, RotateCcw, BookOpen, Crown } from 'lucide-react';
 import MathText from '../components/MathText';
+import { useCountUp } from '../lib/useCountUp';
+
+// Animated number for the score reveal. Mounts with the results screen, so the
+// count-up plays exactly when the score appears.
+function CountUp({ value, duration }) {
+  return useCountUp(value, duration);
+}
 
 // Official digital SAT modules. We run one module per section (a faithful,
 // time-boxed simulation that stays manageable for an ADHD attention span);
@@ -349,12 +356,12 @@ export default function PracticeTest({ user }) {
             <Trophy size={15} /> New Personal Best! (+{total - prevBest})
           </div>
         )}
-        <div style={{ fontSize: '3.4rem', fontWeight: 800, color: 'var(--primary)', margin: '8px 0' }}>{total}</div>
+        <div style={{ fontSize: '3.4rem', fontWeight: 800, color: 'var(--primary)', margin: '8px 0' }}><CountUp value={total} /></div>
         <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', letterSpacing: '1px', marginBottom: '24px' }}>ESTIMATED SCORE (400&ndash;1600)</div>
         <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
           {sectionResults.map(r => (
             <div key={r.section} style={{ flex: 1, backgroundColor: 'var(--bg-card)', borderRadius: '14px', border: '1px solid var(--border)', padding: '18px 12px' }}>
-              <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--primary)' }}>{r.scaled}</div>
+              <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--primary)' }}><CountUp value={r.scaled} duration={900} /></div>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '4px' }}>{r.label}</div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '6px' }}>{r.correct}/{r.total} correct</div>
             </div>
