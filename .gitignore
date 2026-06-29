@@ -37,3 +37,6 @@ dist-ssr
 *.png
 .vercel
 .env*
+
+# Keep the social-preview asset (overrides the *.png screenshot ignore)
+!public/og-image.png
