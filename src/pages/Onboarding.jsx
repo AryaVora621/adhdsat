@@ -76,8 +76,7 @@ export default function Onboarding({ user, setUser }) {
         body: JSON.stringify({ target_score: targetScore, ...(testDate ? { test_date: testDate } : {}) })
       }).catch(() => {});
       navigate('/sprint', { state: { mode: 'adaptive' } });
-    } catch (err) {
-      console.error(err);
+    } catch {
       setSubmitting(false);
     }
   };
@@ -247,7 +246,7 @@ export default function Onboarding({ user, setUser }) {
               Test Date <span style={{ color: '#555', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
             </label>
             <input type="date" value={testDate} onChange={e => setTestDate(e.target.value)}
-              style={{ width: '100%', padding: '12px 14px', backgroundColor: 'var(--bg-main)', border: '1px solid #2a2a46', borderRadius: '10px', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '12px 14px', backgroundColor: 'var(--bg-main)', border: '1px solid #2a2a46', borderRadius: '10px', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none', boxSizing: 'border-box', colorScheme: 'dark' }}
               onFocus={e => e.target.style.borderColor = 'var(--primary)'}
               onBlur={e => e.target.style.borderColor = '#2a2a46'}
             />

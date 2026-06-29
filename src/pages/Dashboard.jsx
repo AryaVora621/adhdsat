@@ -40,6 +40,51 @@ function DomainCard({ name, stats }) {
   );
 }
 
+function WeeklyStatsWidget({ user }) {
+  const [stats, setStats] = useState({ sprints: 0, xp: 0, minutes: 0 });
+
+  useEffect(() => {
+    if (!user?.id) return;
+    fetch(`/api/sprints?userId=${user.id}&days=7`)
+      .then(r => r.json())
+      .then(data => {
+        const sprints = data?.sprints || [];
+        const xp = sprints.reduce((sum, s) => sum + (s.xp_earned || 0), 0);
+        const minutes = Math.round(sprints.reduce((sum, s) => sum + (s.duration_seconds || 0), 0) / 60);
+        setStats({ sprints: sprints.length, xp, minutes });
+      })
+      .catch(() => {});
+  }, [user?.id]);
+
+  return (
+    <div style={{
+      backgroundColor: 'var(--bg-card)',
+      padding: '20px',
+      borderRadius: '14px',
+      border: '1px solid #2a2a46',
+      marginBottom: '24px'
+    }}>
+      <div style={{ fontSize: '0.72rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px', fontWeight: '600' }}>
+        This Week
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--primary)' }}>{stats.sprints}</div>
+          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Sprints</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--xp-gold)' }}>+{stats.xp}</div>
+          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '4px' }}>XP</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--success)' }}>{stats.minutes}</div>
+          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Minutes</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function QuickStartCard({ navigate, user }) {
   const [starting, setStarting] = useState(false);
   const [today, setToday] = useState(null);
@@ -121,13 +166,15 @@ function StudyPlanWidget({ user, navigate }) {
   }, [user.id]);
 
   const save = async () => {
-    const res = await fetch(`/api/study-plan/${user.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ target_score: targetScore, test_date: testDate })
-    });
-    setPlan(await res.json());
-    setEditing(false);
+    try {
+      const res = await fetch(`/api/study-plan/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target_score: targetScore, test_date: testDate })
+      });
+      setPlan(await res.json());
+      setEditing(false);
+    } catch {}
   };
 
   if (editing || !plan) {
@@ -310,6 +357,9 @@ export default function Dashboard({ user, isMobile }) {
           : `${progress.totalAnswered} questions answered total.`
         }
       </p>
+
+      {/* Weekly stats */}
+      <WeeklyStatsWidget user={user} />
 
       {/* Quick start */}
       <QuickStartCard navigate={navigate} user={user} />

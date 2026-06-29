@@ -313,7 +313,7 @@ app.get('/api/progress', (req, res) => {
         math: mathScore,
         english: engScore,
         total: mS + eS,
-        range: `${mS + eS - 40}–${mS + eS + 40}`
+        range: `${mS + eS - 40}-${mS + eS + 40}`
       };
     }
   }
@@ -358,6 +358,34 @@ app.get('/api/sprints/:id/breakdown', (req, res) => {
   })).sort((a, b) => a.accuracy - b.accuracy);
 
   res.json({ domains, totalTime });
+});
+
+app.get('/api/sprints', (req, res) => {
+  const { userId, days = 7 } = req.query;
+  if (!userId) return res.status(400).json({ error: 'userId required' });
+
+  const daysAgo = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  const rows = db.prepare(`
+    SELECT s.id, s.sprint_type, s.correct_count, s.total_count, s.xp_earned, s.created_at,
+           COALESCE(SUM(ua.time_spent_seconds), 0) as duration_seconds
+    FROM sprints s
+    LEFT JOIN user_answers ua ON s.id = ua.sprint_id
+    WHERE s.user_id = ? AND s.created_at > ?
+    GROUP BY s.id
+    ORDER BY s.created_at DESC
+  `).all(userId, daysAgo);
+
+  const sprints = rows.map(r => ({
+    id: r.id,
+    sprint_type: r.sprint_type,
+    correct_count: r.correct_count,
+    total_count: r.total_count,
+    xp_earned: r.xp_earned,
+    duration_seconds: r.duration_seconds,
+    created_at: r.created_at
+  }));
+
+  res.json({ sprints });
 });
 
 // --- Review Errors (SM-2 Spaced Repetition) ---
