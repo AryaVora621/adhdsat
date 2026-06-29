@@ -23411,5 +23411,661 @@
       "past-perfect"
     ],
     "source": "authored"
+  },
+  {
+    "id": "auth3_001",
+    "section": "Math",
+    "domain": "Algebra",
+    "skill": "Linear equations: one variable",
+    "difficulty": "easy",
+    "question_text": "If 5x - 3 = 12, what is the value of x?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "3",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "15",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "1.8",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "9",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "Add 3 to both sides: 5x = 15. Divide by 5: x = 3.",
+    "hint_1": "Undo the -3 first, then the multiplication.",
+    "hint_2": "5x = 15, so x = 3.",
+    "tags": [
+      "linear",
+      "solve"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth3_002",
+    "section": "Math",
+    "domain": "Algebra",
+    "skill": "Systems of equations",
+    "difficulty": "medium",
+    "question_text": "The system of equations x + y = 10 and x - y = 4 has a unique solution. What is the value of x?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "7",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "3",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "5",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "6",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "Add the two equations: (x + y) + (x - y) = 10 + 4, so 2x = 14 and x = 7.",
+    "hint_1": "Adding the equations eliminates y.",
+    "hint_2": "2x = 14.",
+    "tags": [
+      "system",
+      "elimination"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth3_003",
+    "section": "Math",
+    "domain": "Algebra",
+    "skill": "Linear equations: distributing",
+    "difficulty": "hard",
+    "question_text": "If 2(x - 3) = 4x + 6, what is the value of x?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "-6",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "6",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "0",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "-3",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "Distribute: 2x - 6 = 4x + 6. Subtract 2x: -6 = 2x + 6. Subtract 6: -12 = 2x, so x = -6.",
+    "hint_1": "Distribute the 2 first, then collect x terms on one side.",
+    "hint_2": "-12 = 2x.",
+    "tags": [
+      "linear",
+      "distribute"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth3_004",
+    "section": "Math",
+    "domain": "Advanced Math",
+    "skill": "Exponents",
+    "difficulty": "medium",
+    "question_text": "If 2^x = 32, what is the value of x?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "5",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "16",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "6",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "4",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "32 = 2^5, so 2^x = 2^5 means x = 5.",
+    "hint_1": "Write 32 as a power of 2.",
+    "hint_2": "2 x 2 x 2 x 2 x 2 = 32.",
+    "tags": [
+      "exponents",
+      "powers"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth3_005",
+    "section": "Math",
+    "domain": "Advanced Math",
+    "skill": "Rational expressions",
+    "difficulty": "hard",
+    "question_text": "For x not equal to 3, the expression (x^2 - 9) / (x - 3) is equivalent to which of the following?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "x + 3",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "x - 3",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "x + 9",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "x",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "x^2 - 9 is a difference of squares: (x - 3)(x + 3). Dividing by (x - 3) leaves x + 3.",
+    "hint_1": "Factor the numerator as a difference of squares.",
+    "hint_2": "(x - 3)(x + 3) / (x - 3).",
+    "tags": [
+      "factoring",
+      "rational"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth3_006",
+    "section": "Math",
+    "domain": "Advanced Math",
+    "skill": "Composition of functions",
+    "difficulty": "medium",
+    "question_text": "The functions are defined by f(x) = 3x + 1 and g(x) = x^2. What is the value of f(g(2))?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "13",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "7",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "19",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "10",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "First find g(2) = 2^2 = 4. Then f(4) = 3(4) + 1 = 13.",
+    "hint_1": "Work from the inside out: find g(2) first.",
+    "hint_2": "g(2) = 4, then plug into f.",
+    "tags": [
+      "functions",
+      "composition"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth3_007",
+    "section": "Math",
+    "domain": "Problem Solving & Data Analysis",
+    "skill": "Proportional reasoning",
+    "difficulty": "easy",
+    "question_text": "A recipe uses 2 cups of flour to make 12 cookies. At the same rate, how many cups of flour are needed to make 30 cookies?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "5",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "6",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "2.5",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "4",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "The rate is 2 cups / 12 cookies = 1 cup per 6 cookies. For 30 cookies: 30 / 6 = 5 cups.",
+    "hint_1": "Find cups per cookie, or set up a proportion.",
+    "hint_2": "2/12 = x/30.",
+    "tags": [
+      "proportion",
+      "rate"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth3_008",
+    "section": "Math",
+    "domain": "Problem Solving & Data Analysis",
+    "skill": "Statistics: mean",
+    "difficulty": "medium",
+    "question_text": "The mean (average) of 5 numbers is 20. What is the sum of the 5 numbers?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "100",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "25",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "4",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "20",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "Mean = sum / count, so sum = mean x count = 20 x 5 = 100.",
+    "hint_1": "Rearrange the mean formula to solve for the sum.",
+    "hint_2": "Sum = 20 x 5.",
+    "tags": [
+      "mean",
+      "average"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth3_009",
+    "section": "Math",
+    "domain": "Problem Solving & Data Analysis",
+    "skill": "Percent change",
+    "difficulty": "hard",
+    "question_text": "A quantity increases from 80 to 100. What is the percent increase?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "25%",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "20%",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "80%",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "125%",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "Percent increase = (change / original) x 100 = (20 / 80) x 100 = 25%.",
+    "hint_1": "Divide the change by the ORIGINAL value, not the new one.",
+    "hint_2": "20 / 80 = 0.25.",
+    "tags": [
+      "percent",
+      "change"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth3_010",
+    "section": "Math",
+    "domain": "Geometry & Trig",
+    "skill": "Triangle angle sum",
+    "difficulty": "medium",
+    "question_text": "Two of the interior angles of a triangle measure 50 degrees and 60 degrees. What is the measure of the third angle?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "70 degrees",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "110 degrees",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "90 degrees",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "80 degrees",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "The interior angles of a triangle sum to 180 degrees. 180 - 50 - 60 = 70.",
+    "hint_1": "The three interior angles of any triangle add to 180 degrees.",
+    "hint_2": "180 - 50 - 60.",
+    "tags": [
+      "triangle",
+      "angles"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth3_011",
+    "section": "Math",
+    "domain": "Geometry & Trig",
+    "skill": "Pythagorean theorem",
+    "difficulty": "hard",
+    "question_text": "A right triangle has legs of length 6 and 8. What is the length of the hypotenuse?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "10",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "14",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "100",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "48",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "By the Pythagorean theorem, hypotenuse = sqrt(6^2 + 8^2) = sqrt(36 + 64) = sqrt(100) = 10.",
+    "hint_1": "Use a^2 + b^2 = c^2.",
+    "hint_2": "sqrt(36 + 64) = sqrt(100).",
+    "tags": [
+      "pythagorean",
+      "right-triangle"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth3_012",
+    "section": "Math",
+    "domain": "Geometry & Trig",
+    "skill": "Area of rectangles",
+    "difficulty": "easy",
+    "question_text": "A rectangle has a length of 9 and a width of 4. What is the area of the rectangle?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "36",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "26",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "13",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "40",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "Area of a rectangle = length x width = 9 x 4 = 36.",
+    "hint_1": "Area of a rectangle is length times width.",
+    "hint_2": "9 x 4 = 36.",
+    "tags": [
+      "rectangle",
+      "area"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth3_013",
+    "section": "English",
+    "domain": "Standard English Conventions",
+    "skill": "Possessive nouns",
+    "difficulty": "medium",
+    "question_text": "Which choice completes the text so that it conforms to the conventions of Standard English? After the championship game, the ______ uniforms were collected and sent to be cleaned.",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "players",
+        "is_correct": false
+      },
+      {
+        "label": "B",
+        "text": "player's",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "players'",
+        "is_correct": true
+      },
+      {
+        "label": "D",
+        "text": "players's",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "The uniforms belong to multiple players, so a plural possessive is needed. A plural noun already ending in -s takes an apostrophe after the s: players'.",
+    "hint_1": "The uniforms belong to more than one player.",
+    "hint_2": "A plural noun ending in -s shows possession with an apostrophe after the s.",
+    "tags": [
+      "possessive",
+      "apostrophe"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth3_014",
+    "section": "English",
+    "domain": "Expression of Ideas",
+    "skill": "Transitions",
+    "difficulty": "medium",
+    "question_text": "Which choice best completes the text with a logical transition? Solar panels were once prohibitively expensive for the average household. ______, falling manufacturing costs have made them affordable for many homeowners.",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "Today,",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "Likewise,",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "For instance,",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "Therefore,",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "The sentence contrasts a past condition (expensive) with the present (affordable). 'Today' signals that shift in time. The other options imply similarity, example, or cause, which do not fit.",
+    "hint_1": "The two sentences contrast the past with the present.",
+    "hint_2": "Which word marks a change over time?",
+    "tags": [
+      "transition",
+      "time"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth3_015",
+    "section": "English",
+    "domain": "Information & Ideas",
+    "skill": "Command of evidence",
+    "difficulty": "medium",
+    "question_text": "A study found that students who took brief walking breaks during study sessions recalled 20 percent more material than students who studied continuously. Which finding, if true, would most strengthen the conclusion that the walking breaks caused the improved recall?",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "A follow-up study using the same method found the same 20 percent improvement across several different age groups.",
+        "is_correct": true
+      },
+      {
+        "label": "B",
+        "text": "Walking is widely recommended as a form of light exercise.",
+        "is_correct": false
+      },
+      {
+        "label": "C",
+        "text": "Some students in the study said they disliked being told to walk.",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "Studying continuously is a common habit among students.",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "A replication that reproduces the same effect under the same method, across varied groups, strengthens a causal conclusion. The other choices are unrelated to whether the breaks caused the recall gain.",
+    "hint_1": "Look for the choice that provides independent support for the cause-and-effect claim.",
+    "hint_2": "Replication across different groups is strong evidence.",
+    "tags": [
+      "evidence",
+      "reasoning"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "auth3_016",
+    "section": "English",
+    "domain": "Craft & Structure",
+    "skill": "Words in context",
+    "difficulty": "hard",
+    "question_text": "Which choice completes the text with the most logical and precise word? Although several critics found the novel ______, many readers embraced its sprawling, unconventional structure.",
+    "passage_text": null,
+    "choices": [
+      {
+        "label": "A",
+        "text": "engaging",
+        "is_correct": false
+      },
+      {
+        "label": "B",
+        "text": "convoluted",
+        "is_correct": true
+      },
+      {
+        "label": "C",
+        "text": "concise",
+        "is_correct": false
+      },
+      {
+        "label": "D",
+        "text": "familiar",
+        "is_correct": false
+      }
+    ],
+    "is_grid_in": 0,
+    "grid_in_answer": null,
+    "explanation": "'Although' signals a contrast with readers who embraced the book, so the critics' view should be negative. 'Convoluted' (overly complex) fits a 'sprawling, unconventional structure'; the other options are positive, neutral, or contradict 'unconventional.'",
+    "hint_1": "'Although' means the critics' reaction contrasts with the readers' approval.",
+    "hint_2": "The word should be negative and match 'sprawling, unconventional.'",
+    "tags": [
+      "vocabulary",
+      "context"
+    ],
+    "source": "authored"
   }
 ]
