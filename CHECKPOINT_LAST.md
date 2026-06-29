@@ -63,6 +63,18 @@ Status: LIVE at https://adhdsat.vercel.app
   else Landing. Single onAuthStateChange listener.
 - Loop active: cron 20cdaa2a every 30m (premium polish + git checkpoints).
 
+## Premium polish loop (2026-06-29 eve, tags v1.3/v1.4)
+- v1.3-theme-brand: app-wide light mode (swapped ~90 hardcoded hex -> CSS vars
+  across all pages); new brand favicon + PWA icon (cyan->gold bolt on dark tile,
+  replaced the Google Antigravity decal).
+- v1.4-light-mode-fixes: fixed invisible white-on-white text (grid-in/date/name
+  inputs, level-up toast -> var(--text-primary)); removed forced colorScheme:dark
+  on date pickers; themed the loading skeleton.
+- QA'd light mode live across landing, onboarding, sprint, dashboard: all clean
+  and readable. (The stray "00" top-right in automation = Vercel Toolbar badge,
+  visible only to the Vercel account owner, not end users. Not a bug.)
+- All pushed to GitHub with tags; loop cron 20cdaa2a still firing every 30m.
+
 ## Next actions (priority order)
 1. HUMAN (see LAUNCH_CONFIG.md): (a) rotate Supabase DB password [security
    blocker], (b) set Supabase Auth Site URL + redirect allowlist to
