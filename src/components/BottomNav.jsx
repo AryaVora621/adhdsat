@@ -25,7 +25,7 @@ export default function BottomNav({ userId }) {
   return (
     <nav style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
-      backgroundColor: 'var(--bg-sidebar)', borderTop: '1px solid #2a2a46',
+      backgroundColor: 'var(--bg-sidebar)', borderTop: '1px solid var(--border)',
       display: 'flex', alignItems: 'stretch',
       paddingBottom: 'env(safe-area-inset-bottom)',
     }}>

@@ -145,7 +145,7 @@ export default function Profile({ user, setUser }) {
 
   const sectionStyle = {
     backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px',
-    marginBottom: '16px', border: '1px solid #2a2a46'
+    marginBottom: '16px', border: '1px solid var(--border)'
   };
   const labelStyle = {
     fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase',
@@ -195,7 +195,7 @@ export default function Profile({ user, setUser }) {
             </span>
           </div>
           <button onClick={() => navigate('/upgrade')}
-            style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 600, color: user.plan === 'paid' ? 'var(--text-secondary)' : 'var(--primary)', borderColor: user.plan === 'paid' ? '#2a2a46' : 'rgba(0,212,255,0.4)' }}>
+            style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 600, color: user.plan === 'paid' ? 'var(--text-secondary)' : 'var(--primary)', borderColor: user.plan === 'paid' ? 'var(--border)' : 'rgba(0,212,255,0.4)' }}>
             {user.plan === 'paid' ? 'Manage' : 'Upgrade to Pro'}
           </button>
         </div>
@@ -297,7 +297,7 @@ export default function Profile({ user, setUser }) {
           <span>Level {level}</span>
           <span>{user.total_xp - xpForCurrentLevel} / {xpForNextLevel - xpForCurrentLevel} XP</span>
         </div>
-        <div style={{ height: '7px', backgroundColor: '#0f0f1a', borderRadius: '4px', overflow: 'hidden' }}>
+        <div style={{ height: '7px', backgroundColor: 'var(--bg-main)', borderRadius: '4px', overflow: 'hidden' }}>
           <div style={{ width: `${Math.min(xpProgress, 100)}%`, height: '100%', backgroundColor: 'var(--primary)', transition: 'width 0.5s ease' }} />
         </div>
       </div>
@@ -315,7 +315,7 @@ export default function Profile({ user, setUser }) {
           {ALL_DOMAINS.map(d => (
             <button key={d} onClick={() => toggleDomain(d)}
               style={{ padding: '7px 14px', borderRadius: '20px', fontSize: '0.82rem', transition: 'all 0.15s',
-                border: weakAreas.includes(d) ? '1px solid var(--primary)' : '1px solid #2a2a46',
+                border: weakAreas.includes(d) ? '1px solid var(--primary)' : '1px solid var(--border)',
                 backgroundColor: weakAreas.includes(d) ? 'rgba(0,212,255,0.1)' : 'transparent',
                 color: weakAreas.includes(d) ? 'var(--primary)' : 'var(--text-secondary)' }}>
               {d}
@@ -331,14 +331,14 @@ export default function Profile({ user, setUser }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {ALL_DOMAINS.map(d => {
               const acc = progress.domainStats[d]?.accuracy;
-              const color = acc === null ? '#3a3a56' : acc > 0.75 ? 'var(--success)' : acc > 0.5 ? 'var(--xp-gold)' : 'var(--error)';
+              const color = acc === null ? 'var(--bg-elevated)' : acc > 0.75 ? 'var(--success)' : acc > 0.5 ? 'var(--xp-gold)' : 'var(--error)';
               return (
                 <div key={d}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '0.82rem' }}>
                     <span style={{ color: 'var(--text-secondary)' }}>{d}</span>
                     <span style={{ color, fontWeight: '600' }}>{acc === null ? '--' : `${Math.round(acc * 100)}%`}</span>
                   </div>
-                  <div style={{ height: '5px', backgroundColor: '#2a2a46', borderRadius: '3px', overflow: 'hidden' }}>
+                  <div style={{ height: '5px', backgroundColor: 'var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
                     <div style={{ width: `${acc === null ? 0 : acc * 100}%`, height: '100%', backgroundColor: color, transition: 'width 0.6s ease' }} />
                   </div>
                 </div>
@@ -364,7 +364,7 @@ export default function Profile({ user, setUser }) {
               {progress.recentSprints.map(s => {
                 const pct = s.questions_attempted > 0 ? Math.round(s.questions_correct / s.questions_attempted * 100) : 0;
                 return (
-                  <tr key={s.id} style={{ borderTop: '1px solid #2a2a46' }}>
+                  <tr key={s.id} style={{ borderTop: '1px solid var(--border)' }}>
                     <td style={{ padding: '10px 0', color: 'var(--text-secondary)' }}>
                       {new Date(s.completed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </td>
@@ -390,7 +390,7 @@ export default function Profile({ user, setUser }) {
           </p>
         </div>
         <a href={`/api/users/${user.id}/export`} download="adhdsat-history.csv"
-          style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px', fontSize: '0.85rem', border: '1px solid #2a2a46', borderRadius: '10px', color: 'var(--primary)', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
+          style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px', fontSize: '0.85rem', border: '1px solid var(--border)', borderRadius: '10px', color: 'var(--primary)', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
           <Upload size={14} /> Export CSV
         </a>
       </div>

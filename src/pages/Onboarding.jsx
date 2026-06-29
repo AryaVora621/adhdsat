@@ -88,7 +88,7 @@ export default function Onboarding({ user, setUser }) {
 
   const cardStyle = {
     backgroundColor: 'var(--bg-card)', borderRadius: '20px', padding: 'clamp(16px, 5vw, 48px)',
-    border: '1px solid #2a2a46', width: '100%', maxWidth: '560px'
+    border: '1px solid var(--border)', width: '100%', maxWidth: '560px'
   };
 
   return (
@@ -103,7 +103,7 @@ export default function Onboarding({ user, setUser }) {
         {[1, 2, 3].map(s => (
           <div key={s} style={{
             width: s === step ? '32px' : '8px', height: '8px', borderRadius: '4px',
-            backgroundColor: s <= step ? 'var(--primary)' : '#2a2a46',
+            backgroundColor: s <= step ? 'var(--primary)' : 'var(--border)',
             transition: 'all 0.3s ease'
           }} />
         ))}
@@ -141,7 +141,7 @@ export default function Onboarding({ user, setUser }) {
           <div style={{ marginBottom: '32px' }}>
             <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/jpg" style={{ display: 'none' }} onChange={handleImageUpload} />
             <button onClick={() => fileInputRef.current.click()} disabled={uploading}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '12px', justifyContent: 'center', borderStyle: 'dashed', borderColor: '#2a2a46', color: 'var(--text-secondary)' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '12px', justifyContent: 'center', borderStyle: 'dashed', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
               <Upload size={16} /> {uploading ? 'Analyzing...' : 'Upload past score report (PNG/JPG, optional)'}
             </button>
             {uploadMsg && <p style={{ color: uploadMsg.includes('pre-filled') ? 'var(--success)' : 'var(--text-secondary)', fontSize: '0.82rem', marginTop: '8px', textAlign: 'center' }}>{uploadMsg}</p>}
@@ -171,7 +171,7 @@ export default function Onboarding({ user, setUser }) {
                   <button key={domain} onClick={() => toggleDomain(domain)}
                     style={{
                       textAlign: 'left', padding: '11px 16px', borderRadius: '10px',
-                      border: weakAreas.includes(domain) ? '2px solid var(--primary)' : '2px solid #2a2a46',
+                      border: weakAreas.includes(domain) ? '2px solid var(--primary)' : '2px solid var(--border)',
                       backgroundColor: weakAreas.includes(domain) ? 'rgba(0,212,255,0.08)' : 'transparent',
                       color: weakAreas.includes(domain) ? 'var(--primary)' : 'var(--text-primary)',
                       transition: 'all 0.15s', fontSize: '0.95rem'
@@ -203,7 +203,7 @@ export default function Onboarding({ user, setUser }) {
           </div>
 
           {/* Baseline summary */}
-          <div style={{ backgroundColor: 'var(--bg-main)', borderRadius: '14px', padding: '20px', marginBottom: '20px', border: '1px solid #2a2a46' }}>
+          <div style={{ backgroundColor: 'var(--bg-main)', borderRadius: '14px', padding: '20px', marginBottom: '20px', border: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: weakAreas.length > 0 ? '16px' : '0' }}>
               {[['Baseline R&W', englishScore], ['Baseline Math', mathScore], ['Total', englishScore + mathScore]].map(([label, val]) => (
                 <div key={label} style={{ textAlign: 'center' }}>
@@ -213,7 +213,7 @@ export default function Onboarding({ user, setUser }) {
               ))}
             </div>
             {weakAreas.length > 0 && (
-              <div style={{ borderTop: '1px solid #2a2a46', paddingTop: '12px' }}>
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '12px' }}>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>Focus areas</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                   {weakAreas.map(a => (
@@ -243,12 +243,12 @@ export default function Onboarding({ user, setUser }) {
           {/* Test date */}
           <div style={{ marginBottom: '24px' }}>
             <label style={{ display: 'block', marginBottom: '10px', color: 'var(--text-secondary)', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              Test Date <span style={{ color: '#555', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
+              Test Date <span style={{ color: 'var(--text-secondary)', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
             </label>
             <input type="date" value={testDate} onChange={e => setTestDate(e.target.value)}
-              style={{ width: '100%', padding: '12px 14px', backgroundColor: 'var(--bg-main)', border: '1px solid #2a2a46', borderRadius: '10px', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none', boxSizing: 'border-box', colorScheme: 'dark' }}
+              style={{ width: '100%', padding: '12px 14px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border)', borderRadius: '10px', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none', boxSizing: 'border-box', colorScheme: 'dark' }}
               onFocus={e => e.target.style.borderColor = 'var(--primary)'}
-              onBlur={e => e.target.style.borderColor = '#2a2a46'}
+              onBlur={e => e.target.style.borderColor = 'var(--border)'}
             />
           </div>
 

@@ -218,15 +218,15 @@ export default function ReviewSprint({ user, setUser }) {
           <span style={{ color: 'var(--xp-gold)', fontWeight: '600', fontSize: '0.8rem' }}>Spaced Repetition</span>
         </div>
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginBottom: '32px' }}>
-          <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #2a2a46', borderRadius: '16px', padding: '20px 28px' }}>
+          <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '20px 28px' }}>
             <div style={{ fontSize: '2.5rem', fontWeight: '800', color: gradeColor }}>{grade}</div>
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '4px' }}>Grade</div>
           </div>
-          <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #2a2a46', borderRadius: '16px', padding: '20px 28px' }}>
+          <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '20px 28px' }}>
             <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--primary)' }}>{accuracy}%</div>
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '4px' }}>Accuracy</div>
           </div>
-          <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #2a2a46', borderRadius: '16px', padding: '20px 28px' }}>
+          <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '20px 28px' }}>
             <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--xp-gold)' }}>+{stats.xp}</div>
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '4px' }}>XP Earned</div>
           </div>
@@ -239,7 +239,7 @@ export default function ReviewSprint({ user, setUser }) {
             : 'These concepts need more work. Cards are scheduled to return shortly.'}
         </p>
 
-        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #2a2a46', borderRadius: '12px', padding: '16px', marginBottom: '28px' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px', marginBottom: '28px' }}>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Next Review</div>
           <div style={{ fontSize: '1.3rem', fontWeight: '700', color: 'var(--primary)' }}>
             {nextReviewCount > 0 ? `${nextReviewCount} card${nextReviewCount !== 1 ? 's' : ''} due` : 'No cards due soon'}
@@ -252,7 +252,7 @@ export default function ReviewSprint({ user, setUser }) {
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
           <button className="primary" onClick={() => navigate('/')} style={{ padding: '12px 28px' }}>Back to Dashboard</button>
           <button onClick={() => { setShowSummary(false); setQuestionNum(1); setStats({ attempted: 0, correct: 0, xp: 0 }); fetchNextQuestion(); }}
-            style={{ padding: '12px 28px', backgroundColor: 'transparent', border: '1px solid #2a2a46', borderRadius: '10px', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.9rem' }}>
+            style={{ padding: '12px 28px', backgroundColor: 'transparent', border: '1px solid var(--border)', borderRadius: '10px', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.9rem' }}>
             Review More
           </button>
         </div>
@@ -295,7 +295,7 @@ export default function ReviewSprint({ user, setUser }) {
         {Array.from({ length: REVIEW_LENGTH }).map((_, i) => (
           <div key={i} style={{
             flex: 1, height: '5px', borderRadius: '3px',
-            backgroundColor: i < questionNum - 1 ? 'var(--xp-gold)' : i === questionNum - 1 ? 'rgba(255,215,64,0.4)' : '#2a2a46',
+            backgroundColor: i < questionNum - 1 ? 'var(--xp-gold)' : i === questionNum - 1 ? 'rgba(255,215,64,0.4)' : 'var(--border)',
             transition: 'background-color 0.3s'
           }} />
         ))}
@@ -304,17 +304,17 @@ export default function ReviewSprint({ user, setUser }) {
       {/* Domain header */}
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap' }}>
         <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>{question.section}</span>
-        <span style={{ color: '#2a2a46' }}>|</span>
+        <span style={{ color: 'var(--border)' }}>|</span>
         <span style={{ fontSize: '0.75rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px' }}>{question.domain}</span>
-        <span style={{ color: '#2a2a46' }}>|</span>
+        <span style={{ color: 'var(--border)' }}>|</span>
         <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>{question.difficulty}</span>
-        {!isAnswered && <span style={{ marginLeft: 'auto', fontSize: '0.65rem', color: '#2a2a46' }}>1-4 to pick, Enter to submit</span>}
+        {!isAnswered && <span style={{ marginLeft: 'auto', fontSize: '0.65rem', color: 'var(--border)' }}>1-4 to pick, Enter to submit</span>}
       </div>
 
       {/* Question */}
       <div style={{ display: 'flex', flexDirection: window.innerWidth < 768 && question.passage_text ? 'column' : 'row', gap: '24px', marginBottom: '40px' }}>
         {question.passage_text && (
-          <div style={{ flex: 1, borderRight: window.innerWidth < 768 ? 'none' : '1px solid #2a2a46', borderBottom: window.innerWidth < 768 ? '1px solid #2a2a46' : 'none', paddingRight: window.innerWidth < 768 ? '0' : '32px', paddingBottom: window.innerWidth < 768 ? '16px' : '0', fontSize: '0.95rem', lineHeight: 1.75, color: 'var(--text-secondary)' }}>
+          <div style={{ flex: 1, borderRight: window.innerWidth < 768 ? 'none' : '1px solid var(--border)', borderBottom: window.innerWidth < 768 ? '1px solid var(--border)' : 'none', paddingRight: window.innerWidth < 768 ? '0' : '32px', paddingBottom: window.innerWidth < 768 ? '16px' : '0', fontSize: '0.95rem', lineHeight: 1.75, color: 'var(--text-secondary)' }}>
             <MathText>{question.passage_text}</MathText>
           </div>
         )}
@@ -343,11 +343,11 @@ export default function ReviewSprint({ user, setUser }) {
         {question.is_grid_in ? (
           <input type="number" value={selectedChoice || ''} onChange={e => setSelectedChoice(e.target.value)}
             disabled={isAnswered}
-            style={{ padding: '16px', fontSize: '1.2rem', borderRadius: '10px', border: '2px solid #2a2a46', backgroundColor: 'var(--bg-main)', color: 'white', maxWidth: '260px', outline: 'none' }}
+            style={{ padding: '16px', fontSize: '1.2rem', borderRadius: '10px', border: '2px solid var(--border)', backgroundColor: 'var(--bg-main)', color: 'white', maxWidth: '260px', outline: 'none' }}
             placeholder="Enter your answer" />
         ) : (
           question.choices.map(c => {
-            let bgColor = 'var(--bg-card)', borderColor = '#2a2a46', textColor = 'var(--text-primary)';
+            let bgColor = 'var(--bg-card)', borderColor = 'var(--border)', textColor = 'var(--text-primary)';
             if (isAnswered) {
               if (c.is_correct) { bgColor = 'rgba(0,230,118,0.08)'; borderColor = 'var(--success)'; }
               else if (selectedChoice === c.label) { bgColor = 'rgba(255,82,82,0.08)'; borderColor = 'var(--error)'; }
@@ -357,7 +357,7 @@ export default function ReviewSprint({ user, setUser }) {
             return (
               <button key={c.label} disabled={isAnswered} onClick={() => setSelectedChoice(c.label)}
                 style={{ display: 'flex', alignItems: 'center', padding: '14px 18px', backgroundColor: bgColor, border: `2px solid ${borderColor}`, textAlign: 'left', fontSize: '1rem', gap: '14px', borderRadius: '12px', transition: 'all 0.15s', color: textColor }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: selectedChoice === c.label && !isAnswered ? 'var(--primary)' : '#2a2a46', color: selectedChoice === c.label && !isAnswered ? '#000' : 'var(--text-secondary)', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '0.85rem' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: selectedChoice === c.label && !isAnswered ? 'var(--primary)' : 'var(--border)', color: selectedChoice === c.label && !isAnswered ? 'var(--primary-contrast)' : 'var(--text-secondary)', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '0.85rem' }}>
                   {c.label}
                 </div>
                 <MathText style={{ flex: 1, color: 'var(--text-primary)' }}>{c.text}</MathText>
@@ -379,7 +379,7 @@ export default function ReviewSprint({ user, setUser }) {
                   {isCorrect ? 'Correct! +25 XP' : 'Explanation'}
                 </h3>
                 {sm2Result && (
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', backgroundColor: '#0f0f1a', padding: '3px 8px', borderRadius: '10px', border: '1px solid #2a2a46' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-main)', padding: '3px 8px', borderRadius: '10px', border: '1px solid var(--border)' }}>
                     {isCorrect
                       ? `Next review in ${sm2Result.interval_days}d`
                       : `Will repeat soon`}
@@ -417,7 +417,7 @@ export default function ReviewSprint({ user, setUser }) {
       ) : (
         <div style={{ display: 'flex', gap: '10px' }}>
           <button onClick={() => setHintsUsed(h => Math.min(h + 1, 2))} disabled={hintsUsed >= 2}
-            style={{ flex: 1, padding: '13px', fontSize: '0.9rem', color: hintsUsed >= 2 ? 'var(--text-secondary)' : 'var(--xp-gold)', borderColor: hintsUsed >= 2 ? '#2a2a46' : 'rgba(255,215,64,0.3)' }}>
+            style={{ flex: 1, padding: '13px', fontSize: '0.9rem', color: hintsUsed >= 2 ? 'var(--text-secondary)' : 'var(--xp-gold)', borderColor: hintsUsed >= 2 ? 'var(--border)' : 'rgba(255,215,64,0.3)' }}>
             Hint ({2 - hintsUsed} left)
           </button>
           <button className="primary" onClick={handleAnswerSubmit}

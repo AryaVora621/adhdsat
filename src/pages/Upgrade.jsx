@@ -78,7 +78,7 @@ export default function Upgrade({ user, setUser }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', marginBottom: '28px' }}>
         {/* Free */}
-        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', border: '1px solid #2a2a46', padding: '24px' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border)', padding: '24px' }}>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 700, marginBottom: '4px' }}>Free</div>
           <div style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '16px' }}>$0</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -91,7 +91,7 @@ export default function Upgrade({ user, setUser }) {
           </div>
           {isPro && (
             <button onClick={() => setPlan('free')} disabled={working}
-              style={{ width: '100%', marginTop: '20px', padding: '11px', fontSize: '0.85rem', color: 'var(--text-secondary)', border: '1px solid #2a2a46', borderRadius: '10px' }}>
+              style={{ width: '100%', marginTop: '20px', padding: '11px', fontSize: '0.85rem', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: '10px' }}>
               Switch to Free
             </button>
           )}

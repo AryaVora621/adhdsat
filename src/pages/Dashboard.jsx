@@ -17,11 +17,11 @@ function DomainCard({ name, stats }) {
   const acc = stats?.accuracy ?? null;
   const prior = stats?.priorAccuracy ?? null;
   const hasData = acc !== null && stats?.count > 0;
-  const color = !hasData ? '#2a2a46' : acc > 0.75 ? 'var(--success)' : acc > 0.5 ? 'var(--xp-gold)' : 'var(--error)';
+  const color = !hasData ? 'var(--border)' : acc > 0.75 ? 'var(--success)' : acc > 0.5 ? 'var(--xp-gold)' : 'var(--error)';
   const trend = hasData && prior !== null ? (acc > prior + 0.02 ? 'up' : acc < prior - 0.02 ? 'down' : 'flat') : null;
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '16px', border: `1px solid ${hasData ? color + '40' : '#2a2a46'}`, transition: 'border-color 0.3s' }}>
+    <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '16px', border: `1px solid ${hasData ? color + '40' : 'var(--border)'}`, transition: 'border-color 0.3s' }}>
       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '10px', lineHeight: 1.3, minHeight: '28px' }}>{name}</div>
       {hasData ? (
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
@@ -34,7 +34,7 @@ function DomainCard({ name, stats }) {
           </div>
         </div>
       ) : (
-        <div style={{ fontSize: '0.75rem', color: '#3a3a56', fontStyle: 'italic' }}>No data yet</div>
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>No data yet</div>
       )}
     </div>
   );
@@ -61,7 +61,7 @@ function WeeklyStatsWidget({ user }) {
       backgroundColor: 'var(--bg-card)',
       padding: '20px',
       borderRadius: '14px',
-      border: '1px solid #2a2a46',
+      border: '1px solid var(--border)',
       marginBottom: '24px'
     }}>
       <div style={{ fontSize: '0.72rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px', fontWeight: '600' }}>
@@ -136,7 +136,7 @@ function QuickStartCard({ navigate, user }) {
             {Array.from({ length: DAILY_GOAL }, (_, i) => (
               <div key={i} style={{
                 width: '28px', height: '8px', borderRadius: '4px',
-                backgroundColor: i < done ? 'var(--primary)' : '#2a2a46',
+                backgroundColor: i < done ? 'var(--primary)' : 'var(--border)',
                 transition: 'background-color 0.3s'
               }} />
             ))}
@@ -182,7 +182,7 @@ function StudyPlanWidget({ user, navigate }) {
 
   if (editing || !plan) {
     return (
-      <div style={{ backgroundColor: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid #2a2a46', marginBottom: '28px' }}>
+      <div style={{ backgroundColor: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', marginBottom: '28px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
           <Target size={20} color="var(--primary)" />
           <h2 style={{ fontSize: '1rem' }}>Set Your Study Plan</h2>
@@ -200,7 +200,7 @@ function StudyPlanWidget({ user, navigate }) {
           <div>
             <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Test Date</div>
             <input type="date" value={testDate} onChange={e => setTestDate(e.target.value)} min={new Date().toISOString().split('T')[0]}
-              style={{ padding: '8px 12px', backgroundColor: 'var(--bg-main)', border: '1px solid #2a2a46', borderRadius: '8px', color: 'white', fontSize: '0.9rem', colorScheme: 'dark' }} />
+              style={{ padding: '8px 12px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border)', borderRadius: '8px', color: 'white', fontSize: '0.9rem', colorScheme: 'dark' }} />
           </div>
           <button className="primary" onClick={save}
             style={{ padding: '8px 20px', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
@@ -220,7 +220,7 @@ function StudyPlanWidget({ user, navigate }) {
   const pct = currentTotal >= plan.target_score ? 100 : Math.round((currentTotal / plan.target_score) * 100);
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-card)', padding: '22px 28px', borderRadius: '16px', border: '1px solid #2a2a46', marginBottom: '28px' }}>
+    <div style={{ backgroundColor: 'var(--bg-card)', padding: '22px 28px', borderRadius: '16px', border: '1px solid var(--border)', marginBottom: '28px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
         <Target size={18} color="var(--primary)" />
         <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>Study Plan</span>
@@ -248,7 +248,7 @@ function StudyPlanWidget({ user, navigate }) {
           </div>
         )}
       </div>
-      <div style={{ height: '5px', backgroundColor: '#0f0f1a', borderRadius: '3px', overflow: 'hidden' }}>
+      <div style={{ height: '5px', backgroundColor: 'var(--bg-main)', borderRadius: '3px', overflow: 'hidden' }}>
         <div style={{ width: `${Math.min(pct, 100)}%`, height: '100%', backgroundColor: 'var(--primary)', transition: 'width 0.5s ease' }} />
       </div>
       <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '5px' }}>
@@ -283,7 +283,7 @@ function SprintSparkline({ sprints }) {
   const trendLabel = trend > 5 ? `+${trend}% improving` : trend < -5 ? `${trend}% declining` : 'holding steady';
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '20px 24px', border: '1px solid #2a2a46', marginBottom: '12px' }}>
+    <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '20px 24px', border: '1px solid var(--border)', marginBottom: '12px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
         <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Accuracy Trend</span>
         <span style={{ fontSize: '0.82rem', color: trendColor, fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -294,7 +294,7 @@ function SprintSparkline({ sprints }) {
       <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ overflow: 'visible' }}>
         {/* Gridlines at 50% and 75% if in range */}
         {[50, 75].filter(v => v >= minY - 5 && v <= maxY + 5).map(v => (
-          <line key={v} x1={PAD} x2={W - PAD} y1={y(v)} y2={y(v)} stroke="#2a2a46" strokeWidth="1" strokeDasharray="4 4" />
+          <line key={v} x1={PAD} x2={W - PAD} y1={y(v)} y2={y(v)} stroke="var(--border)" strokeWidth="1" strokeDasharray="4 4" />
         ))}
         {/* Area fill */}
         <path d={areaPath} fill="rgba(0,212,255,0.05)" />
@@ -447,9 +447,9 @@ export default function Dashboard({ user, isMobile }) {
           ].map(m => (
             <button key={m.mode}
               onClick={() => navigate('/sprint', { state: { mode: m.mode } })}
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '6px', padding: '16px 18px', backgroundColor: 'var(--bg-card)', border: '1px solid #2a2a46', borderRadius: '14px', cursor: 'pointer', transition: 'border-color 0.15s, transform 0.15s', textAlign: 'left' }}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '6px', padding: '16px 18px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '14px', cursor: 'pointer', transition: 'border-color 0.15s, transform 0.15s', textAlign: 'left' }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = m.color; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a46'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
               <span style={{ color: m.color }}>{m.icon}</span>
               <div style={{ fontWeight: '700', fontSize: '0.95rem' }}>{m.label}</div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.3 }}>{m.sub}</div>
@@ -460,9 +460,9 @@ export default function Dashboard({ user, isMobile }) {
 
       {/* Review Errors CTA */}
       <div onClick={() => reviewCount > 0 && navigate('/review')}
-        style={{ backgroundColor: 'var(--bg-card)', padding: '18px 24px', borderRadius: '14px', border: '1px solid #2a2a46', marginBottom: '36px', display: 'flex', alignItems: 'center', gap: '16px', opacity: reviewCount > 0 ? 1 : 0.5, cursor: reviewCount > 0 ? 'pointer' : 'default', transition: 'border-color 0.15s' }}
+        style={{ backgroundColor: 'var(--bg-card)', padding: '18px 24px', borderRadius: '14px', border: '1px solid var(--border)', marginBottom: '36px', display: 'flex', alignItems: 'center', gap: '16px', opacity: reviewCount > 0 ? 1 : 0.5, cursor: reviewCount > 0 ? 'pointer' : 'default', transition: 'border-color 0.15s' }}
         onMouseEnter={e => { if (reviewCount > 0) e.currentTarget.style.borderColor = 'var(--xp-gold)'; }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a46'; }}>
+        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}>
         <BookOpen size={24} color="var(--xp-gold)" />
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: '600', marginBottom: '2px' }}>Review Errors</div>
@@ -508,7 +508,7 @@ export default function Dashboard({ user, isMobile }) {
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: '10px', marginBottom: '40px' }}>
         {loading
           ? DOMAINS.map(d => (
-              <div key={d.name} style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '16px', border: '1px solid #2a2a46' }}>
+              <div key={d.name} style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '16px', border: '1px solid var(--border)' }}>
                 <div className="skeleton" style={{ height: '12px', width: '70%', marginBottom: '14px' }} />
                 <div className="skeleton" style={{ height: '28px', width: '50%' }} />
               </div>
@@ -532,7 +532,7 @@ export default function Dashboard({ user, isMobile }) {
           {progress.recentSprints.map(s => {
             const pct = s.questions_attempted > 0 ? Math.round(s.questions_correct / s.questions_attempted * 100) : 0;
             return (
-              <div key={s.id} style={{ backgroundColor: 'var(--bg-card)', borderRadius: '10px', padding: '12px 20px', display: 'flex', alignItems: 'center', border: '1px solid #2a2a46' }}>
+              <div key={s.id} style={{ backgroundColor: 'var(--bg-card)', borderRadius: '10px', padding: '12px 20px', display: 'flex', alignItems: 'center', border: '1px solid var(--border)' }}>
                 <div style={{ flex: 1, color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
                   {new Date(s.completed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                 </div>
@@ -549,7 +549,7 @@ export default function Dashboard({ user, isMobile }) {
 
       {!loading && progress?.totalAnswered === 0 && (
         <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
-          <BarChart2 size={36} color="#3a3a56" style={{ marginBottom: '12px' }} />
+          <BarChart2 size={36} color="var(--text-secondary)" style={{ marginBottom: '12px' }} />
           <p>Domain stats appear after you answer questions in a sprint.</p>
         </div>
       )}

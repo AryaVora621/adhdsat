@@ -14,7 +14,7 @@ function WrongAnswerCard({ item }) {
         <span style={{ fontSize: '0.72rem', color: expanded ? 'var(--primary)' : 'var(--text-secondary)', flexShrink: 0 }}>{expanded ? 'Hide' : 'Show'}</span>
       </button>
       {expanded && (
-        <div style={{ padding: '0 16px 14px', borderTop: '1px solid #2a2a46' }}>
+        <div style={{ padding: '0 16px 14px', borderTop: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', gap: '16px', marginTop: '12px', marginBottom: '10px', fontSize: '0.85rem' }}>
             <div>
               <span style={{ color: 'var(--error)', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '1px' }}>You chose</span>
@@ -26,7 +26,7 @@ function WrongAnswerCard({ item }) {
             </div>
           </div>
           {item.explanation && (
-            <div style={{ fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text-secondary)', borderTop: '1px solid #2a2a46', paddingTop: '10px' }}>
+            <div style={{ fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text-secondary)', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
               <MathText>{item.explanation}</MathText>
             </div>
           )}
@@ -122,7 +122,7 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
           { label: 'Accuracy', value: `${accuracy}%`, color: grade.color },
           { label: 'XP Earned', value: `+${finalStats.xp}`, color: 'var(--xp-gold)' }
         ].map(stat => (
-          <div key={stat.label} style={{ backgroundColor: 'var(--bg-card)', padding: '14px 10px', borderRadius: '14px', border: '1px solid #2a2a46', minWidth: 0 }}>
+          <div key={stat.label} style={{ backgroundColor: 'var(--bg-card)', padding: '14px 10px', borderRadius: '14px', border: '1px solid var(--border)', minWidth: 0 }}>
             <div style={{ fontSize: '0.62rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{stat.label}</div>
             <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: stat.color || 'var(--text-primary)' }}>{stat.value}</div>
           </div>
@@ -190,7 +190,7 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
             {breakdown.domains.map(d => (
               <div key={d.domain} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ flex: 1, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{d.domain}</span>
-                <div style={{ width: '60px', height: '3px', backgroundColor: '#2a2a46', borderRadius: '2px', overflow: 'hidden' }}>
+                <div style={{ width: '60px', height: '3px', backgroundColor: 'var(--border)', borderRadius: '2px', overflow: 'hidden' }}>
                   <div style={{ width: `${d.accuracy}%`, height: '100%', backgroundColor: d.accuracy > 70 ? 'var(--success)' : d.accuracy > 50 ? 'var(--xp-gold)' : 'var(--error)' }} />
                 </div>
                 <span style={{ fontSize: '0.8rem', fontWeight: '600', color: d.accuracy > 70 ? 'var(--success)' : d.accuracy > 50 ? 'var(--xp-gold)' : 'var(--error)', minWidth: '32px', textAlign: 'right' }}>{d.accuracy}%</span>
@@ -201,13 +201,13 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
       )}
 
       {breakdown?.domains?.length > 0 && (
-        <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px 20px', borderRadius: '14px', border: '1px solid #2a2a46', marginBottom: '24px', textAlign: 'left' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px 20px', borderRadius: '14px', border: '1px solid var(--border)', marginBottom: '24px', textAlign: 'left' }}>
           <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '12px' }}>Domain Breakdown</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {breakdown.domains.map(d => (
               <div key={d.domain} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ flex: 1, fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{d.domain}</span>
-                <div style={{ width: '80px', height: '4px', backgroundColor: '#2a2a46', borderRadius: '2px', overflow: 'hidden' }}>
+                <div style={{ width: '80px', height: '4px', backgroundColor: 'var(--border)', borderRadius: '2px', overflow: 'hidden' }}>
                   <div style={{ width: `${d.accuracy}%`, height: '100%', backgroundColor: domainColor(d.accuracy) }} />
                 </div>
                 <span style={{ fontSize: '0.82rem', fontWeight: '600', color: domainColor(d.accuracy), minWidth: '38px', textAlign: 'right' }}>{d.accuracy}%</span>
@@ -216,7 +216,7 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
             ))}
           </div>
           {breakdown.totalTime > 0 && (
-            <div style={{ marginTop: '12px', fontSize: '0.72rem', color: 'var(--text-secondary)', borderTop: '1px solid #2a2a46', paddingTop: '10px' }}>
+            <div style={{ marginTop: '12px', fontSize: '0.72rem', color: 'var(--text-secondary)', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
               Total time: {Math.floor(breakdown.totalTime / 60)}m {breakdown.totalTime % 60}s
             </div>
           )}
@@ -762,7 +762,7 @@ export default function Sprint({ user, setUser }) {
           <div style={{ display: 'flex', gap: '8px' }}>
             {[5, 10, 15, 20].map(n => (
               <button key={n} onClick={() => { setSprintLength(n); sprintLengthRef.current = n; sessionStorage.setItem('preferredSprintLength', n); }}
-                style={{ padding: '8px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', border: `2px solid ${sprintLength === n ? 'var(--primary)' : '#2a2a46'}`, backgroundColor: sprintLength === n ? 'rgba(0,212,255,0.08)' : 'transparent', color: sprintLength === n ? 'var(--primary)' : 'var(--text-secondary)', transition: 'all 0.15s' }}>
+                style={{ padding: '8px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', border: `2px solid ${sprintLength === n ? 'var(--primary)' : 'var(--border)'}`, backgroundColor: sprintLength === n ? 'rgba(0,212,255,0.08)' : 'transparent', color: sprintLength === n ? 'var(--primary)' : 'var(--text-secondary)', transition: 'all 0.15s' }}>
                 {n}Q
               </button>
             ))}
@@ -772,9 +772,9 @@ export default function Sprint({ user, setUser }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {modes.map(m => (
             <button key={m.key} onClick={() => startSprint(m.key)}
-              style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '20px 24px', backgroundColor: 'var(--bg-card)', border: '1px solid #2a2a46', borderRadius: '16px', textAlign: 'left', cursor: 'pointer', transition: 'border-color 0.15s' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '20px 24px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', textAlign: 'left', cursor: 'pointer', transition: 'border-color 0.15s' }}
               onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = '#2a2a46'}>
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
               <span style={{ color: 'var(--primary)' }}>{m.icon}</span>
               <div>
                 <div style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '3px' }}>{m.label}</div>
@@ -788,9 +788,9 @@ export default function Sprint({ user, setUser }) {
         {/* Practice Test section */}
         <div style={{ marginTop: '28px', marginBottom: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-            <div style={{ flex: 1, height: '1px', backgroundColor: '#2a2a46' }} />
+            <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border)' }} />
             <span style={{ fontSize: '0.7rem', color: 'var(--xp-gold)', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '600' }}>Practice Test</span>
-            <div style={{ flex: 1, height: '1px', backgroundColor: '#2a2a46' }} />
+            <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border)' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <button onClick={() => navigate('/practice-test')}
@@ -896,7 +896,7 @@ export default function Sprint({ user, setUser }) {
           {Array.from({ length: SPRINT_LENGTH }).map((_, i) => (
             <div key={i} style={{
               flex: 1, height: '5px', borderRadius: '3px',
-              backgroundColor: i < questionNum - 1 ? 'var(--primary)' : i === questionNum - 1 ? 'rgba(0,212,255,0.4)' : '#2a2a46',
+              backgroundColor: i < questionNum - 1 ? 'var(--primary)' : i === questionNum - 1 ? 'rgba(0,212,255,0.4)' : 'var(--border)',
               transition: 'background-color 0.3s'
             }} />
           ))}
@@ -919,11 +919,11 @@ export default function Sprint({ user, setUser }) {
           </span>
         )}
         <span style={{ fontSize: '0.75rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px' }}>{question.domain}</span>
-        <span style={{ color: '#2a2a46', flexShrink: 0 }}>|</span>
+        <span style={{ color: 'var(--border)', flexShrink: 0 }}>|</span>
         <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', flexShrink: 0 }}>{question.difficulty}</span>
         {!isAnswered && questionNum === 1 && (
           <button onClick={() => { setSprintMode(null); setSprintModeState(null); sessionStorage.removeItem('lastSprintMode'); setSprintId(null); setQuestion(null); setLoading(false); sprintStartRef.current = null; }}
-            style={{ marginLeft: 'auto', fontSize: '0.68rem', color: 'var(--text-secondary)', padding: '2px 8px', borderRadius: '6px', border: '1px solid #2a2a46', backgroundColor: 'transparent', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}
+            style={{ marginLeft: 'auto', fontSize: '0.68rem', color: 'var(--text-secondary)', padding: '2px 8px', borderRadius: '6px', border: '1px solid var(--border)', backgroundColor: 'transparent', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}
             title="Change sprint mode">
             <ChevronLeft size={11} style={{ verticalAlign: 'middle' }} /> mode
           </button>
@@ -934,7 +934,7 @@ export default function Sprint({ user, setUser }) {
       {/* Question content */}
       <div style={{ display: 'flex', flexDirection: window.innerWidth < 768 && question.passage_text ? 'column' : 'row', gap: '24px', marginBottom: '40px' }}>
         {question.passage_text && (
-          <div style={{ flex: 1, borderRight: window.innerWidth < 768 ? 'none' : '1px solid #2a2a46', borderBottom: window.innerWidth < 768 ? '1px solid #2a2a46' : 'none', paddingRight: window.innerWidth < 768 ? '0' : '32px', paddingBottom: window.innerWidth < 768 ? '16px' : '0', fontSize: '0.95rem', lineHeight: 1.75, color: 'var(--text-secondary)' }}>
+          <div style={{ flex: 1, borderRight: window.innerWidth < 768 ? 'none' : '1px solid var(--border)', borderBottom: window.innerWidth < 768 ? '1px solid var(--border)' : 'none', paddingRight: window.innerWidth < 768 ? '0' : '32px', paddingBottom: window.innerWidth < 768 ? '16px' : '0', fontSize: '0.95rem', lineHeight: 1.75, color: 'var(--text-secondary)' }}>
             <MathText>{question.passage_text}</MathText>
           </div>
         )}
@@ -963,13 +963,13 @@ export default function Sprint({ user, setUser }) {
         {question.is_grid_in ? (
           <input type="number" value={selectedChoice || ''} onChange={e => setSelectedChoice(e.target.value)}
             disabled={isAnswered} autoFocus
-            style={{ padding: '16px', fontSize: '1.2rem', borderRadius: '10px', border: '2px solid #2a2a46', backgroundColor: 'var(--bg-main)', color: 'white', maxWidth: '260px', outline: 'none' }}
+            style={{ padding: '16px', fontSize: '1.2rem', borderRadius: '10px', border: '2px solid var(--border)', backgroundColor: 'var(--bg-main)', color: 'white', maxWidth: '260px', outline: 'none' }}
             onFocus={e => e.target.style.borderColor = 'var(--primary)'}
-            onBlur={e => e.target.style.borderColor = '#2a2a46'}
+            onBlur={e => e.target.style.borderColor = 'var(--border)'}
             placeholder="Enter your answer" />
         ) : (
           question.choices.map((c, idx) => {
-            let bgColor = 'var(--bg-card)', borderColor = '#2a2a46', textColor = 'var(--text-primary)';
+            let bgColor = 'var(--bg-card)', borderColor = 'var(--border)', textColor = 'var(--text-primary)';
             if (isAnswered) {
               if (c.is_correct) { bgColor = 'rgba(0,230,118,0.08)'; borderColor = 'var(--success)'; }
               else if (selectedChoice === c.label) { bgColor = 'rgba(255,82,82,0.08)'; borderColor = 'var(--error)'; }
@@ -979,7 +979,7 @@ export default function Sprint({ user, setUser }) {
             return (
               <button key={c.label} disabled={isAnswered} onClick={() => setSelectedChoice(c.label)}
                 style={{ display: 'flex', alignItems: 'center', padding: '14px 18px', backgroundColor: bgColor, border: `2px solid ${borderColor}`, textAlign: 'left', fontSize: '1rem', gap: '14px', borderRadius: '12px', transition: 'all 0.15s', color: textColor }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: selectedChoice === c.label && !isAnswered ? 'var(--primary)' : '#2a2a46', color: selectedChoice === c.label && !isAnswered ? '#000' : 'var(--text-secondary)', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '0.85rem' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: selectedChoice === c.label && !isAnswered ? 'var(--primary)' : 'var(--border)', color: selectedChoice === c.label && !isAnswered ? 'var(--primary-contrast)' : 'var(--text-secondary)', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '0.85rem' }}>
                   {c.label}
                 </div>
                 <MathText style={{ flex: 1, color: 'var(--text-primary)' }}>{c.text}</MathText>
@@ -1038,7 +1038,7 @@ export default function Sprint({ user, setUser }) {
         <div style={{ display: 'flex', gap: '10px' }}>
           {!isTestMode && (
             <button onClick={() => setHintsUsed(h => Math.min(h + 1, 2))} disabled={hintsUsed >= 2}
-              style={{ flex: 1, padding: '13px', fontSize: '0.9rem', color: hintsUsed >= 2 ? 'var(--text-secondary)' : 'var(--xp-gold)', borderColor: hintsUsed >= 2 ? '#2a2a46' : 'rgba(255,215,64,0.3)' }}>
+              style={{ flex: 1, padding: '13px', fontSize: '0.9rem', color: hintsUsed >= 2 ? 'var(--text-secondary)' : 'var(--xp-gold)', borderColor: hintsUsed >= 2 ? 'var(--border)' : 'rgba(255,215,64,0.3)' }}>
               Hint ({2 - hintsUsed} left)
             </button>
           )}
@@ -1050,7 +1050,7 @@ export default function Sprint({ user, setUser }) {
         </div>
       )}
       {!isAnswered && !question.is_grid_in && (
-        <p style={{ textAlign: 'center', marginTop: '10px', fontSize: '0.65rem', color: '#3a3a56', letterSpacing: '0.5px' }}>
+        <p style={{ textAlign: 'center', marginTop: '10px', fontSize: '0.65rem', color: 'var(--text-secondary)', letterSpacing: '0.5px' }}>
           1-4 to select · Enter to check{!isTestMode ? ' · H for hint' : ''}
         </p>
       )}

@@ -49,7 +49,7 @@ function ReviewCard({ item }) {
         <span style={{ fontSize: '0.72rem', fontWeight: 700, color: correct ? 'var(--success)' : 'var(--error)' }}>{correct ? 'Correct' : 'Incorrect'}</span>
       </div>
       {q.passage_text && (
-        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '10px', paddingLeft: '10px', borderLeft: '2px solid #2a2a46' }}>
+        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '10px', paddingLeft: '10px', borderLeft: '2px solid var(--border)' }}>
           <MathText>{q.passage_text}</MathText>
         </div>
       )}
@@ -65,10 +65,10 @@ function ReviewCard({ item }) {
             const isCorrect = c.is_correct;
             const isPicked = selected === c.label;
             const bg = isCorrect ? 'rgba(0,230,118,0.1)' : isPicked ? 'rgba(255,82,82,0.1)' : 'transparent';
-            const bd = isCorrect ? 'var(--success)' : isPicked ? 'var(--error)' : '#2a2a46';
+            const bd = isCorrect ? 'var(--success)' : isPicked ? 'var(--error)' : 'var(--border)';
             return (
               <div key={c.label} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', backgroundColor: bg, border: `1px solid ${bd}`, borderRadius: '8px', fontSize: '0.88rem' }}>
-                <span style={{ fontWeight: 700, color: bd === '#2a2a46' ? 'var(--text-secondary)' : bd }}>{c.label}</span>
+                <span style={{ fontWeight: 700, color: bd === 'var(--border)' ? 'var(--text-secondary)' : bd }}>{c.label}</span>
                 <span style={{ flex: 1 }}><MathText>{c.text}</MathText></span>
                 {isCorrect && <span style={{ fontSize: '0.7rem', color: 'var(--success)', fontWeight: 700 }}>ANSWER</span>}
                 {isPicked && !isCorrect && <span style={{ fontSize: '0.7rem', color: 'var(--error)', fontWeight: 700 }}>YOURS</span>}
@@ -256,7 +256,7 @@ export default function PracticeTest({ user }) {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '28px' }}>
           {MODULES.map((m, i) => (
-            <div key={m.section} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 18px', backgroundColor: 'var(--bg-card)', borderRadius: '14px', border: '1px solid #2a2a46' }}>
+            <div key={m.section} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 18px', backgroundColor: 'var(--bg-card)', borderRadius: '14px', border: '1px solid var(--border)' }}>
               <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: 'rgba(0,212,255,0.12)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700 }}>{m.label}</div>
@@ -270,7 +270,7 @@ export default function PracticeTest({ user }) {
           const recent = history.slice(0, 6).reverse(); // oldest -> newest for a left-to-right trend
           const max = Math.max(...recent.map(h => h.total_score), 1);
           return (
-            <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '14px', border: '1px solid #2a2a46', padding: '16px 18px', marginBottom: '24px' }}>
+            <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '14px', border: '1px solid var(--border)', padding: '16px 18px', marginBottom: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '12px' }}>
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Your Scores</span>
                 <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Best <strong style={{ color: 'var(--xp-gold)' }}>{best}</strong></span>
@@ -353,7 +353,7 @@ export default function PracticeTest({ user }) {
         <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', letterSpacing: '1px', marginBottom: '24px' }}>ESTIMATED SCORE (400&ndash;1600)</div>
         <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
           {sectionResults.map(r => (
-            <div key={r.section} style={{ flex: 1, backgroundColor: 'var(--bg-card)', borderRadius: '14px', border: '1px solid #2a2a46', padding: '18px 12px' }}>
+            <div key={r.section} style={{ flex: 1, backgroundColor: 'var(--bg-card)', borderRadius: '14px', border: '1px solid var(--border)', padding: '18px 12px' }}>
               <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--primary)' }}>{r.scaled}</div>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '4px' }}>{r.label}</div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '6px' }}>{r.correct}/{r.total} correct</div>
@@ -367,7 +367,7 @@ export default function PracticeTest({ user }) {
           const missed = reviewItems.filter(it => !it.correct).length;
           return (
             <button onClick={() => setShowReview(s => !s)}
-              style={{ width: '100%', padding: '13px', marginBottom: '20px', backgroundColor: 'var(--bg-card)', border: '1px solid #2a2a46', borderRadius: '12px', color: 'var(--text-primary)', fontWeight: 600, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+              style={{ width: '100%', padding: '13px', marginBottom: '20px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text-primary)', fontWeight: 600, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
               <BookOpen size={16} color="var(--primary)" />
               {showReview ? 'Hide answer review' : `Review your answers (${missed} missed)`}
             </button>
@@ -378,7 +378,7 @@ export default function PracticeTest({ user }) {
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '14px' }}>
               {['missed', 'all'].map(f => (
                 <button key={f} onClick={() => setReviewFilter(f)}
-                  style={{ padding: '6px 16px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600, border: `1px solid ${reviewFilter === f ? 'var(--primary)' : '#2a2a46'}`, backgroundColor: reviewFilter === f ? 'rgba(0,212,255,0.1)' : 'transparent', color: reviewFilter === f ? 'var(--primary)' : 'var(--text-secondary)', textTransform: 'capitalize' }}>
+                  style={{ padding: '6px 16px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600, border: `1px solid ${reviewFilter === f ? 'var(--primary)' : 'var(--border)'}`, backgroundColor: reviewFilter === f ? 'rgba(0,212,255,0.1)' : 'transparent', color: reviewFilter === f ? 'var(--primary)' : 'var(--text-secondary)', textTransform: 'capitalize' }}>
                   {f === 'missed' ? 'Missed only' : 'All questions'}
                 </button>
               ))}
@@ -424,7 +424,7 @@ export default function PracticeTest({ user }) {
       {/* Progress bar */}
       <div style={{ display: 'flex', gap: '3px', marginBottom: '24px' }}>
         {questions.map((qq, i) => (
-          <div key={i} style={{ flex: 1, height: '4px', borderRadius: '2px', backgroundColor: i < qIndex ? 'var(--primary)' : i === qIndex ? 'rgba(0,212,255,0.4)' : '#2a2a46' }} />
+          <div key={i} style={{ flex: 1, height: '4px', borderRadius: '2px', backgroundColor: i < qIndex ? 'var(--primary)' : i === qIndex ? 'rgba(0,212,255,0.4)' : 'var(--border)' }} />
         ))}
       </div>
 
@@ -445,14 +445,14 @@ export default function PracticeTest({ user }) {
         {q.is_grid_in ? (
           <input type="number" value={selected || ''} onChange={e => setSelected(e.target.value)} autoFocus
             placeholder="Enter your answer"
-            style={{ padding: '16px', fontSize: '1.2rem', borderRadius: '10px', border: '2px solid #2a2a46', backgroundColor: 'var(--bg-main)', color: 'white', maxWidth: '260px', outline: 'none' }} />
+            style={{ padding: '16px', fontSize: '1.2rem', borderRadius: '10px', border: '2px solid var(--border)', backgroundColor: 'var(--bg-main)', color: 'white', maxWidth: '260px', outline: 'none' }} />
         ) : (
           q.choices.map(c => {
             const active = selected === c.label;
             return (
               <button key={c.label} onClick={() => setSelected(c.label)}
-                style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 18px', backgroundColor: active ? 'rgba(0,212,255,0.07)' : 'var(--bg-card)', border: `2px solid ${active ? 'var(--primary)' : '#2a2a46'}`, borderRadius: '12px', textAlign: 'left', fontSize: '1rem', color: active ? 'var(--primary)' : 'var(--text-primary)' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: active ? 'var(--primary)' : '#2a2a46', color: active ? '#000' : 'var(--text-secondary)', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '0.85rem' }}>{c.label}</div>
+                style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 18px', backgroundColor: active ? 'rgba(0,212,255,0.07)' : 'var(--bg-card)', border: `2px solid ${active ? 'var(--primary)' : 'var(--border)'}`, borderRadius: '12px', textAlign: 'left', fontSize: '1rem', color: active ? 'var(--primary)' : 'var(--text-primary)' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: active ? 'var(--primary)' : 'var(--border)', color: active ? 'var(--primary-contrast)' : 'var(--text-secondary)', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '0.85rem' }}>{c.label}</div>
                 <MathText style={{ flex: 1 }}>{c.text}</MathText>
               </button>
             );

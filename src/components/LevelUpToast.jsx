@@ -14,7 +14,7 @@ export default function LevelUpToast({ level, onDone }) {
       position: 'fixed', top: '24px', left: '50%', transform: `translateX(-50%) translateY(${visible ? '0' : '-100px'})`,
       zIndex: 9999, transition: 'transform 0.4s cubic-bezier(.34,1.56,.64,1), opacity 0.4s',
       opacity: visible ? 1 : 0,
-      backgroundColor: '#1a1a2e', border: '2px solid var(--xp-gold)',
+      backgroundColor: 'var(--bg-card)', border: '2px solid var(--xp-gold)',
       borderRadius: '16px', padding: '16px 28px',
       display: 'flex', alignItems: 'center', gap: '14px',
       boxShadow: '0 8px 32px rgba(255,215,64,0.25)'

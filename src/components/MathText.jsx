@@ -150,7 +150,7 @@ function renderMathSegment(latex, key) {
 }
 
 const cellStyle = {
-  border: '1px solid #2a2a46',
+  border: '1px solid var(--border)',
   padding: '7px 12px',
   textAlign: 'left',
   fontSize: '0.9em',
