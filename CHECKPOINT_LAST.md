@@ -23,8 +23,23 @@ Status: LIVE at https://adhdsat.vercel.app
 - Question bank: 551 -> 599 (three verified authored batches, 48 originals across
   all 8 domains, official Digital SAT format). Live count confirmed 599.
 
-## In progress
-- Nothing actively mid-edit. Clean working tree, all pushed to main.
+## In progress (2026-06-29, user asked for polish + 1000 questions + tiers)
+- Polish pass: DONE core. Fixed mobile bug where Check Answer/Hint buttons sat
+  under the bottom nav -> added focus mode (hide mobile nav on /sprint, /review,
+  /practice-test). Relabeled single-module tests ("Math Module", "Reading &
+  Writing Module") vs Full Practice Test. Verified all screens clean, 0 console
+  errors. Live.
+- Questions -> 1000+: gen-verify.mjs pipeline (server/gen-verify.mjs) generates
+  via Gemini then INDEPENDENTLY re-solves each item, keeping only answer-key
+  matches. Running in background toward ~51/domain (~408 new). Output staged in
+  server/data/generated-staging.json. NEXT: when done, validate + merge into
+  questions.json, ingest, deploy, verify count >= 1000.
+- Tiers (free vs paid): NOT STARTED. Begin after 1000 questions + polish land.
+
+## Next: free vs paid tiers (design notes for when we start)
+- Likely free: limited daily sprints, basic review. Paid: full practice tests,
+  unlimited sprints, AI insights/breakdowns, score-report import, full bank.
+- Needs: plan field on users, gating middleware, upgrade UI, (later) payments.
 
 ## Next actions (priority order)
 1. HUMAN: rotate the Supabase DB password (pasted in chat earlier). The one true
