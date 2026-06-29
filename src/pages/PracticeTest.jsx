@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, ChevronRight, FileText, Coffee, Trophy, AlertCircle, RotateCcw } from 'lucide-react';
+import { Clock, ChevronRight, FileText, Coffee, Trophy, AlertCircle, RotateCcw, BookOpen } from 'lucide-react';
 import MathText from '../components/MathText';
 
 // Official digital SAT modules. We run one module per section (a faithful,
@@ -36,6 +36,57 @@ function fmtTime(s) {
   return `${m}:${String(s % 60).padStart(2, '0')}`;
 }
 
+// Post-test review of a single question: shows the student's answer, the correct
+// answer, and the explanation, so the test becomes a learning tool.
+function ReviewCard({ item }) {
+  const { q, selected, correct } = item;
+  const correctChoice = q.choices?.find(c => c.is_correct);
+  const borderColor = correct ? 'rgba(0,230,118,0.35)' : 'rgba(255,82,82,0.35)';
+  return (
+    <div style={{ backgroundColor: 'var(--bg-card)', border: `1px solid ${borderColor}`, borderRadius: '12px', padding: '16px 18px', textAlign: 'left', marginBottom: '10px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', gap: '8px' }}>
+        <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{q.domain} &middot; {q.difficulty}</span>
+        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: correct ? 'var(--success)' : 'var(--error)' }}>{correct ? 'Correct' : 'Incorrect'}</span>
+      </div>
+      {q.passage_text && (
+        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '10px', paddingLeft: '10px', borderLeft: '2px solid #2a2a46' }}>
+          <MathText>{q.passage_text}</MathText>
+        </div>
+      )}
+      <div style={{ fontSize: '0.95rem', lineHeight: 1.45, marginBottom: '12px' }}><MathText>{q.question_text}</MathText></div>
+      {q.is_grid_in ? (
+        <div style={{ display: 'flex', gap: '16px', fontSize: '0.85rem', marginBottom: '10px' }}>
+          <span style={{ color: correct ? 'var(--success)' : 'var(--error)' }}>Your answer: {selected || 'blank'}</span>
+          {!correct && <span style={{ color: 'var(--success)' }}>Correct: {q.grid_in_answer}</span>}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+          {q.choices?.map(c => {
+            const isCorrect = c.is_correct;
+            const isPicked = selected === c.label;
+            const bg = isCorrect ? 'rgba(0,230,118,0.1)' : isPicked ? 'rgba(255,82,82,0.1)' : 'transparent';
+            const bd = isCorrect ? 'var(--success)' : isPicked ? 'var(--error)' : '#2a2a46';
+            return (
+              <div key={c.label} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', backgroundColor: bg, border: `1px solid ${bd}`, borderRadius: '8px', fontSize: '0.88rem' }}>
+                <span style={{ fontWeight: 700, color: bd === '#2a2a46' ? 'var(--text-secondary)' : bd }}>{c.label}</span>
+                <span style={{ flex: 1 }}><MathText>{c.text}</MathText></span>
+                {isCorrect && <span style={{ fontSize: '0.7rem', color: 'var(--success)', fontWeight: 700 }}>ANSWER</span>}
+                {isPicked && !isCorrect && <span style={{ fontSize: '0.7rem', color: 'var(--error)', fontWeight: 700 }}>YOURS</span>}
+              </div>
+            );
+          })}
+          {selected == null && <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>You left this blank.</div>}
+        </div>
+      )}
+      {q.explanation && (
+        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.55, backgroundColor: 'rgba(0,212,255,0.04)', borderRadius: '8px', padding: '10px 12px' }}>
+          <MathText>{q.explanation}</MathText>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PracticeTest({ user }) {
   const navigate = useNavigate();
   const [phase, setPhase] = useState('intro'); // intro | module | break | results | error
@@ -49,6 +100,9 @@ export default function PracticeTest({ user }) {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState([]);
   const [prevBest, setPrevBest] = useState(null);
+  const [reviewItems, setReviewItems] = useState([]); // every answered question, for post-test review
+  const [showReview, setShowReview] = useState(false);
+  const [reviewFilter, setReviewFilter] = useState('missed'); // missed | all
 
   const timerRef = useRef(null);
   const answersRef = useRef({});
@@ -115,6 +169,11 @@ export default function PracticeTest({ user }) {
     const scaled = scaleSection(modAnswers);
     const correct = modAnswers.filter(a => a.correct).length;
     setSectionResults(prev => [...prev, { section: mod.section, label: mod.label, scaled, correct, total: questions.length }]);
+    // Keep each question with the student's response for the post-test review.
+    setReviewItems(prev => [...prev, ...questions.map(q => {
+      const a = answersRef.current[q.id];
+      return { q, selected: a?.selected ?? null, correct: !!a?.correct, sectionLabel: mod.label };
+    })]);
     if (moduleIndex < MODULES.length - 1) {
       setPhase('break');
     } else {
@@ -278,11 +337,39 @@ export default function PracticeTest({ user }) {
             </div>
           ))}
         </div>
-        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: 1.6 }}>
+        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '20px', lineHeight: 1.6 }}>
           This is a difficulty-weighted estimate from a single module per section, not an official score. Use it to track progress over time.
         </p>
+        {(() => {
+          const missed = reviewItems.filter(it => !it.correct).length;
+          return (
+            <button onClick={() => setShowReview(s => !s)}
+              style={{ width: '100%', padding: '13px', marginBottom: '20px', backgroundColor: 'var(--bg-card)', border: '1px solid #2a2a46', borderRadius: '12px', color: 'var(--text-primary)', fontWeight: 600, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+              <BookOpen size={16} color="var(--primary)" />
+              {showReview ? 'Hide answer review' : `Review your answers (${missed} missed)`}
+            </button>
+          );
+        })()}
+        {showReview && (
+          <div style={{ marginBottom: '24px' }}>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '14px' }}>
+              {['missed', 'all'].map(f => (
+                <button key={f} onClick={() => setReviewFilter(f)}
+                  style={{ padding: '6px 16px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600, border: `1px solid ${reviewFilter === f ? 'var(--primary)' : '#2a2a46'}`, backgroundColor: reviewFilter === f ? 'rgba(0,212,255,0.1)' : 'transparent', color: reviewFilter === f ? 'var(--primary)' : 'var(--text-secondary)', textTransform: 'capitalize' }}>
+                  {f === 'missed' ? 'Missed only' : 'All questions'}
+                </button>
+              ))}
+            </div>
+            {reviewItems
+              .filter(it => reviewFilter === 'all' || !it.correct)
+              .map((it, i) => <ReviewCard key={i} item={it} />)}
+            {reviewFilter === 'missed' && reviewItems.every(it => it.correct) && (
+              <p style={{ color: 'var(--success)', fontSize: '0.9rem' }}>Perfect run -- nothing missed. Switch to "All questions" to review everything.</p>
+            )}
+          </div>
+        )}
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-          <button className="primary" onClick={() => { savedRef.current = false; setSectionResults([]); setAnswers({}); setPhase('intro'); }}
+          <button className="primary" onClick={() => { savedRef.current = false; setShowReview(false); setReviewItems([]); setSectionResults([]); setAnswers({}); setPhase('intro'); }}
             style={{ padding: '13px 24px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
             <RotateCcw size={16} /> Retake
           </button>
