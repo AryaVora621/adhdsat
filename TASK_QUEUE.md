@@ -29,9 +29,11 @@
 - [ ] Expand question bank with more items modeled on the official Digital SAT
       (Bluebook) format + verified sources. NOTE: official CB/Bluebook items are
       copyrighted -- author original items matching official domains/skills/format,
-      do not copy verbatim. Confirm spec via WebSearch.
-- [ ] Full practice-test option: complete SAT sim (R&W module + Math module, timed,
-      scored to 400-1600). Per-section test modes already exist in Sprint.jsx.
+      do not copy verbatim. Confirmed official spec via College Board:
+      R&W 2x27Q@32min, Math 2x22Q@35min, 400-1600 scale, adaptive module 2.
+- [x] Full practice-test option: DONE + verified live. New /practice-test page +
+      /api/practice-test endpoint. R&W module (27Q/32min) -> break -> Math module
+      (22Q/35min) -> difficulty-weighted 400-1600 scaled score. Entry in Sprint picker.
 - [x] Save these goals to memory + trackers so work survives a memory wipe.
 
 ## Open (Future Phases)
