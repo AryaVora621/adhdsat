@@ -151,8 +151,51 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
               Your lowest domain: <strong>{breakdown?.domains?.length > 0 ? breakdown.domains.reduce((a, b) => a.accuracy < b.accuracy ? a : b).domain : 'Mixed'}</strong>
             </div>
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '8px' }}>
-              Improvement typically kicks in by sprint 5. Keep practicing—you're building the skills. ✓
+              Improvement typically kicks in by sprint 5. Keep practicing -- you're building the skills.
             </div>
+          </div>
+        </div>
+      )}
+
+      {isTestMode && breakdown?.domains?.length > 0 && (
+        <div style={{
+          backgroundColor: 'rgba(0,212,255,0.08)',
+          border: '1px solid rgba(0,212,255,0.25)',
+          borderRadius: '12px',
+          padding: '16px',
+          marginBottom: '24px'
+        }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '12px', fontWeight: '600', letterSpacing: '0.5px' }}>
+            Practice Test Analysis
+          </div>
+
+          <div style={{ marginBottom: '14px' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Focus Next</div>
+            <div style={{ fontSize: '1rem', color: 'var(--error)', fontWeight: '700' }}>
+              {breakdown.domains.reduce((a, b) => a.accuracy < b.accuracy ? a : b).domain} ({breakdown.domains.reduce((a, b) => a.accuracy < b.accuracy ? a : b).accuracy}%)
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '14px' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Readiness Score</div>
+            <div style={{ fontSize: '1rem', color: accuracy >= 70 ? 'var(--success)' : 'var(--xp-gold)', fontWeight: '700' }}>
+              {accuracy}% - {accuracy >= 70 ? 'Ready for test' : accuracy >= 60 ? 'Nearly ready (1-2 weeks)' : 'Needs focused practice'}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Domain Performance
+            </div>
+            {breakdown.domains.map(d => (
+              <div key={d.domain} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ flex: 1, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{d.domain}</span>
+                <div style={{ width: '60px', height: '3px', backgroundColor: '#2a2a46', borderRadius: '2px', overflow: 'hidden' }}>
+                  <div style={{ width: `${d.accuracy}%`, height: '100%', backgroundColor: d.accuracy > 70 ? 'var(--success)' : d.accuracy > 50 ? 'var(--xp-gold)' : 'var(--error)' }} />
+                </div>
+                <span style={{ fontSize: '0.8rem', fontWeight: '600', color: d.accuracy > 70 ? 'var(--success)' : d.accuracy > 50 ? 'var(--xp-gold)' : 'var(--error)', minWidth: '32px', textAlign: 'right' }}>{d.accuracy}%</span>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -184,7 +227,7 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
         <div style={{ textAlign: 'left', marginBottom: '20px' }}>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <XCircle size={13} color="var(--error)" />
-            {wrongAnswers.length} Wrong Answer{wrongAnswers.length !== 1 ? 's' : ''} — tap to review
+            {wrongAnswers.length} Wrong Answer{wrongAnswers.length !== 1 ? 's' : ''} -- tap to review
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {wrongAnswers.map((item, i) => <WrongAnswerCard key={i} item={item} />)}
@@ -277,9 +320,9 @@ export default function Sprint({ user, setUser }) {
   }, []);
 
   const MILESTONES = [
-    { seconds: 120, label: '2 min in — keep going!' },
-    { seconds: 300, label: '5 minutes — you\'re on fire!' },
-    { seconds: 600, label: '10 min — serious focus mode!' },
+    { seconds: 120, label: '2 min in -- keep going!' },
+    { seconds: 300, label: '5 minutes -- you\'re on fire!' },
+    { seconds: 600, label: '10 min -- serious focus mode!' },
   ];
 
   // Start per-question timer

@@ -548,7 +548,7 @@ app.get('/api/insights/:userId', async (req, res) => {
   const insights = [];
 
   if (dueReviews > 0) {
-    insights.push({ type: 'review', priority: 1, text: `${dueReviews} card${dueReviews > 1 ? 's' : ''} due for review — complete these first to lock in the concepts.` });
+    insights.push({ type: 'review', priority: 1, text: `${dueReviews} card${dueReviews > 1 ? 's' : ''} due for review -- complete these first to lock in the concepts.` });
   }
 
   // Find weakest domain with data
