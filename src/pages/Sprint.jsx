@@ -398,8 +398,8 @@ export default function Sprint({ user, setUser }) {
       const data = await res.json();
       setSprintId(data.id);
       await fetchNextQuestion();
-    } catch (err) {
-      console.error(err);
+    } catch {
+
       setLoading(false);
     }
   };
@@ -438,8 +438,8 @@ export default function Sprint({ user, setUser }) {
       const q = await fetchQuestionFromAPI();
       setQuestion(q);
       startTimer();
-    } catch (err) {
-      console.error(err);
+    } catch {
+
     } finally {
       setLoading(false);
     }
@@ -526,8 +526,8 @@ export default function Sprint({ user, setUser }) {
       } catch { /* storage full, skip */ }
       // Pre-fetch next question while user reads explanation (not needed after last Q)
       if (questionNum < sprintLengthRef.current) prefetchNextQuestion();
-    } catch (err) {
-      console.error(err);
+    } catch {
+
     }
   }, [selectedChoice, question, isAnswered, hintsUsed, sprintId, stats, questionNum, user.id]);
 
