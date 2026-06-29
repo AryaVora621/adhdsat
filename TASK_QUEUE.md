@@ -40,6 +40,14 @@
 - [x] Added 16 authored questions (bank 551 -> 567), official-format originals.
 - [x] Save these goals to memory + trackers so work survives a memory wipe.
 
+## Roadmap (user direction 2026-06-29)
+- [ ] Stripe subscription (WEB FIRST). User will set up the Stripe account soon.
+      Tier gating already exists (plan-flag). Wire: Checkout session endpoint,
+      webhook -> set users.plan='paid' on active sub, customer/sub ids on users,
+      billing portal. Replace the placeholder POST /api/users/:id/plan upgrade.
+- [ ] Mobile apps (iOS + Android) AFTER web subscription. SPA today; likely
+      Capacitor or React Native wrap + StoreKit/Play Billing.
+
 ## Open (Future Phases)
 - [ ] Leaderboards / friend challenges
 - [ ] Push notifications / streak reminders
