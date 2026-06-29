@@ -50,6 +50,7 @@ const getLevel = (xp) => Math.floor((xp || 0) / 500) + 1;
 function AppInner() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(false);
   const [levelUpToast, setLevelUpToast] = useState(null);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -83,7 +84,7 @@ function AppInner() {
           navigate('/onboarding');
         }
       })
-      .catch(() => setLoading(false));
+      .catch(() => { setApiError(true); setLoading(false); });
   }, []);
 
   if (loading) {
@@ -91,6 +92,20 @@ function AppInner() {
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100vw', flexDirection: 'column', gap: '16px' }}>
         <div style={{ color: 'var(--primary)', fontSize: '1.5rem', fontWeight: 'bold', letterSpacing: '2px' }}>ADHDSat</div>
         <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Loading...</div>
+      </div>
+    );
+  }
+
+  if (apiError) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100vw', flexDirection: 'column', gap: '16px', padding: '32px', textAlign: 'center' }}>
+        <div style={{ color: 'var(--primary)', fontSize: '1.5rem', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '8px' }}>ADHDSat</div>
+        <div style={{ color: 'var(--text-secondary)', maxWidth: '360px', lineHeight: 1.6 }}>
+          Could not connect to the server. Check your connection and try again.
+        </div>
+        <button className="primary" onClick={() => window.location.reload()} style={{ marginTop: '8px', padding: '12px 28px' }}>
+          Retry
+        </button>
       </div>
     );
   }
