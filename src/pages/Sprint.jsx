@@ -737,8 +737,8 @@ export default function Sprint({ user, setUser }) {
       { key: 'english', label: 'English', sub: 'Reading, Writing & Language...', icon: <BookOpen size={28} /> },
     ];
     const testModes = [
-      { key: 'test-math', label: 'Math Test', sub: '22 questions · 35 min · full module simulation', icon: <Calculator size={24} />, time: '35 min' },
-      { key: 'test-english', label: 'English Test', sub: '27 questions · 32 min · full module simulation', icon: <BookOpen size={24} />, time: '32 min' },
+      { key: 'test-math', label: 'Math Module', sub: '22 questions · 35 min · one timed section only', icon: <Calculator size={24} />, time: '35 min' },
+      { key: 'test-english', label: 'Reading & Writing Module', sub: '27 questions · 32 min · one timed section only', icon: <BookOpen size={24} />, time: '32 min' },
     ];
     return (
       <div style={{ padding: 'clamp(16px, 5vw, 48px)', maxWidth: '600px', margin: '0 auto', width: '100%' }}>

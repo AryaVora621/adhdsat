@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Component } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Zap } from 'lucide-react';
 
 class ErrorBoundary extends Component {
@@ -54,7 +54,12 @@ function AppInner() {
   const [apiError, setApiError] = useState(false);
   const [levelUpToast, setLevelUpToast] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = useIsMobile();
+
+  // Task routes are focus modes: hide the mobile bottom nav so the question has
+  // the full screen (and the primary action buttons never sit under the nav).
+  const focusRoute = ['/sprint', '/review', '/practice-test'].includes(location.pathname);
 
   const setUserWithLevelCheck = (newUser) => {
     setUser(prev => {
@@ -122,7 +127,7 @@ function AppInner() {
 
   return (
     <div style={{ display: 'flex', width: '100%', height: '100vh' }}>
-      <div style={{ flex: '1', display: 'flex', flexDirection: 'column', overflowY: 'auto', paddingBottom: isMobile && showNav ? '64px' : 0 }}>
+      <div style={{ flex: '1', display: 'flex', flexDirection: 'column', overflowY: 'auto', paddingBottom: isMobile && showNav && !focusRoute ? '64px' : 0 }}>
         <Routes>
           <Route path="/onboarding" element={<Onboarding user={user} setUser={setUserWithLevelCheck} />} />
           <Route path="/" element={user?.onboarding_completed ? <Dashboard user={user} isMobile={isMobile} /> : <Navigate to="/onboarding" />} />
@@ -134,7 +139,7 @@ function AppInner() {
         </Routes>
       </div>
       {showNav && !isMobile && <Sidebar user={user} />}
-      {showNav && isMobile && <BottomNav userId={user?.id} />}
+      {showNav && isMobile && !focusRoute && <BottomNav userId={user?.id} />}
       {levelUpToast && <LevelUpToast level={levelUpToast} onDone={() => setLevelUpToast(null)} />}
     </div>
   );
