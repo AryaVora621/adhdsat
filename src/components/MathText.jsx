@@ -58,7 +58,14 @@ function parseSegments(text) {
     // Currency: $<digits> immediately followed by whitespace or sentence punctuation.
     // This correctly rejects $2^{3}$ (^ is not punctuation) and $3$ ($ is not punctuation).
     const currencyMatch = afterDollar.match(/^(\d+)(?=\s|[.,;:!?)]|$)/);
-    if (currencyMatch) {
+    // But a '$<digits>...' can also be a math span that just starts with a number, e.g.
+    // $165 = 45 + 30h$ or $1.50c + 0.75p \le 180$. Treat as money only when there is no
+    // closing $, or the enclosed span carries no math signal (LaTeX command, a relational/
+    // exponent operator, or a coefficient like 30h). Otherwise render it as math.
+    const closeIdx = processed.indexOf('$', start + 1);
+    const spanInner = closeIdx === -1 ? '' : processed.slice(start + 1, closeIdx);
+    const looksMath = closeIdx !== -1 && (/[\\=<>^{]/.test(spanInner) || /\d[a-zA-Z]/.test(spanInner));
+    if (currencyMatch && !looksMath) {
       const textSoFar = processed.slice(i, start + 1);
       if (segments.length > 0 && segments[segments.length - 1].type === 'text') {
         segments[segments.length - 1].content += textSoFar;
