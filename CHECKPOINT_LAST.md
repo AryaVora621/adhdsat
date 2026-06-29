@@ -1,45 +1,35 @@
-# Checkpoint - ADHDSat Postgres Migration (VERIFIED)
+# Checkpoint - ADHDSat (CODE-COMPLETE, awaiting Vercel env var)
 
-## Outcome
-Migrated backend from broken SQLite-in-/tmp to shared Supabase Postgres.
-Verified end-to-end against the LIVE DB. Production 500s root-caused and fixed.
+## State: code-complete + verified end-to-end. One user action left.
 
-## Root cause of prod 500s
-better-sqlite3 wrote to /tmp = ephemeral + per-instance. POST /api/users and
-POST /api/onboarding hit different serverless instances -> user row missing ->
-`user.weak_areas` on undefined -> 500. study-plan 404 cascaded from that.
+## Shipped & pushed (HEAD 55bd664)
+- Postgres migration (Supabase): fixes prod data loss + onboarding 500.
+- All table refs schema-qualified (transaction pooler resets search_path).
+- Graceful error screen when /api/users fails (was broken onboarding).
+- Fixed 7-day stats query; Sprint no-question retry state.
+- ingest.js ported to Postgres upsert sync; seed.js removed; README + .env.example;
+  bank-expansion pipeline (generate -> ingest) documented.
 
-## What shipped (code)
-- server/db.js: pg Pool, idempotent SCHEMA_DDL bootstrap (adhdsat schema) +
-  batch question seed from server/data/questions.json on first boot.
-- server/index.js: ALL handlers async Postgres. Onboarding is now an UPSERT
-  (can't 500 on missing user). ANY/ALL array params, GROUP BY pk, substr dates,
-  COUNT::int, JSON error-handler middleware.
-- ALL table refs SCHEMA-QUALIFIED (adhdsat.*). Critical: Supabase transaction
-  pooler (pgbouncer) resets search_path between queries, so SET search_path was
-  unreliable -> intermittent "relation does not exist". Qualifying removed the
-  dependency entirely.
-- src/pages/Sprint.jsx: friendly no-question retry state (was dev jargon).
-- README.md rewritten (real docs); .env.example added.
-- .env: DATABASE_URL set locally (Sydney project rhhpshsyrvckouqtyeov).
+## Verified
+- Backend flow test vs LIVE Supabase: predicted score, SM-2 review, streak, XP.
+- Full app driven in a real BROWSER vs Postgres: onboarding -> sprint -> correct
+  answer -> +20 XP -> streak; Profile + Review pages. Zero console errors.
+- HEAD smoke test: build green, health 200, fresh onboarding 200 + persists.
+- ingest.js: synced 529 questions, bank holds 529.
 
-## Verified against live Supabase DB
-- Fresh-user onboarding -> 200 + persists (the exact prod bug). 
-- Full flow: 532 questions seeded, predicted score ~1000, SM-2 review (5 due),
-  streak, XP, fixed 7-day stats. All correct.
-- Build passes (178KB gzip). Lint: only pre-existing exhaustive-deps warnings.
+## THE ONLY BLOCKER (user action - cannot be done by Claude)
+Production has no DATABASE_URL. Confirmed via prod: ECONNREFUSED 127.0.0.1:5432.
+Vercel MCP has no env-write tool; it's the user's account.
+Fix (either):
+  A. Vercel dashboard -> adhdsat -> Settings -> Environment Variables ->
+     add DATABASE_URL (Supabase transaction-pooler string) to all 3 envs -> Redeploy.
+  B. User runs `npm i -g vercel && vercel login`, then Claude runs
+     `vercel env add DATABASE_URL` + GEMINI_API_KEY + `vercel --prod`.
 
-## REMAINING TO SHIP (user)
-1. Add env vars to Vercel project (Production + Preview + Development):
-   - DATABASE_URL = (the Sydney transaction-pooler string)
-   - GEMINI_API_KEY = (existing key)
-   Dashboard: Project -> Settings -> Environment Variables. (Vercel CLI not installed.)
-2. Redeploy (push to main triggers it, or Vercel dashboard "Redeploy").
-3. Perf note: DB is in Sydney (ap-southeast-2). If users/Vercel are elsewhere,
-   trans-Pacific latency is high. Optionally set Vercel function region to syd1
-   (vercel.json regions) OR move DB closer.
-
-## Decisions Needed
-- Commit? Changes are on main (uncommitted). Committing/pushing needs approval.
-- Legacy dev scripts (server/seed.js, ingest.js, generate-questions.js) still use
-  old SQLite API and will break if run; not used in prod. Delete or port later.
+## Notes
+- Reviewer peer (1jowzo8v) went offline mid-session; peer messaging errors.
+  It landed commit 7b73900 (safe). Shared-repo: a concurrent actor reset a commit
+  once; re-pushed cleanly.
+- DB is in Sydney (ap-southeast-2); trans-Pacific latency. Optional: set Vercel
+  region syd1 or move DB.
+- DB password was pasted in chat; rotate after setup if this is real-user.
