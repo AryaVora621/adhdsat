@@ -229,7 +229,10 @@ app.get('/api/questions/next', async (req, res) => {
 // mix across the section's domains). Returns the answer keys too, since the
 // practice-test client scores locally at the end of each timed module.
 app.get('/api/practice-test', async (req, res) => {
-  const { section } = req.query;
+  const { section, userId } = req.query;
+  if (await getPlan(userId) !== 'paid') {
+    return res.status(403).json({ error: 'upgrade_required', feature: 'Full practice tests' });
+  }
   const count = Math.min(parseInt(req.query.count, 10) || 27, 30);
   const domains = section === 'math' ? MATH_DOMAINS : ENG_DOMAINS;
   const perDiff = Math.ceil(count / 3);
@@ -296,13 +299,54 @@ app.get('/api/practice-test/history/:userId', async (req, res) => {
 
 // --- Sprints ---
 
+// --- Plan / tier gating ---
+// Free: up to 3 sprints/day + unlimited review. Paid: unlimited sprints, full
+// practice tests, timed modules, and all AI features.
+const FREE_DAILY_SPRINTS = 3;
+async function getPlan(userId) {
+  if (!userId) return 'free';
+  const u = await row('SELECT plan FROM adhdsat.users WHERE id = $1', [userId]);
+  return u?.plan === 'paid' ? 'paid' : 'free';
+}
+
 app.post('/api/sprints', async (req, res) => {
   const { userId, sprint_type } = req.body;
   try {
+    const plan = await getPlan(userId);
+    const isTimedModule = sprint_type === 'test-math' || sprint_type === 'test-english';
+    if (plan === 'free') {
+      if (isTimedModule) {
+        return res.status(403).json({ error: 'upgrade_required', feature: 'Timed practice modules' });
+      }
+      const today = new Date().toISOString().slice(0, 10);
+      const startedToday = (await row(
+        `SELECT COUNT(*)::int AS cnt FROM adhdsat.sprints
+         WHERE user_id = $1 AND started_at >= $2 AND sprint_type NOT IN ('review', 'test-math', 'test-english')`,
+        [userId, today + 'T00:00:00.000Z']
+      )).cnt;
+      if (startedToday >= FREE_DAILY_SPRINTS) {
+        return res.status(403).json({ error: 'daily_limit', limit: FREE_DAILY_SPRINTS });
+      }
+    }
     const id = crypto.randomUUID();
     await query('INSERT INTO adhdsat.sprints (id, user_id, sprint_type, started_at) VALUES ($1, $2, $3, $4)',
       [id, userId, sprint_type || 'adaptive', new Date().toISOString()]);
     res.json({ id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Upgrade / downgrade a user's plan. Plan-flag only for now (no payment
+// processor yet); the upgrade screen calls this to grant access.
+app.post('/api/users/:id/plan', async (req, res) => {
+  const { plan } = req.body;
+  if (!['free', 'paid'].includes(plan)) return res.status(400).json({ error: 'plan must be free or paid' });
+  try {
+    const user = await row('UPDATE adhdsat.users SET plan = $1 WHERE id = $2 RETURNING *', [plan, req.params.id]);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    user.weak_areas = JSON.parse(user.weak_areas || '[]');
+    res.json(user);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -713,7 +757,9 @@ app.get('/api/insights/:userId', async (req, res) => {
   }
 
   let aiInsight = null;
-  if (process.env.GEMINI_API_KEY && totalAnswered >= 5) {
+  // The AI-written insight is a paid feature; free users still get the
+  // rule-based insights above.
+  if (user.plan === 'paid' && process.env.GEMINI_API_KEY && totalAnswered >= 5) {
     try {
       const { GoogleGenerativeAI } = await import('@google/generative-ai');
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -748,7 +794,10 @@ Return ONLY the insight text, no JSON, no labels.`;
 // --- Gemini Endpoints ---
 
 app.post('/api/explain', async (req, res) => {
-  const { questionText, selectedChoice, correctAnswer } = req.body;
+  const { questionText, selectedChoice, correctAnswer, userId } = req.body;
+  if (await getPlan(userId) !== 'paid') {
+    return res.status(403).json({ error: 'upgrade_required', feature: 'AI breakdowns' });
+  }
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
@@ -767,6 +816,9 @@ app.post('/api/explain', async (req, res) => {
 app.post('/api/analyze-report', async (req, res) => {
   const { image, mimeType, userId } = req.body;
   if (!image) return res.status(400).json({ error: 'image (base64) required' });
+  if (await getPlan(userId) !== 'paid') {
+    return res.status(403).json({ error: 'upgrade_required', feature: 'Score report import' });
+  }
   const result = await analyzeScoreReport(image, mimeType);
   if (!result) return res.status(422).json({ error: 'Could not parse score report' });
 

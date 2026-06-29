@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, ChevronRight, FileText, Coffee, Trophy, AlertCircle, RotateCcw, BookOpen } from 'lucide-react';
+import { Clock, ChevronRight, FileText, Coffee, Trophy, AlertCircle, RotateCcw, BookOpen, Crown } from 'lucide-react';
 import MathText from '../components/MathText';
 
 // Official digital SAT modules. We run one module per section (a faithful,
@@ -156,7 +156,8 @@ export default function PracticeTest({ user }) {
     const mod = MODULES[idx];
     setLoading(true);
     try {
-      const res = await fetch(`/api/practice-test?section=${mod.section}&count=${mod.count}`);
+      const res = await fetch(`/api/practice-test?section=${mod.section}&count=${mod.count}&userId=${user.id}`);
+      if (res.status === 403) { setLoading(false); navigate('/upgrade', { state: { reason: 'Full practice tests' } }); return; }
       if (!res.ok) throw new Error('fetch failed');
       const data = await res.json();
       if (!data.questions?.length) throw new Error('no questions');
@@ -288,10 +289,17 @@ export default function PracticeTest({ user }) {
         <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '20px' }}>
           No hints or explanations during the test, just like the real thing. There is a short break between sections.
         </p>
-        <button className="primary" disabled={loading} onClick={() => loadModule(0)}
-          style={{ width: '100%', padding: '15px', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-          {loading ? 'Loading...' : 'Start Practice Test'} <ChevronRight size={18} />
-        </button>
+        {user.plan === 'paid' ? (
+          <button className="primary" disabled={loading} onClick={() => loadModule(0)}
+            style={{ width: '100%', padding: '15px', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+            {loading ? 'Loading...' : 'Start Practice Test'} <ChevronRight size={18} />
+          </button>
+        ) : (
+          <button className="primary" onClick={() => navigate('/upgrade', { state: { reason: 'Full practice tests' } })}
+            style={{ width: '100%', padding: '15px', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+            <Crown size={17} /> Unlock with Pro
+          </button>
+        )}
         <button onClick={() => navigate('/')} style={{ width: '100%', marginTop: '10px', padding: '10px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
           Back to Dashboard
         </button>

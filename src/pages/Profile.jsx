@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Check, Edit2, Upload, RotateCcw, AlertTriangle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Check, Edit2, Upload, RotateCcw, AlertTriangle, Crown } from 'lucide-react';
 
 const MATH_DOMAINS = ['Algebra', 'Advanced Math', 'Problem Solving & Data Analysis', 'Geometry & Trig'];
 const ENG_DOMAINS = ['Information & Ideas', 'Craft & Structure', 'Expression of Ideas', 'Standard English Conventions'];
 const ALL_DOMAINS = [...MATH_DOMAINS, ...ENG_DOMAINS];
 
 export default function Profile({ user, setUser }) {
+  const navigate = useNavigate();
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(user.display_name || '');
   const [weakAreas, setWeakAreas] = useState(user.weak_areas || []);
@@ -180,15 +182,34 @@ export default function Profile({ user, setUser }) {
         )}
       </div>
 
+      {/* Plan */}
+      <div style={sectionStyle}>
+        <div style={labelStyle}>Plan</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {user.plan === 'paid'
+              ? <><Crown size={20} color="var(--xp-gold)" /><span style={{ fontSize: '1.1rem', fontWeight: 700 }}>Pro</span></>
+              : <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Free</span>}
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              {user.plan === 'paid' ? 'Full access' : '3 sprints/day'}
+            </span>
+          </div>
+          <button onClick={() => navigate('/upgrade')}
+            style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 600, color: user.plan === 'paid' ? 'var(--text-secondary)' : 'var(--primary)', borderColor: user.plan === 'paid' ? '#2a2a46' : 'rgba(0,212,255,0.4)' }}>
+            {user.plan === 'paid' ? 'Manage' : 'Upgrade to Pro'}
+          </button>
+        </div>
+      </div>
+
       {/* Scores */}
       <div style={sectionStyle}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
           <div style={labelStyle}>Baseline Scores</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {scoreMsg && <span style={{ color: 'var(--success)', fontSize: '0.82rem' }}>{scoreMsg}</span>}
-            <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
+            <button onClick={() => user.plan === 'paid' ? fileInputRef.current?.click() : navigate('/upgrade', { state: { reason: 'Score report import' } })} disabled={uploading}
               style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.8rem', color: uploading ? 'var(--text-secondary)' : 'var(--primary)', borderColor: 'rgba(0,212,255,0.3)' }}>
-              <Upload size={13} /> {uploading ? 'Analyzing...' : 'Upload Report'}
+              <Upload size={13} /> {uploading ? 'Analyzing...' : 'Upload Report'}{user.plan !== 'paid' ? ' (Pro)' : ''}
             </button>
             <input type="file" ref={fileInputRef} accept="image/*,.pdf" style={{ display: 'none' }} onChange={handleScoreReport} />
             <button onClick={() => setEditingScores(e => !e)}

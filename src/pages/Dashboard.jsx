@@ -97,18 +97,11 @@ function QuickStartCard({ navigate, user }) {
       .catch(() => {});
   }, [user.id]);
 
-  const handleStudyNow = async () => {
+  const handleStudyNow = () => {
+    // Sprint.jsx creates the sprint record (and enforces the plan gate) on mount;
+    // navigating with the mode avoids a duplicate sprint and a double count.
     setStarting(true);
-    try {
-      await fetch('/api/sprints', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, sprint_type: 'adaptive' })
-      });
-      navigate('/sprint', { state: { mode: 'adaptive' } });
-    } catch {
-      setStarting(false);
-    }
+    navigate('/sprint', { state: { mode: 'adaptive' } });
   };
 
   const done = today?.sprints_today || 0;
@@ -341,24 +334,28 @@ function PracticeTestCard({ user, navigate }) {
   const taken = history && history.length > 0;
   const best = taken ? Math.max(...history.map(h => h.total_score)) : null;
   const last = taken ? history[0].total_score : null;
+  const isPro = user.plan === 'paid';
 
   return (
-    <div onClick={() => navigate('/practice-test')}
+    <div onClick={() => navigate(isPro ? '/practice-test' : '/upgrade', isPro ? undefined : { state: { reason: 'Full practice tests' } })}
       style={{ backgroundImage: 'linear-gradient(135deg, rgba(0,212,255,0.08), rgba(124,77,255,0.06))', padding: '18px 24px', borderRadius: '14px', border: '1px solid rgba(0,212,255,0.25)', marginBottom: '36px', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'border-color 0.15s' }}
       onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,212,255,0.6)'; }}
       onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,212,255,0.25)'; }}>
       <FileText size={24} color="var(--primary)" />
       <div style={{ flex: 1 }}>
-        <div style={{ fontWeight: '600', marginBottom: '2px' }}>Full Practice Test</div>
+        <div style={{ fontWeight: '600', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          Full Practice Test
+          {!isPro && <span style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.5px', color: 'var(--xp-gold)', backgroundColor: 'rgba(255,215,64,0.12)', border: '1px solid rgba(255,215,64,0.3)', borderRadius: '6px', padding: '1px 6px' }}>PRO</span>}
+        </div>
         <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
           {taken
             ? `Best ${best} · last ${last} · timed, scored 400-1600`
             : 'A timed two-section SAT simulation, scored 400-1600'}
         </div>
       </div>
-      <button onClick={e => { e.stopPropagation(); navigate('/practice-test'); }}
+      <button onClick={e => { e.stopPropagation(); navigate(isPro ? '/practice-test' : '/upgrade', isPro ? undefined : { state: { reason: 'Full practice tests' } }); }}
         style={{ padding: '8px 18px', fontSize: '0.85rem', backgroundColor: 'rgba(0,212,255,0.1)', color: 'var(--primary)', border: '1px solid rgba(0,212,255,0.4)', borderRadius: '8px', whiteSpace: 'nowrap' }}>
-        {taken ? 'Retake' : 'Start'}
+        {isPro ? (taken ? 'Retake' : 'Start') : 'Unlock'}
       </button>
     </div>
   );

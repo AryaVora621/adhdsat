@@ -395,6 +395,12 @@ export default function Sprint({ user, setUser }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id, sprint_type: mode })
       });
+      if (res.status === 403) {
+        const body = await res.json().catch(() => ({}));
+        setLoading(false);
+        navigate('/upgrade', { state: { reason: body.error === 'daily_limit' ? 'daily_limit' : body.feature } });
+        return;
+      }
       const data = await res.json();
       setSprintId(data.id);
       await fetchNextQuestion();
@@ -610,6 +616,10 @@ export default function Sprint({ user, setUser }) {
   }, [showSummary, navigate]);
 
   const handleDeepDive = async () => {
+    if (user.plan !== 'paid') {
+      navigate('/upgrade', { state: { reason: 'AI breakdowns' } });
+      return;
+    }
     setDeepDiveLoading(true);
     setShowDeepDive(true);
     setDeepDiveText('');
@@ -624,7 +634,8 @@ export default function Sprint({ user, setUser }) {
         body: JSON.stringify({
           questionText: question.question_text,
           selectedChoice: `${selectedChoice}: ${selectedText}`,
-          correctAnswer
+          correctAnswer,
+          userId: user.id
         })
       });
       const reader = res.body.getReader();

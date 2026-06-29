@@ -44,8 +44,10 @@ CREATE TABLE IF NOT EXISTS adhdsat.users (
   longest_streak INTEGER DEFAULT 0, last_active_date TEXT, created_at TEXT,
   study_plan TEXT DEFAULT NULL, baseline_english INTEGER DEFAULT 0,
   baseline_math INTEGER DEFAULT 0, weak_areas TEXT DEFAULT '[]',
-  onboarding_completed INTEGER DEFAULT 0, subscores TEXT DEFAULT NULL
+  onboarding_completed INTEGER DEFAULT 0, subscores TEXT DEFAULT NULL,
+  plan TEXT DEFAULT 'free'
 );
+ALTER TABLE adhdsat.users ADD COLUMN IF NOT EXISTS plan TEXT DEFAULT 'free';
 CREATE TABLE IF NOT EXISTS adhdsat.questions (
   id TEXT PRIMARY KEY, section TEXT, domain TEXT, skill TEXT, difficulty TEXT,
   question_text TEXT, passage_text TEXT, choices TEXT, is_grid_in INTEGER DEFAULT 0,
