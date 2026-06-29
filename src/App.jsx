@@ -186,7 +186,7 @@ function AppInner() {
           <Route path="/onboarding" element={<Onboarding user={user} setUser={setUserWithLevelCheck} />} />
           <Route path="/" element={user?.onboarding_completed ? <Dashboard user={user} isMobile={isMobile} /> : <Navigate to="/onboarding" />} />
           <Route path="/sprint" element={user?.onboarding_completed ? <Sprint user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
-          <Route path="/profile" element={user?.onboarding_completed ? <Profile user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
+          <Route path="/profile" element={user?.onboarding_completed ? <Profile user={user} setUser={setUserWithLevelCheck} onSignOut={signOut} /> : <Navigate to="/onboarding" />} />
           <Route path="/review" element={user?.onboarding_completed ? <ReviewSprint user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
           <Route path="/practice-test" element={user?.onboarding_completed ? <PracticeTest user={user} /> : <Navigate to="/onboarding" />} />
           <Route path="/upgrade" element={user?.onboarding_completed ? <Upgrade user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />

@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Edit2, Upload, RotateCcw, AlertTriangle, Crown } from 'lucide-react';
+import { Check, Edit2, Upload, RotateCcw, AlertTriangle, Crown, Mail, LogOut, Cloud } from 'lucide-react';
+import AuthModal from '../components/AuthModal';
 
 const MATH_DOMAINS = ['Algebra', 'Advanced Math', 'Problem Solving & Data Analysis', 'Geometry & Trig'];
 const ENG_DOMAINS = ['Information & Ideas', 'Craft & Structure', 'Expression of Ideas', 'Standard English Conventions'];
 const ALL_DOMAINS = [...MATH_DOMAINS, ...ENG_DOMAINS];
 
-export default function Profile({ user, setUser }) {
+export default function Profile({ user, setUser, onSignOut }) {
   const navigate = useNavigate();
+  const [authOpen, setAuthOpen] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(user.display_name || '');
   const [weakAreas, setWeakAreas] = useState(user.weak_areas || []);
@@ -177,6 +179,42 @@ export default function Profile({ user, setUser }) {
             <button onClick={() => setEditingName(true)}
               style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 12px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
               <Edit2 size={13} /> Edit
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Account: signed-in users see their email + sign out; guests get a
+          prompt to claim their progress without leaving the app. */}
+      <div style={sectionStyle}>
+        <div style={labelStyle}>Account</div>
+        {user.email ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+              <Mail size={16} color="var(--primary)" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: '0.95rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.email}</span>
+            </div>
+            {onSignOut && (
+              <button onClick={onSignOut}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', fontSize: '0.85rem', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: '8px' }}>
+                <LogOut size={14} /> Sign out
+              </button>
+            )}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1, minWidth: '220px' }}>
+              <Cloud size={20} color="var(--xp-gold)" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <div style={{ fontWeight: 600, marginBottom: '2px' }}>You're using a guest account</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                  Create a free account to save your progress and sync across devices. Clearing your browser would erase a guest.
+                </div>
+              </div>
+            </div>
+            <button className="primary" onClick={() => setAuthOpen(true)}
+              style={{ padding: '11px 20px', fontSize: '0.9rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
+              Save my progress
             </button>
           </div>
         )}
@@ -421,6 +459,14 @@ export default function Profile({ user, setUser }) {
           )}
         </div>
       </div>
+
+      {authOpen && (
+        <AuthModal
+          onClose={() => setAuthOpen(false)}
+          title="Save your progress"
+          blurb="Link an email or Google account. Your current streak, XP, and history move with you and sync across devices."
+        />
+      )}
     </div>
   );
 }
