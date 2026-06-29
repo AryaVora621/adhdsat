@@ -445,7 +445,7 @@ export default function PracticeTest({ user }) {
         {q.is_grid_in ? (
           <input type="number" value={selected || ''} onChange={e => setSelected(e.target.value)} autoFocus
             placeholder="Enter your answer"
-            style={{ padding: '16px', fontSize: '1.2rem', borderRadius: '10px', border: '2px solid var(--border)', backgroundColor: 'var(--bg-main)', color: 'white', maxWidth: '260px', outline: 'none' }} />
+            style={{ padding: '16px', fontSize: '1.2rem', borderRadius: '10px', border: '2px solid var(--border)', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)', maxWidth: '260px', outline: 'none' }} />
         ) : (
           q.choices.map(c => {
             const active = selected === c.label;

@@ -162,7 +162,7 @@ export default function Profile({ user, setUser }) {
         {editingName ? (
           <div style={{ display: 'flex', gap: '10px' }}>
             <input value={nameInput} onChange={e => setNameInput(e.target.value)} autoFocus
-              style={{ flex: 1, padding: '10px 14px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--primary)', borderRadius: '8px', color: 'white', fontSize: '1rem', outline: 'none' }}
+              style={{ flex: 1, padding: '10px 14px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--primary)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none' }}
               onKeyDown={e => e.key === 'Enter' && saveName()} />
             <button className="primary" onClick={saveName} disabled={saving}
               style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem' }}>

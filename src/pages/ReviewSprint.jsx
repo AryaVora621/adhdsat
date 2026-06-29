@@ -343,7 +343,7 @@ export default function ReviewSprint({ user, setUser }) {
         {question.is_grid_in ? (
           <input type="number" value={selectedChoice || ''} onChange={e => setSelectedChoice(e.target.value)}
             disabled={isAnswered}
-            style={{ padding: '16px', fontSize: '1.2rem', borderRadius: '10px', border: '2px solid var(--border)', backgroundColor: 'var(--bg-main)', color: 'white', maxWidth: '260px', outline: 'none' }}
+            style={{ padding: '16px', fontSize: '1.2rem', borderRadius: '10px', border: '2px solid var(--border)', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)', maxWidth: '260px', outline: 'none' }}
             placeholder="Enter your answer" />
         ) : (
           question.choices.map(c => {

@@ -200,7 +200,7 @@ function StudyPlanWidget({ user, navigate }) {
           <div>
             <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Test Date</div>
             <input type="date" value={testDate} onChange={e => setTestDate(e.target.value)} min={new Date().toISOString().split('T')[0]}
-              style={{ padding: '8px 12px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border)', borderRadius: '8px', color: 'white', fontSize: '0.9rem', colorScheme: 'dark' }} />
+              style={{ padding: '8px 12px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '0.9rem' }} />
           </div>
           <button className="primary" onClick={save}
             style={{ padding: '8px 20px', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
