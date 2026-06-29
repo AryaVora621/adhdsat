@@ -23,10 +23,6 @@ const pool = new Pool({
   connectionTimeoutMillis: 8000,
 });
 
-// All application tables live in the dedicated `adhdsat` schema.
-pool.on('connect', (client) => {
-  client.query('SET search_path TO adhdsat, public').catch(() => {});
-});
 
 pool.on('error', (err) => {
   console.error('[ADHDSat] Postgres pool error:', err.message);
