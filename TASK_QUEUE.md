@@ -34,6 +34,10 @@
 - [x] Full practice-test option: DONE + verified live. New /practice-test page +
       /api/practice-test endpoint. R&W module (27Q/32min) -> break -> Math module
       (22Q/35min) -> difficulty-weighted 400-1600 scaled score. Entry in Sprint picker.
+- [x] Practice-test history: DONE + verified live. practice_test_results table,
+      POST /api/practice-test/result, GET /api/practice-test/history/:userId.
+      Intro shows past-scores bar trend + best; results flag "New Personal Best!".
+- [x] Added 16 authored questions (bank 551 -> 567), official-format originals.
 - [x] Save these goals to memory + trackers so work survives a memory wipe.
 
 ## Open (Future Phases)
