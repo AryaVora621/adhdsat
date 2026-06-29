@@ -48,15 +48,33 @@ Status: LIVE at https://adhdsat.vercel.app
   sprint -> dashboard -> upgrade -> practice test, 63s mp4.
 - Roadmap: Stripe subscription (web) then mobile apps. See the memory note.
 
+## Landing page + real auth (2026-06-29, DONE + live, tag v1.2-landing-auth)
+- New marketing landing page for newcomers (src/pages/Landing.jsx): Bricolage
+  Grotesque display font, animated gradient mesh, concrete sprint-card hero,
+  6-feature grid, closing CTA. Light + dark mode (data-theme system in
+  src/lib/theme.js, follows OS, persists). Verified live in both themes.
+- Real accounts via Supabase Auth (src/lib/supabase.js): email magic-link +
+  Google OAuth modal. Guest mode preserved ("Start free" -> guest -> onboarding,
+  verified live). Sidebar got theme toggle + sign-out (auth users only).
+- Account migration: POST /api/users/claim promotes an anonymous guest (with all
+  progress) into the authed account on first sign-in. users table + email,
+  + is_guest. Migration SQL verified via rolled-back dry-run; endpoint live.
+- App.jsx identity resolution: Supabase session -> claim; else returning guest;
+  else Landing. Single onAuthStateChange listener.
+- Loop active: cron 20cdaa2a every 30m (premium polish + git checkpoints).
+
 ## Next actions (priority order)
-1. HUMAN: rotate the Supabase DB password (pasted in chat earlier). The one true
-   launch blocker. Supabase dashboard -> Database -> Reset password, then update
-   DATABASE_URL in Vercel env. ~5 min.
-2. Keep growing the question bank toward 700+ (proven authoring + ingest pattern).
-3. Optional: notifications/streak reminders; leaderboards (future phases).
+1. HUMAN (see LAUNCH_CONFIG.md): (a) rotate Supabase DB password [security
+   blocker], (b) set Supabase Auth Site URL + redirect allowlist to
+   adhdsat.vercel.app and enable Google provider [needed for sign-in to work
+   end-to-end; guest mode already works without it].
+2. Consider converting in-app pages (Dashboard/Sprint/etc.) to fully honor the
+   light theme (they still use some hardcoded dark hex; landing+auth are done).
+3. Keep growing the question bank; polish passes.
+4. Stripe (deferred): wire Checkout + webhook to flip users.plan to pro.
 
 ## Human decisions needed
-- DB password rotation (only the user can do this).
+- DB password rotation + Supabase Auth URL/provider config (see LAUNCH_CONFIG.md).
 
 ## How to expand questions
 Edit server/data/questions.json (or stage a batch file), validate (one correct

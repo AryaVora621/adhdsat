@@ -40,3 +40,4 @@ dist-ssr
 
 # Keep the social-preview asset (overrides the *.png screenshot ignore)
 !public/og-image.png
+*.jpeg
