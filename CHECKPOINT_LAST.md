@@ -75,6 +75,24 @@ Status: LIVE at https://adhdsat.vercel.app
   visible only to the Vercel account owner, not end users. Not a bug.)
 - All pushed to GitHub with tags; loop cron 20cdaa2a still firing every 30m.
 
+## Premium polish loop continued (2026-06-30, tags v1.5 - v2.1)
+- v1.5-og-chrome: on-brand OG social card (bolt + gradient headline); theme-adaptive
+  browser chrome (color-scheme light dark + media theme-color metas).
+- v1.6-mobile-polish: fixed inverted reduced-motion media query; features grid
+  3/2/1-col responsive. QA'd landing/auth/dashboard at 390px.
+- v1.7-sprint-microinteractions: correct-answer scale pop + explanation fade-slide
+  on Sprint and Review. Verified full loop live (answered a question).
+- v1.8-upgrade-polish: removed last purple remnants (Upgrade Pro card + Dashboard
+  CTA -> brand gold); added cyan->gold 'Recommended' badge to Pro plan.
+- v1.9-profile-account: extracted shared src/components/AuthModal.jsx; Profile
+  Account section (email+Sign out for authed; 'Save my progress' for guests ->
+  opens auth modal -> /api/users/claim migrates progress). Closes the in-app
+  guest-to-account gap. Verified live.
+- v2.0-score-countup: useCountUp hook (easeOutCubic, reduced-motion aware); the
+  practice-test total + section scores climb from 0 on the results reveal.
+- v2.1-focus-a11y: global :focus-visible box-shadow ring (keyboard-only, on-brand).
+  Verified the ring shows on Tab.
+
 ## Next actions (priority order)
 1. HUMAN (see LAUNCH_CONFIG.md): (a) rotate Supabase DB password [security
    blocker], (b) set Supabase Auth Site URL + redirect allowlist to
