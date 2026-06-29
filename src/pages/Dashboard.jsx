@@ -460,9 +460,17 @@ export default function Dashboard({ user, isMobile }) {
       {/* Domain grid */}
       <h2 style={{ fontSize: '1rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px' }}>Domain Performance</h2>
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: '10px', marginBottom: '40px' }}>
-        {DOMAINS.map(d => (
-          <DomainCard key={d.name} name={d.name} stats={progress?.domainStats?.[d.name]} />
-        ))}
+        {loading
+          ? DOMAINS.map(d => (
+              <div key={d.name} style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '16px', border: '1px solid #2a2a46' }}>
+                <div className="skeleton" style={{ height: '12px', width: '70%', marginBottom: '14px' }} />
+                <div className="skeleton" style={{ height: '28px', width: '50%' }} />
+              </div>
+            ))
+          : DOMAINS.map(d => (
+              <DomainCard key={d.name} name={d.name} stats={progress?.domainStats?.[d.name]} />
+            ))
+        }
       </div>
 
       {/* Sprint history with sparkline */}

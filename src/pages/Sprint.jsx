@@ -558,6 +558,13 @@ export default function Sprint({ user, setUser }) {
     if (questionNum >= sprintLengthRef.current) {
       await finishSprint(current);
     } else {
+      // Fire halfway milestone when crossing the midpoint
+      const half = Math.floor(sprintLengthRef.current / 2);
+      if (questionNum === half && !milestoneShownRef.current.has('half')) {
+        milestoneShownRef.current.add('half');
+        setMilestone('Halfway there -- keep it up!');
+        setTimeout(() => setMilestone(null), 2800);
+      }
       setQuestionNum(n => n + 1);
       await fetchNextQuestion();
     }
