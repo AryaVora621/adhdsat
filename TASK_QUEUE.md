@@ -25,10 +25,19 @@
 - [x] Fixed broken 7-day stats query (wrong columns)
 - [x] Friendly no-question retry state in Sprint; real README + .env.example
 
+## In-Progress (2026-06-29)
+- [ ] Expand question bank with more items modeled on the official Digital SAT
+      (Bluebook) format + verified sources. NOTE: official CB/Bluebook items are
+      copyrighted -- author original items matching official domains/skills/format,
+      do not copy verbatim. Confirm spec via WebSearch.
+- [ ] Full practice-test option: complete SAT sim (R&W module + Math module, timed,
+      scored to 400-1600). Per-section test modes already exist in Sprint.jsx.
+- [x] Save these goals to memory + trackers so work survives a memory wipe.
+
 ## Open (Future Phases)
 - [ ] Leaderboards / friend challenges
 - [ ] Push notifications / streak reminders
-- [ ] More question bank coverage (500+ questions)
+- [x] More question bank coverage (now 551, incl. 22 grid-ins; expanding further)
 - [x] Port legacy dev scripts: ingest.js -> Postgres upsert sync tool, deleted
       redundant seed.js, generate-questions.js writes JSON (works as-is).
       Bank-expansion pipeline documented in README.
