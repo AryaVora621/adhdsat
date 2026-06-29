@@ -40,8 +40,13 @@ Status: LIVE at https://adhdsat.vercel.app
   /upgrade screen + POST /api/users/:id/plan. Profile badge, Dashboard PRO lock.
   Verified: free blocked at 403, 4th sprint blocked, upgrade flips to paid,
   paid unlocks. Also fixed a Study-Now double sprint-create.
-- Questions -> 1000: gen-verify nearly done (~353/408 staged). When complete:
-  node server/merge-staging.mjs ; node --env-file=.env server/ingest.js ; deploy.
+- Questions -> 1000: DONE. Bank now 1062 live (567 Math / 495 English, all 8
+  domains 113-167 each, 302/451/309 easy/med/hard, 22 grid-ins). Generated via
+  gen-verify (independent re-solve gate) + dedup. Markdown bold/italic stripped
+  bank-wide (was rendering literally in MathText); merge + gen prompt now prevent it.
+- Runthrough video delivered (server/record-demo.mjs, Playwright). Onboarding ->
+  sprint -> dashboard -> upgrade -> practice test, 63s mp4.
+- Roadmap: Stripe subscription (web) then mobile apps. See the memory note.
 
 ## Next actions (priority order)
 1. HUMAN: rotate the Supabase DB password (pasted in chat earlier). The one true
