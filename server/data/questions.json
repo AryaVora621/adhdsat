@@ -22293,5 +22293,256 @@
       "Vieta's formulas"
     ],
     "source": "generated"
+  },
+  {
+    "id": "gridin_001",
+    "section": "Math",
+    "domain": "Algebra",
+    "skill": "Linear equations in one variable",
+    "difficulty": "easy",
+    "question_text": "If 5x - 12 = 38, what is the value of x?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 10,
+    "explanation": "Add 12 to both sides: 5x = 50. Divide both sides by 5: x = 10.",
+    "hint_1": "Move the constant term to the right side first.",
+    "hint_2": "After getting 5x = 50, divide both sides by 5.",
+    "tags": [
+      "linear",
+      "grid-in",
+      "solve"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_002",
+    "section": "Math",
+    "domain": "Algebra",
+    "skill": "Linear equations in one variable",
+    "difficulty": "easy",
+    "question_text": "If 2(x + 4) = 26, what is the value of x?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 9,
+    "explanation": "Divide both sides by 2: x + 4 = 13. Subtract 4: x = 9. (Or distribute first: 2x + 8 = 26, so 2x = 18, x = 9.)",
+    "hint_1": "You can divide both sides by 2 before doing anything else.",
+    "hint_2": "After x + 4 = 13, subtract 4 from both sides.",
+    "tags": [
+      "linear",
+      "grid-in",
+      "distribute"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_003",
+    "section": "Math",
+    "domain": "Algebra",
+    "skill": "Systems of two linear equations",
+    "difficulty": "medium",
+    "question_text": "If x + y = 15 and x - y = 3, what is the value of x?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 9,
+    "explanation": "Add the two equations to eliminate y: (x + y) + (x - y) = 15 + 3, so 2x = 18 and x = 9.",
+    "hint_1": "Adding the equations cancels one of the variables.",
+    "hint_2": "Adding them gives 2x = 18.",
+    "tags": [
+      "system",
+      "grid-in",
+      "elimination"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_004",
+    "section": "Math",
+    "domain": "Advanced Math",
+    "skill": "Quadratic equations",
+    "difficulty": "easy",
+    "question_text": "If x squared = 49 and x > 0, what is the value of x?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 7,
+    "explanation": "Taking the square root of 49 gives 7 or -7. Since x > 0, x = 7.",
+    "hint_1": "What number times itself equals 49?",
+    "hint_2": "Both 7 and -7 square to 49, but only one is positive.",
+    "tags": [
+      "quadratic",
+      "grid-in",
+      "roots"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_005",
+    "section": "Math",
+    "domain": "Advanced Math",
+    "skill": "Function notation",
+    "difficulty": "medium",
+    "question_text": "The function f is defined by f(x) = 2x^2 - 3x + 1. What is the value of f(3)?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 10,
+    "explanation": "Substitute x = 3: f(3) = 2(3)^2 - 3(3) + 1 = 2(9) - 9 + 1 = 18 - 9 + 1 = 10.",
+    "hint_1": "Replace every x with 3, then follow order of operations.",
+    "hint_2": "2(9) = 18, then subtract 9 and add 1.",
+    "tags": [
+      "function",
+      "grid-in",
+      "evaluate"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_006",
+    "section": "Math",
+    "domain": "Advanced Math",
+    "skill": "Exponential expressions",
+    "difficulty": "medium",
+    "question_text": "If 2^x = 32, what is the value of x?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 5,
+    "explanation": "Write 32 as a power of 2: 32 = 2^5. So 2^x = 2^5, which means x = 5.",
+    "hint_1": "Express 32 as 2 raised to some power.",
+    "hint_2": "2 x 2 x 2 x 2 x 2 = 32.",
+    "tags": [
+      "exponent",
+      "grid-in",
+      "powers"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_007",
+    "section": "Math",
+    "domain": "Problem Solving & Data Analysis",
+    "skill": "Percentages",
+    "difficulty": "easy",
+    "question_text": "What is 15 percent of 80?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 12,
+    "explanation": "15 percent = 0.15. Multiply: 0.15 x 80 = 12.",
+    "hint_1": "Convert the percent to a decimal first.",
+    "hint_2": "0.15 x 80 = 12.",
+    "tags": [
+      "percent",
+      "grid-in"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_008",
+    "section": "Math",
+    "domain": "Problem Solving & Data Analysis",
+    "skill": "Ratios and proportions",
+    "difficulty": "easy",
+    "question_text": "On a map, a scale of 1 inch represents 25 miles. How many miles do 6 inches represent?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 150,
+    "explanation": "Each inch is 25 miles, so 6 inches represent 6 x 25 = 150 miles.",
+    "hint_1": "Multiply the number of inches by the miles per inch.",
+    "hint_2": "6 x 25 = 150.",
+    "tags": [
+      "ratio",
+      "grid-in",
+      "proportion"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_009",
+    "section": "Math",
+    "domain": "Problem Solving & Data Analysis",
+    "skill": "Statistics: mean",
+    "difficulty": "medium",
+    "question_text": "The mean of four numbers is 20. Three of the numbers are 15, 25, and 18. What is the fourth number?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 22,
+    "explanation": "If the mean of four numbers is 20, their sum is 4 x 20 = 80. The three known numbers add to 15 + 25 + 18 = 58. The fourth number is 80 - 58 = 22.",
+    "hint_1": "Total = mean x count. Find the total of all four numbers first.",
+    "hint_2": "The four numbers must sum to 80; subtract the three you know.",
+    "tags": [
+      "mean",
+      "grid-in",
+      "statistics"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_010",
+    "section": "Math",
+    "domain": "Geometry & Trig",
+    "skill": "Triangle angle relationships",
+    "difficulty": "easy",
+    "question_text": "Two angles of a triangle measure 50 degrees and 70 degrees. What is the measure, in degrees, of the third angle?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 60,
+    "explanation": "The angles of a triangle sum to 180 degrees. The third angle is 180 - 50 - 70 = 60 degrees.",
+    "hint_1": "The three interior angles of any triangle add to 180 degrees.",
+    "hint_2": "180 - (50 + 70) = 60.",
+    "tags": [
+      "triangle",
+      "grid-in",
+      "angles"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_011",
+    "section": "Math",
+    "domain": "Geometry & Trig",
+    "skill": "Right triangles: Pythagorean theorem",
+    "difficulty": "medium",
+    "question_text": "A right triangle has legs of length 6 and 8. What is the length of the hypotenuse?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 10,
+    "explanation": "By the Pythagorean theorem, the hypotenuse is the square root of (6^2 + 8^2) = square root of (36 + 64) = square root of 100 = 10.",
+    "hint_1": "Use a^2 + b^2 = c^2, where c is the hypotenuse.",
+    "hint_2": "36 + 64 = 100, and the square root of 100 is 10.",
+    "tags": [
+      "pythagorean",
+      "grid-in",
+      "right-triangle"
+    ],
+    "source": "authored"
+  },
+  {
+    "id": "gridin_012",
+    "section": "Math",
+    "domain": "Geometry & Trig",
+    "skill": "Circles: area",
+    "difficulty": "medium",
+    "question_text": "A circle has a radius of 5. If its area is written as k times pi, what is the value of k?",
+    "passage_text": null,
+    "choices": [],
+    "is_grid_in": 1,
+    "grid_in_answer": 25,
+    "explanation": "The area of a circle is pi times r^2. With r = 5, the area is pi x 25 = 25 pi, so k = 25.",
+    "hint_1": "Area = pi x r^2.",
+    "hint_2": "r^2 = 5^2 = 25, so the area is 25 pi.",
+    "tags": [
+      "circle",
+      "grid-in",
+      "area"
+    ],
+    "source": "authored"
   }
 ]
