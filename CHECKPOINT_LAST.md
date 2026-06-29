@@ -1,27 +1,34 @@
-# Checkpoint - ADHDSat (LIVE; active workstream: questions + full practice test)
+# Checkpoint - ADHDSat
 
-## Status: LIVE at https://adhdsat.vercel.app
+Agent: Claude Opus 4.8 (Claude Code)
+Updated: 2026-06-29
+Status: LIVE at https://adhdsat.vercel.app
 
-Comprehensively shipped & verified (features, AI, mobile, a11y, PWA, SEO).
-Bank currently 551 questions (295 Math / 256 English, 22 grid-ins).
+## Completed (this workstream, all live on prod)
+- Full practice test: /practice-test page + /api/practice-test. R&W module
+  (27Q/32min) -> break -> Math module (22Q/35min) -> scaled 400-1600. Verified
+  end-to-end in browser.
+- Practice-test history: practice_test_results table, POST result + GET history
+  endpoints. Intro shows past-scores bar trend + best; results flag "New Personal
+  Best!". Verified live (chart renders, best highlighted gold).
+- Dashboard practice-test card: best/last score + Start/Retake CTA, after Review
+  Errors. Makes the feature discoverable. Verified live.
+- Question bank: 551 -> 583 (two verified authored batches, 32 originals across
+  all 8 domains, official Digital SAT format). Live count confirmed 583.
 
-## Active workstream (started 2026-06-29) -- survives memory wipe
-Goals also saved in memory: active-goals-questions-practice-test.md, and TASK_QUEUE.md.
+## In progress
+- Nothing actively mid-edit. Clean working tree, all pushed to main.
 
-1. Expand question bank with more items modeled on the official Digital SAT
-   (Bluebook) format + verified sources. Author ORIGINAL items in the official
-   format (CB/Bluebook questions are copyrighted -- do not copy verbatim).
-2. Full practice-test option: complete SAT sim (R&W + Math modules, timed, 400-1600
-   scale). Per-section test modes already exist (test-math, test-english in
-   src/pages/Sprint.jsx `testModes` / `startSprint`).
+## Next actions (priority order)
+1. HUMAN: rotate the Supabase DB password (pasted in chat earlier). The one true
+   launch blocker. Supabase dashboard -> Database -> Reset password, then update
+   DATABASE_URL in Vercel env. ~5 min.
+2. Keep growing the question bank toward 700+ (proven authoring + ingest pattern).
+3. Optional: notifications/streak reminders; leaderboards (future phases).
 
-## How to resume fast
-- Add questions: edit server/data/questions.json, then `node --env-file=.env server/ingest.js`
-  (idempotent upsert to Supabase). Schema sample in any existing question object.
-- Grid-in items: is_grid_in:1, choices:[], grid_in_answer:<number>. Verified working.
-- Deploy: `vercel --prod --yes` (token + env vars already configured).
-- Official Digital SAT structure: R&W 2x27Q@32min, Math 2x22Q@35min, 400-1600 scale.
+## Human decisions needed
+- DB password rotation (only the user can do this).
 
-## Follow-ups (need user)
-- Rotate the DB password (was shared in chat).
-- Reviewer peer (claude-peers) unreachable all session.
+## How to expand questions
+Edit server/data/questions.json (or stage a batch file), validate (one correct
+choice per MC), then: node --env-file=.env server/ingest.js (idempotent upsert).
