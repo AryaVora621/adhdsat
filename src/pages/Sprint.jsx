@@ -815,9 +815,16 @@ export default function Sprint({ user, setUser }) {
   }
   if (!question) {
     return (
-      <div style={{ padding: 'clamp(16px, 5vw, 48px)' }}>
-        <h2 style={{ marginBottom: '12px' }}>No questions available</h2>
-        <p style={{ color: 'var(--text-secondary)' }}>Run <code style={{ backgroundColor: '#2a2a46', padding: '2px 6px', borderRadius: '4px' }}>node server/ingest.js</code> to load the question bank.</p>
+      <div style={{ padding: 'clamp(16px, 5vw, 48px)', maxWidth: '460px', margin: '0 auto', width: '100%', textAlign: 'center' }}>
+        <AlertCircle size={36} color="var(--xp-gold)" style={{ marginBottom: '16px' }} />
+        <h2 style={{ marginBottom: '8px' }}>Could not load a question</h2>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: 1.6 }}>
+          Check your connection and try again.
+        </p>
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+          <button className="primary" onClick={() => fetchNextQuestion()} style={{ padding: '12px 28px' }}>Retry</button>
+          <button onClick={() => navigate('/')} style={{ padding: '12px 20px', color: 'var(--text-secondary)' }}>Back to Dashboard</button>
+        </div>
       </div>
     );
   }

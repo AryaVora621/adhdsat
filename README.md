@@ -1,16 +1,85 @@
-# React + Vite
+# ADHDSat
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+An ADHD-oriented SAT prep tool. Short adaptive sprints, instant feedback, spaced
+repetition, XP and streaks, and an AI coach. Built for focus: small wins,
+visible progress, and low friction to start.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Adaptive sprints** (5/10/15/20 questions) that target your weakest domains
+- **Full practice-test simulations** (timed math/english modules)
+- **Spaced repetition** (SM-2) for wrong answers via the Review queue
+- **Predicted SAT score** with a difficulty-weighted model once you've answered 10+
+- **AI coach insights** and on-demand "Deep Dive" explanations (Gemini)
+- **Gamification**: XP, levels, daily streaks, milestone nudges, confetti
+- **Study plan**: target score, test date, daily sprint pacing
+- KaTeX math rendering, keyboard shortcuts, mobile + desktop layouts
 
-## React Compiler
+## Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend**: React 19 + Vite, React Router
+- **Backend**: Express 5 (also runs as a Vercel serverless function)
+- **Database**: Postgres (Supabase) via `pg`, in a dedicated `adhdsat` schema
+- **AI**: Google Gemini 2.5 Flash (optional; rule-based fallbacks everywhere)
 
-## Expanding the Oxlint configuration
+## Environment variables
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+| Name             | Required | Purpose                                                        |
+| ---------------- | -------- | -------------------------------------------------------------- |
+| `DATABASE_URL`   | yes      | Postgres connection string (Supabase **transaction pooler**)   |
+| `GEMINI_API_KEY` | no       | Enables adaptive AI + AI insights/explanations (falls back)    |
+
+`DATABASE_URL` should be the Supabase **Transaction pooler** URI (port 6543),
+which is built for serverless:
+
+```
+postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres
+```
+
+## Local development
+
+```bash
+npm install
+cp .env.example .env   # then fill in DATABASE_URL (and optionally GEMINI_API_KEY)
+npm run dev            # vite + express together
+```
+
+On first boot the server seeds the 532-question bank from
+`server/data/questions.json` into Postgres (idempotent — it only runs when the
+`questions` table is empty).
+
+- Frontend: http://localhost:5173
+- API: http://localhost:3001 (proxied)
+
+## Database
+
+Schema lives in the `adhdsat` Postgres schema. Tables: `users`, `questions`,
+`user_answers`, `sprints`, `review_cards`. The server sets `search_path` to
+`adhdsat` on every connection, so queries are unqualified.
+
+To re-create the schema on a fresh Postgres, apply the DDL in
+`server/db.js`'s sibling migration (see the `adhdsat_init_schema` migration that
+created the schema), or run it through your migration tool of choice.
+
+## Deploy (Vercel)
+
+1. Set both env vars in the Vercel project (Production, Preview, Development):
+   ```bash
+   vercel env add DATABASE_URL
+   vercel env add GEMINI_API_KEY
+   ```
+2. Deploy:
+   ```bash
+   vercel --prod
+   ```
+
+`api/[...slug].js` proxies all `/api/*` requests to the Express app; the SPA is
+served from `dist`. Because the database is shared Postgres (not local SQLite),
+user progress persists across cold starts and function instances.
+
+## Scripts
+
+- `npm run dev` — Vite + Express (nodemon)
+- `npm run build` — production build to `dist`
+- `npm start` — run the Express server (serves `dist` if present)
+- `npm run lint` — oxlint

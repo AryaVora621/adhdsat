@@ -4,7 +4,7 @@ import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { existsSync } from 'fs';
-import db from './db.js';
+import { query, rows, row, ensureSeed } from './db.js';
 import { getAdaptiveCriteria, streamExplanation, analyzeScoreReport } from './gemini.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -17,31 +17,43 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+// Ensure the shared question bank is seeded before serving any API request.
+// The promise is memoized, so this is a no-op after the first call per instance.
+app.use((req, res, next) => {
+  ensureSeed().then(() => next()).catch(() => next());
+});
+
 const MATH_DOMAINS = ['Algebra', 'Advanced Math', 'Problem Solving & Data Analysis', 'Geometry & Trig'];
 const ENG_DOMAINS = ['Information & Ideas', 'Craft & Structure', 'Expression of Ideas', 'Standard English Conventions'];
 const DOMAINS = [...MATH_DOMAINS, ...ENG_DOMAINS];
 
+const toInt = (v) => (v ? 1 : 0); // coerce boolean/number to the 0/1 integer columns use
+
 // --- Health ---
 
-app.get('/api/health', (req, res) => {
-  const qCount = db.prepare('SELECT COUNT(*) as cnt FROM questions').get().cnt;
-  res.json({ status: 'ok', questions: qCount, ts: new Date().toISOString() });
+app.get('/api/health', async (req, res) => {
+  const r = await row('SELECT COUNT(*)::int AS cnt FROM adhdsat.questions');
+  res.json({ status: 'ok', questions: r?.cnt ?? 0, ts: new Date().toISOString() });
 });
 
 // --- Users ---
 
-app.get('/api/users/:id', (req, res) => {
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id);
+app.get('/api/users/:id', async (req, res) => {
+  const user = await row('SELECT * FROM adhdsat.users WHERE id = $1', [req.params.id]);
   if (!user) return res.status(404).json({ error: 'User not found' });
   user.weak_areas = JSON.parse(user.weak_areas || '[]');
   res.json(user);
 });
 
-app.post('/api/users', (req, res) => {
+app.post('/api/users', async (req, res) => {
   const { id, display_name } = req.body;
+  if (!id) return res.status(400).json({ error: 'id required' });
   try {
-    db.prepare('INSERT OR IGNORE INTO users (id, display_name, created_at) VALUES (?, ?, ?)').run(id, display_name || 'Learner', new Date().toISOString());
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+    await query(
+      'INSERT INTO adhdsat.users (id, display_name, created_at) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING',
+      [id, display_name || 'Learner', new Date().toISOString()]
+    );
+    const user = await row('SELECT * FROM adhdsat.users WHERE id = $1', [id]);
     user.weak_areas = JSON.parse(user.weak_areas || '[]');
     res.json(user);
   } catch (err) {
@@ -49,19 +61,21 @@ app.post('/api/users', (req, res) => {
   }
 });
 
-app.put('/api/users/:id', (req, res) => {
+app.put('/api/users/:id', async (req, res) => {
   const { display_name, weak_areas, baseline_english, baseline_math } = req.body;
   try {
     const fields = [];
     const vals = [];
-    if (display_name !== undefined) { fields.push('display_name = ?'); vals.push(display_name); }
-    if (weak_areas !== undefined) { fields.push('weak_areas = ?'); vals.push(JSON.stringify(weak_areas)); }
-    if (baseline_english !== undefined) { fields.push('baseline_english = ?'); vals.push(baseline_english); }
-    if (baseline_math !== undefined) { fields.push('baseline_math = ?'); vals.push(baseline_math); }
+    let p = 0;
+    if (display_name !== undefined) { fields.push(`display_name = $${++p}`); vals.push(display_name); }
+    if (weak_areas !== undefined) { fields.push(`weak_areas = $${++p}`); vals.push(JSON.stringify(weak_areas)); }
+    if (baseline_english !== undefined) { fields.push(`baseline_english = $${++p}`); vals.push(baseline_english); }
+    if (baseline_math !== undefined) { fields.push(`baseline_math = $${++p}`); vals.push(baseline_math); }
     if (!fields.length) return res.status(400).json({ error: 'No fields to update' });
     vals.push(req.params.id);
-    db.prepare(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`).run(...vals);
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id);
+    await query(`UPDATE adhdsat.users SET ${fields.join(', ')} WHERE id = $${++p}`, vals);
+    const user = await row('SELECT * FROM adhdsat.users WHERE id = $1', [req.params.id]);
+    if (!user) return res.status(404).json({ error: 'User not found' });
     user.weak_areas = JSON.parse(user.weak_areas || '[]');
     res.json(user);
   } catch (err) {
@@ -69,22 +83,23 @@ app.put('/api/users/:id', (req, res) => {
   }
 });
 
-app.post('/api/users/:id/xp', (req, res) => {
+app.post('/api/users/:id/xp', async (req, res) => {
   const { xp_gained } = req.body;
   try {
-    db.prepare('UPDATE users SET total_xp = total_xp + ? WHERE id = ?').run(xp_gained, req.params.id);
+    await query('UPDATE adhdsat.users SET total_xp = total_xp + $1 WHERE id = $2', [xp_gained || 0, req.params.id]);
     const today = new Date().toISOString().split('T')[0];
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id);
+    const user = await row('SELECT * FROM adhdsat.users WHERE id = $1', [req.params.id]);
+    if (!user) return res.status(404).json({ error: 'User not found' });
     let newStreak = user.current_streak;
     let longestStreak = user.longest_streak;
     if (user.last_active_date !== today) {
       const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
       newStreak = user.last_active_date === yesterday ? newStreak + 1 : 1;
       longestStreak = Math.max(longestStreak, newStreak);
-      db.prepare('UPDATE users SET current_streak = ?, longest_streak = ?, last_active_date = ? WHERE id = ?')
-        .run(newStreak, longestStreak, today, req.params.id);
+      await query('UPDATE adhdsat.users SET current_streak = $1, longest_streak = $2, last_active_date = $3 WHERE id = $4',
+        [newStreak, longestStreak, today, req.params.id]);
     }
-    const updated = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id);
+    const updated = await row('SELECT * FROM adhdsat.users WHERE id = $1', [req.params.id]);
     updated.weak_areas = JSON.parse(updated.weak_areas || '[]');
     res.json(updated);
   } catch (err) {
@@ -93,13 +108,24 @@ app.post('/api/users/:id/xp', (req, res) => {
 });
 
 // --- Onboarding ---
+// Upsert so onboarding succeeds even if the initial /api/users call never
+// reached this instance (the old SQLite-in-/tmp bug). Idempotent.
 
-app.post('/api/onboarding', (req, res) => {
+app.post('/api/onboarding', async (req, res) => {
   const { userId, baseline_english, baseline_math, weak_areas } = req.body;
+  if (!userId) return res.status(400).json({ error: 'userId required' });
   try {
-    db.prepare(`UPDATE users SET baseline_english = ?, baseline_math = ?, weak_areas = ?, onboarding_completed = 1 WHERE id = ?`)
-      .run(baseline_english || 0, baseline_math || 0, JSON.stringify(weak_areas || []), userId);
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+    await query(
+      `INSERT INTO adhdsat.users (id, display_name, created_at, baseline_english, baseline_math, weak_areas, onboarding_completed)
+       VALUES ($1, 'Learner', $2, $3, $4, $5, 1)
+       ON CONFLICT (id) DO UPDATE SET
+         baseline_english = EXCLUDED.baseline_english,
+         baseline_math = EXCLUDED.baseline_math,
+         weak_areas = EXCLUDED.weak_areas,
+         onboarding_completed = 1`,
+      [userId, new Date().toISOString(), baseline_english || 0, baseline_math || 0, JSON.stringify(weak_areas || [])]
+    );
+    const user = await row('SELECT * FROM adhdsat.users WHERE id = $1', [userId]);
     user.weak_areas = JSON.parse(user.weak_areas || '[]');
     res.json(user);
   } catch (err) {
@@ -109,39 +135,38 @@ app.post('/api/onboarding', (req, res) => {
 
 // --- Questions ---
 
-app.get('/api/questions', (req, res) => {
+app.get('/api/questions', async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
-  const questions = db.prepare('SELECT * FROM questions ORDER BY RANDOM() LIMIT ?').all(limit);
-  res.json(questions.map(q => ({ ...q, choices: JSON.parse(q.choices || '[]'), tags: JSON.parse(q.tags || '[]') })));
+  const qs = await rows('SELECT * FROM adhdsat.questions ORDER BY random() LIMIT $1', [limit]);
+  res.json(qs.map(q => ({ ...q, choices: JSON.parse(q.choices || '[]'), tags: JSON.parse(q.tags || '[]') })));
 });
 
 app.get('/api/questions/next', async (req, res) => {
   const { userId, section } = req.query;
   if (!userId) return res.status(400).json({ error: 'userId required' });
 
-  // Determine which domains are in scope for this sprint
   const allowedDomains = section === 'math' ? MATH_DOMAINS : section === 'english' ? ENG_DOMAINS : DOMAINS;
 
-  const seen = db.prepare('SELECT question_id FROM user_answers WHERE user_id = ? ORDER BY created_at DESC LIMIT 50').all(userId).map(r => r.question_id);
+  const seen = (await rows('SELECT question_id FROM adhdsat.user_answers WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50', [userId])).map(r => r.question_id);
 
-  const recent = db.prepare(`
-    SELECT q.domain, ua.is_correct FROM user_answers ua
-    JOIN questions q ON ua.question_id = q.id
-    WHERE ua.user_id = ? ORDER BY ua.created_at DESC LIMIT 30
-  `).all(userId);
+  const recent = await rows(`
+    SELECT q.domain, ua.is_correct FROM adhdsat.user_answers ua
+    JOIN adhdsat.questions q ON ua.question_id = q.id
+    WHERE ua.user_id = $1 ORDER BY ua.created_at DESC LIMIT 30
+  `, [userId]);
 
   const domainStats = {};
-  for (const row of recent) {
-    if (!domainStats[row.domain]) domainStats[row.domain] = { correct: 0, total: 0 };
-    domainStats[row.domain].total++;
-    if (row.is_correct) domainStats[row.domain].correct++;
+  for (const r of recent) {
+    if (!domainStats[r.domain]) domainStats[r.domain] = { correct: 0, total: 0 };
+    domainStats[r.domain].total++;
+    if (r.is_correct) domainStats[r.domain].correct++;
   }
   const domainAccuracy = {};
   for (const [d, s] of Object.entries(domainStats)) {
     domainAccuracy[d] = s.total > 0 ? s.correct / s.total : null;
   }
 
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+  const user = await row('SELECT * FROM adhdsat.users WHERE id = $1', [userId]);
   const allWeakAreas = JSON.parse(user?.weak_areas || '[]');
   const weakAreas = allWeakAreas.filter(d => allowedDomains.includes(d));
   const subscores = user?.subscores ? JSON.parse(user.subscores) : null;
@@ -154,25 +179,19 @@ app.get('/api/questions/next', async (req, res) => {
     criteria = await getAdaptiveCriteria({ domainAccuracy, weakAreas, subscores, targetScore, baseline });
   } catch {}
 
-  // Validate that Gemini's pick is within the allowed section; if not, fall through to rule-based
   if (!criteria || !allowedDomains.includes(criteria.domain)) {
-    // Pick the weakest domain (lowest accuracy), or a domain with no data, or a flagged weak area
     let targetDomain = null;
     let lowestAcc = Infinity;
-    // Prefer domains with no data at all (virgin territory)
     const untriedDomains = allowedDomains.filter(d => domainAccuracy[d] === undefined);
     if (untriedDomains.length > 0) {
-      // Prioritize flagged weak areas with no data, else first untried
       targetDomain = untriedDomains.find(d => weakAreas.includes(d)) || untriedDomains[0];
     } else {
-      // All domains tried -- pick weakest
       for (const [d, acc] of Object.entries(domainAccuracy)) {
         if (!allowedDomains.includes(d) || acc === null) continue;
         if (acc < lowestAcc) { lowestAcc = acc; targetDomain = d; }
       }
       if (!targetDomain) targetDomain = weakAreas[0] || allowedDomains[0];
     }
-    // Vary difficulty based on domain accuracy
     const domainAcc = domainAccuracy[targetDomain];
     const difficulty = domainAcc === undefined || domainAcc === null ? 'medium'
       : domainAcc < 0.4 ? 'easy'
@@ -181,49 +200,49 @@ app.get('/api/questions/next', async (req, res) => {
     criteria = { domain: targetDomain, difficulty };
   }
 
-  const placeholders = seen.length > 0 ? seen.map(() => '?').join(',') : "'__none__'";
-  let question = db.prepare(
-    `SELECT * FROM questions WHERE domain = ? AND difficulty = ? AND id NOT IN (${placeholders}) ORDER BY RANDOM() LIMIT 1`
-  ).get(criteria.domain, criteria.difficulty, ...seen);
-
+  let question = await row(
+    `SELECT * FROM adhdsat.questions WHERE domain = $1 AND difficulty = $2 AND id <> ALL($3::text[]) ORDER BY random() LIMIT 1`,
+    [criteria.domain, criteria.difficulty, seen]
+  );
   if (!question) {
-    question = db.prepare(
-      `SELECT * FROM questions WHERE domain = ? AND id NOT IN (${placeholders}) ORDER BY RANDOM() LIMIT 1`
-    ).get(criteria.domain, ...seen);
-  }
-  // Fallback: any question from the allowed section not recently seen
-  if (!question) {
-    const domainClause = allowedDomains.map(() => '?').join(',');
-    question = db.prepare(
-      `SELECT * FROM questions WHERE domain IN (${domainClause}) AND id NOT IN (${placeholders}) ORDER BY RANDOM() LIMIT 1`
-    ).get(...allowedDomains, ...seen);
+    question = await row(
+      `SELECT * FROM adhdsat.questions WHERE domain = $1 AND id <> ALL($2::text[]) ORDER BY random() LIMIT 1`,
+      [criteria.domain, seen]
+    );
   }
   if (!question) {
-    question = db.prepare('SELECT * FROM questions ORDER BY RANDOM() LIMIT 1').get();
+    question = await row(
+      `SELECT * FROM adhdsat.questions WHERE domain = ANY($1::text[]) AND id <> ALL($2::text[]) ORDER BY random() LIMIT 1`,
+      [allowedDomains, seen]
+    );
   }
-  if (!question) return res.status(404).json({ error: 'No questions available. Run: node server/ingest.js' });
+  if (!question) {
+    question = await row('SELECT * FROM adhdsat.questions ORDER BY random() LIMIT 1');
+  }
+  if (!question) return res.status(404).json({ error: 'No questions available.' });
 
   res.json({ ...question, choices: JSON.parse(question.choices || '[]'), tags: JSON.parse(question.tags || '[]') });
 });
 
 // --- Sprints ---
 
-app.post('/api/sprints', (req, res) => {
+app.post('/api/sprints', async (req, res) => {
   const { userId, sprint_type } = req.body;
   try {
     const id = crypto.randomUUID();
-    db.prepare('INSERT INTO sprints (id, user_id, sprint_type, started_at) VALUES (?, ?, ?, ?)').run(id, userId, sprint_type || 'adaptive', new Date().toISOString());
+    await query('INSERT INTO adhdsat.sprints (id, user_id, sprint_type, started_at) VALUES ($1, $2, $3, $4)',
+      [id, userId, sprint_type || 'adaptive', new Date().toISOString()]);
     res.json({ id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/sprints/:id/finish', (req, res) => {
+app.post('/api/sprints/:id/finish', async (req, res) => {
   const { questions_attempted, questions_correct, xp_earned } = req.body;
   try {
-    db.prepare('UPDATE sprints SET questions_attempted = ?, questions_correct = ?, xp_earned = ?, completed_at = ? WHERE id = ?')
-      .run(questions_attempted || 0, questions_correct || 0, xp_earned || 0, new Date().toISOString(), req.params.id);
+    await query('UPDATE adhdsat.sprints SET questions_attempted = $1, questions_correct = $2, xp_earned = $3, completed_at = $4 WHERE id = $5',
+      [questions_attempted || 0, questions_correct || 0, xp_earned || 0, new Date().toISOString(), req.params.id]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -232,11 +251,14 @@ app.post('/api/sprints/:id/finish', (req, res) => {
 
 // --- Answers ---
 
-app.post('/api/answers', (req, res) => {
+app.post('/api/answers', async (req, res) => {
   const { id, user_id, question_id, selected_choice, is_correct, hints_used, time_spent_seconds, sprint_id } = req.body;
   try {
-    db.prepare(`INSERT INTO user_answers (id, user_id, question_id, selected_choice, is_correct, hints_used, time_spent_seconds, sprint_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(id || crypto.randomUUID(), user_id, question_id, selected_choice, is_correct, hints_used || 0, time_spent_seconds || 0, sprint_id, new Date().toISOString());
+    await query(
+      `INSERT INTO adhdsat.user_answers (id, user_id, question_id, selected_choice, is_correct, hints_used, time_spent_seconds, sprint_id, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [id || crypto.randomUUID(), user_id, question_id, selected_choice, toInt(is_correct), hints_used || 0, time_spent_seconds || 0, sprint_id, new Date().toISOString()]
+    );
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -245,31 +267,26 @@ app.post('/api/answers', (req, res) => {
 
 // --- Progress ---
 
-app.get('/api/progress', (req, res) => {
+app.get('/api/progress', async (req, res) => {
   const { userId } = req.query;
   if (!userId) return res.status(400).json({ error: 'userId required' });
 
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+  const user = await row('SELECT * FROM adhdsat.users WHERE id = $1', [userId]);
   if (!user) return res.status(404).json({ error: 'User not found' });
 
-  const totalAnswered = db.prepare('SELECT COUNT(*) as cnt FROM user_answers WHERE user_id = ?').get(userId).cnt;
+  const totalAnswered = (await row('SELECT COUNT(*)::int AS cnt FROM adhdsat.user_answers WHERE user_id = $1', [userId])).cnt;
 
   const domainStats = {};
   for (const domain of DOMAINS) {
-    const last20 = db.prepare(`
-      SELECT ua.is_correct FROM user_answers ua
-      JOIN questions q ON ua.question_id = q.id
-      WHERE ua.user_id = ? AND q.domain = ?
-      ORDER BY ua.created_at DESC LIMIT 20
-    `).all(userId, domain);
-    const prior20 = db.prepare(`
-      SELECT ua.is_correct FROM user_answers ua
-      JOIN questions q ON ua.question_id = q.id
-      WHERE ua.user_id = ? AND q.domain = ?
+    const last40 = await rows(`
+      SELECT ua.is_correct FROM adhdsat.user_answers ua
+      JOIN adhdsat.questions q ON ua.question_id = q.id
+      WHERE ua.user_id = $1 AND q.domain = $2
       ORDER BY ua.created_at DESC LIMIT 40
-    `).all(userId, domain).slice(20);
-
-    const acc = (rows) => rows.length === 0 ? null : rows.filter(r => r.is_correct).length / rows.length;
+    `, [userId, domain]);
+    const last20 = last40.slice(0, 20);
+    const prior20 = last40.slice(20);
+    const acc = (arr) => arr.length === 0 ? null : arr.filter(r => r.is_correct).length / arr.length;
     domainStats[domain] = {
       accuracy: acc(last20),
       priorAccuracy: acc(prior20),
@@ -279,30 +296,25 @@ app.get('/api/progress', (req, res) => {
 
   let predictedScore = null;
   if (totalAnswered >= 10) {
-    const mathDomains = ['Algebra', 'Advanced Math', 'Problem Solving & Data Analysis', 'Geometry & Trig'];
-    const engDomains = ['Information & Ideas', 'Craft & Structure', 'Expression of Ideas', 'Standard English Conventions'];
-    // Difficulty-weighted score: hard correct = 2pts, medium = 1.5pts, easy = 1pt
     const DIFF_WEIGHT = { easy: 1, medium: 1.5, hard: 2 };
-    const weightedAcc = (domains) => {
-      const rows = db.prepare(`
+    const weightedAcc = async (domains) => {
+      const rs = await rows(`
         SELECT ua.is_correct, q.difficulty
-        FROM user_answers ua JOIN questions q ON ua.question_id = q.id
-        WHERE ua.user_id = ? AND q.domain IN (${domains.map(() => '?').join(',')})
+        FROM adhdsat.user_answers ua JOIN adhdsat.questions q ON ua.question_id = q.id
+        WHERE ua.user_id = $1 AND q.domain = ANY($2::text[])
         ORDER BY ua.created_at DESC LIMIT 60
-      `).all(userId, ...domains);
-      if (rows.length < 3) return null;
+      `, [userId, domains]);
+      if (rs.length < 3) return null;
       let earned = 0, possible = 0;
-      for (const r of rows) {
+      for (const r of rs) {
         const w = DIFF_WEIGHT[r.difficulty] || 1.5;
         possible += w;
         if (r.is_correct) earned += w;
       }
       return possible > 0 ? earned / possible : null;
     };
-    const mathAcc = weightedAcc(mathDomains);
-    const engAcc = weightedAcc(engDomains);
-    // Score curve: accounts for the fact that SAT scoring is roughly linear
-    // but clamp to realistic bounds
+    const mathAcc = await weightedAcc(MATH_DOMAINS);
+    const engAcc = await weightedAcc(ENG_DOMAINS);
     const toScore = (acc) => acc === null ? null : Math.min(800, Math.max(200, Math.round(200 + acc * 620)));
     const mathScore = toScore(mathAcc);
     const engScore = toScore(engAcc);
@@ -318,10 +330,10 @@ app.get('/api/progress', (req, res) => {
     }
   }
 
-  const recentSprints = db.prepare(`
-    SELECT * FROM sprints WHERE user_id = ? AND completed_at IS NOT NULL
+  const recentSprints = await rows(`
+    SELECT * FROM adhdsat.sprints WHERE user_id = $1 AND completed_at IS NOT NULL
     ORDER BY completed_at DESC LIMIT 10
-  `).all(userId);
+  `, [userId]);
 
   res.json({
     domainStats,
@@ -333,17 +345,17 @@ app.get('/api/progress', (req, res) => {
 });
 
 // --- Sprint domain breakdown ---
-app.get('/api/sprints/:id/breakdown', (req, res) => {
-  const rows = db.prepare(`
+app.get('/api/sprints/:id/breakdown', async (req, res) => {
+  const rs = await rows(`
     SELECT q.domain, ua.is_correct, ua.time_spent_seconds
-    FROM user_answers ua
-    JOIN questions q ON ua.question_id = q.id
-    WHERE ua.sprint_id = ?
-  `).all(req.params.id);
+    FROM adhdsat.user_answers ua
+    JOIN adhdsat.questions q ON ua.question_id = q.id
+    WHERE ua.sprint_id = $1
+  `, [req.params.id]);
 
   const byDomain = {};
   let totalTime = 0;
-  for (const r of rows) {
+  for (const r of rs) {
     if (!byDomain[r.domain]) byDomain[r.domain] = { correct: 0, total: 0 };
     byDomain[r.domain].total++;
     if (r.is_correct) byDomain[r.domain].correct++;
@@ -360,29 +372,30 @@ app.get('/api/sprints/:id/breakdown', (req, res) => {
   res.json({ domains, totalTime });
 });
 
-app.get('/api/sprints', (req, res) => {
+app.get('/api/sprints', async (req, res) => {
   const { userId, days = 7 } = req.query;
   if (!userId) return res.status(400).json({ error: 'userId required' });
 
   const daysAgo = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
-  const rows = db.prepare(`
-    SELECT s.id, s.sprint_type, s.correct_count, s.total_count, s.xp_earned, s.created_at,
-           COALESCE(SUM(ua.time_spent_seconds), 0) as duration_seconds
-    FROM sprints s
-    LEFT JOIN user_answers ua ON s.id = ua.sprint_id
-    WHERE s.user_id = ? AND s.created_at > ?
+  const rs = await rows(`
+    SELECT s.id, s.sprint_type, s.questions_correct, s.questions_attempted, s.xp_earned,
+           s.started_at, s.completed_at,
+           COALESCE(SUM(ua.time_spent_seconds), 0) AS duration_seconds
+    FROM adhdsat.sprints s
+    LEFT JOIN adhdsat.user_answers ua ON s.id = ua.sprint_id
+    WHERE s.user_id = $1 AND s.completed_at IS NOT NULL AND s.started_at > $2
     GROUP BY s.id
-    ORDER BY s.created_at DESC
-  `).all(userId, daysAgo);
+    ORDER BY s.started_at DESC
+  `, [userId, daysAgo]);
 
-  const sprints = rows.map(r => ({
+  const sprints = rs.map(r => ({
     id: r.id,
     sprint_type: r.sprint_type,
-    correct_count: r.correct_count,
-    total_count: r.total_count,
+    correct_count: r.questions_correct,
+    total_count: r.questions_attempted,
     xp_earned: r.xp_earned,
-    duration_seconds: r.duration_seconds,
-    created_at: r.created_at
+    duration_seconds: Number(r.duration_seconds),
+    created_at: r.completed_at || r.started_at
   }));
 
   res.json({ sprints });
@@ -390,35 +403,34 @@ app.get('/api/sprints', (req, res) => {
 
 // --- Review Errors (SM-2 Spaced Repetition) ---
 
-// Ensure a review card exists for every wrong answer the user has made
-function syncReviewCards(userId) {
-  const wrongIds = db.prepare(`
-    SELECT DISTINCT ua.question_id
-    FROM user_answers ua
-    WHERE ua.user_id = ? AND ua.is_correct = 0
-  `).all(userId).map(r => r.question_id);
+async function syncReviewCards(userId) {
+  const wrong = await rows(`
+    SELECT DISTINCT question_id FROM adhdsat.user_answers
+    WHERE user_id = $1 AND is_correct = 0
+  `, [userId]);
+  if (!wrong.length) return;
 
   const now = new Date().toISOString();
-  const insertCard = db.prepare(`
-    INSERT OR IGNORE INTO review_cards (id, user_id, question_id, next_review_at, interval_days, ease_factor, rep_count)
-    VALUES (?, ?, ?, ?, 1, 2.5, 0)
-  `);
-  const txn = db.transaction(() => {
-    for (const qid of wrongIds) {
-      insertCard.run(crypto.randomUUID(), userId, qid, now);
-    }
-  });
-  txn();
+  const values = [];
+  const params = [];
+  let p = 0;
+  for (const r of wrong) {
+    values.push(`($${++p}, $${++p}, $${++p}, $${++p}, 1, 2.5, 0)`);
+    params.push(crypto.randomUUID(), userId, r.question_id, now);
+  }
+  await query(
+    `INSERT INTO adhdsat.review_cards (id, user_id, question_id, next_review_at, interval_days, ease_factor, rep_count)
+     VALUES ${values.join(',')}
+     ON CONFLICT (user_id, question_id) DO NOTHING`,
+    params
+  );
 }
 
-// SM-2 algorithm: given quality (0=wrong, 1=correct), update the card
 function sm2Update(card, quality) {
-  // quality: 0 = wrong (reset), 1 = correct (advance)
-  const q = quality === 1 ? 4 : 1; // map to 0-5 scale
+  const q = quality === 1 ? 4 : 1;
   let { ease_factor, interval_days, rep_count } = card;
 
   if (q < 3) {
-    // Reset: start over from interval 1
     rep_count = 0;
     interval_days = 1;
   } else {
@@ -433,42 +445,38 @@ function sm2Update(card, quality) {
   return { ease_factor, interval_days, rep_count, next_review_at: next };
 }
 
-app.get('/api/review/next', (req, res) => {
+app.get('/api/review/next', async (req, res) => {
   const { userId } = req.query;
   if (!userId) return res.status(400).json({ error: 'userId required' });
 
-  syncReviewCards(userId);
-
+  await syncReviewCards(userId);
   const now = new Date().toISOString();
 
-  // First: find a due card (next_review_at <= now)
-  let card = db.prepare(`
-    SELECT rc.*, q.id as q_id FROM review_cards rc
-    JOIN questions q ON rc.question_id = q.id
-    WHERE rc.user_id = ? AND rc.next_review_at <= ?
+  let card = await row(`
+    SELECT rc.* FROM adhdsat.review_cards rc
+    JOIN adhdsat.questions q ON rc.question_id = q.id
+    WHERE rc.user_id = $1 AND rc.next_review_at <= $2
     ORDER BY rc.next_review_at ASC
     LIMIT 1
-  `).get(userId, now);
+  `, [userId, now]);
 
-  // Fallback: if no card is due yet, return the one due soonest
   if (!card) {
-    card = db.prepare(`
-      SELECT rc.*, q.id as q_id FROM review_cards rc
-      JOIN questions q ON rc.question_id = q.id
-      WHERE rc.user_id = ?
+    card = await row(`
+      SELECT rc.* FROM adhdsat.review_cards rc
+      JOIN adhdsat.questions q ON rc.question_id = q.id
+      WHERE rc.user_id = $1
       ORDER BY rc.next_review_at ASC
       LIMIT 1
-    `).get(userId);
+    `, [userId]);
   }
 
   if (!card) return res.json(null);
 
-  const q = db.prepare('SELECT * FROM questions WHERE id = ?').get(card.question_id);
+  const q = await row('SELECT * FROM adhdsat.questions WHERE id = $1', [card.question_id]);
   if (!q) return res.json(null);
   q.choices = JSON.parse(q.choices || '[]');
   q.tags = JSON.parse(q.tags || '[]');
 
-  // Include SM-2 metadata so frontend can show "Next review in N days"
   q._sm2 = {
     card_id: card.id,
     interval_days: card.interval_days,
@@ -478,64 +486,53 @@ app.get('/api/review/next', (req, res) => {
   res.json(q);
 });
 
-app.post('/api/review/answer', (req, res) => {
+app.post('/api/review/answer', async (req, res) => {
   const { userId, questionId, isCorrect } = req.body;
   if (!userId || !questionId) return res.status(400).json({ error: 'userId and questionId required' });
 
-  syncReviewCards(userId);
+  await syncReviewCards(userId);
 
-  const card = db.prepare('SELECT * FROM review_cards WHERE user_id = ? AND question_id = ?').get(userId, questionId);
+  const card = await row('SELECT * FROM adhdsat.review_cards WHERE user_id = $1 AND question_id = $2', [userId, questionId]);
   if (!card) return res.status(404).json({ error: 'Card not found' });
 
   const quality = isCorrect ? 1 : 0;
   const updated = sm2Update(card, quality);
 
-  db.prepare(`
-    UPDATE review_cards
-    SET ease_factor = ?, interval_days = ?, rep_count = ?, next_review_at = ?, last_reviewed_at = ?
-    WHERE id = ?
-  `).run(updated.ease_factor, updated.interval_days, updated.rep_count, updated.next_review_at, new Date().toISOString(), card.id);
+  await query(`
+    UPDATE adhdsat.review_cards
+    SET ease_factor = $1, interval_days = $2, rep_count = $3, next_review_at = $4, last_reviewed_at = $5
+    WHERE id = $6
+  `, [updated.ease_factor, updated.interval_days, updated.rep_count, updated.next_review_at, new Date().toISOString(), card.id]);
 
-  // If answered correctly twice in a row (rep_count >= 2 and correct), remove from active review
-  const updatedCard = db.prepare('SELECT * FROM review_cards WHERE id = ?').get(card.id);
-  res.json({ success: true, next_review_at: updatedCard.next_review_at, interval_days: updatedCard.interval_days });
+  res.json({ success: true, next_review_at: updated.next_review_at, interval_days: updated.interval_days });
 });
 
-app.get('/api/review/count', (req, res) => {
+app.get('/api/review/count', async (req, res) => {
   const { userId } = req.query;
   if (!userId) return res.status(400).json({ error: 'userId required' });
 
-  syncReviewCards(userId);
-
+  await syncReviewCards(userId);
   const now = new Date().toISOString();
-  const due = db.prepare(`
-    SELECT COUNT(*) as cnt FROM review_cards
-    WHERE user_id = ? AND next_review_at <= ?
-  `).get(userId, now).cnt;
-
-  // Also count upcoming (not yet due)
-  const total = db.prepare(`
-    SELECT COUNT(*) as cnt FROM review_cards WHERE user_id = ?
-  `).get(userId).cnt;
-
+  const due = (await row('SELECT COUNT(*)::int AS cnt FROM adhdsat.review_cards WHERE user_id = $1 AND next_review_at <= $2', [userId, now])).cnt;
+  const total = (await row('SELECT COUNT(*)::int AS cnt FROM adhdsat.review_cards WHERE user_id = $1', [userId])).cnt;
   res.json({ count: due, total });
 });
 
 // --- Study Plan ---
 
-app.get('/api/study-plan/:userId', (req, res) => {
-  const user = db.prepare('SELECT study_plan FROM users WHERE id = ?').get(req.params.userId);
+app.get('/api/study-plan/:userId', async (req, res) => {
+  const user = await row('SELECT study_plan FROM adhdsat.users WHERE id = $1', [req.params.userId]);
   if (!user) return res.status(404).json({ error: 'User not found' });
   res.json(user.study_plan ? JSON.parse(user.study_plan) : null);
 });
 
-app.put('/api/study-plan/:userId', (req, res) => {
+app.put('/api/study-plan/:userId', async (req, res) => {
   const { target_score, test_date } = req.body;
   if (!target_score) return res.status(400).json({ error: 'target_score required' });
-  const existing = db.prepare('SELECT study_plan FROM users WHERE id = ?').get(req.params.userId);
+  const existing = await row('SELECT study_plan FROM adhdsat.users WHERE id = $1', [req.params.userId]);
   const prev = existing?.study_plan ? JSON.parse(existing.study_plan) : {};
   const plan = JSON.stringify({ ...prev, target_score, ...(test_date ? { test_date } : {}) });
-  db.prepare('UPDATE users SET study_plan = ? WHERE id = ?').run(plan, req.params.userId);
+  await query('UPDATE adhdsat.users SET study_plan = $1 WHERE id = $2', [plan, req.params.userId]);
   res.json(JSON.parse(plan));
 });
 
@@ -543,23 +540,22 @@ app.put('/api/study-plan/:userId', (req, res) => {
 
 app.get('/api/insights/:userId', async (req, res) => {
   const userId = req.params.userId;
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+  const user = await row('SELECT * FROM adhdsat.users WHERE id = $1', [userId]);
   if (!user) return res.status(404).json({ error: 'User not found' });
 
-  const totalAnswered = db.prepare('SELECT COUNT(*) as cnt FROM user_answers WHERE user_id = ?').get(userId).cnt;
+  const totalAnswered = (await row('SELECT COUNT(*)::int AS cnt FROM adhdsat.user_answers WHERE user_id = $1', [userId])).cnt;
 
-  // Per-domain accuracy from last 30 answers
-  const recent = db.prepare(`
-    SELECT q.domain, ua.is_correct FROM user_answers ua
-    JOIN questions q ON ua.question_id = q.id
-    WHERE ua.user_id = ? ORDER BY ua.created_at DESC LIMIT 30
-  `).all(userId);
+  const recent = await rows(`
+    SELECT q.domain, ua.is_correct FROM adhdsat.user_answers ua
+    JOIN adhdsat.questions q ON ua.question_id = q.id
+    WHERE ua.user_id = $1 ORDER BY ua.created_at DESC LIMIT 30
+  `, [userId]);
 
   const domainStats = {};
-  for (const row of recent) {
-    if (!domainStats[row.domain]) domainStats[row.domain] = { correct: 0, total: 0 };
-    domainStats[row.domain].total++;
-    if (row.is_correct) domainStats[row.domain].correct++;
+  for (const r of recent) {
+    if (!domainStats[r.domain]) domainStats[r.domain] = { correct: 0, total: 0 };
+    domainStats[r.domain].total++;
+    if (r.is_correct) domainStats[r.domain].correct++;
   }
 
   const domainAccuracy = {};
@@ -570,16 +566,14 @@ app.get('/api/insights/:userId', async (req, res) => {
   const weakAreas = JSON.parse(user.weak_areas || '[]');
   const subscores = user.subscores ? JSON.parse(user.subscores) : null;
   const studyPlan = user.study_plan ? JSON.parse(user.study_plan) : null;
-  const dueReviews = db.prepare(`SELECT COUNT(*) as cnt FROM review_cards WHERE user_id = ? AND next_review_at <= ?`).get(userId, new Date().toISOString()).cnt;
+  const dueReviews = (await row('SELECT COUNT(*)::int AS cnt FROM adhdsat.review_cards WHERE user_id = $1 AND next_review_at <= $2', [userId, new Date().toISOString()])).cnt;
 
-  // Rule-based insights that always work (no Gemini needed)
   const insights = [];
 
   if (dueReviews > 0) {
     insights.push({ type: 'review', priority: 1, text: `${dueReviews} card${dueReviews > 1 ? 's' : ''} due for review -- complete these first to lock in the concepts.` });
   }
 
-  // Find weakest domain with data
   let weakestDomain = null, weakestAcc = Infinity;
   for (const [d, acc] of Object.entries(domainAccuracy)) {
     if (acc !== null && acc < weakestAcc) { weakestAcc = acc; weakestDomain = d; }
@@ -609,7 +603,6 @@ app.get('/api/insights/:userId', async (req, res) => {
     insights.push({ type: 'focus', priority: 2, text: `You flagged ${weakAreas.slice(0, 2).join(' and ')} as weak areas. Start with an Adaptive sprint to build your baseline there.` });
   }
 
-  // Domain neglect alert: domains with no data while total answered >= 20
   if (totalAnswered >= 20) {
     const practicedDomains = new Set(Object.keys(domainAccuracy));
     const neglectedMath = MATH_DOMAINS.filter(d => !practicedDomains.has(d));
@@ -621,10 +614,8 @@ app.get('/api/insights/:userId', async (req, res) => {
     }
   }
 
-  // Try AI insight if Gemini is available and we have enough data
   let aiInsight = null;
-  const geminiClient = process.env.GEMINI_API_KEY;
-  if (geminiClient && totalAnswered >= 5) {
+  if (process.env.GEMINI_API_KEY && totalAnswered >= 5) {
     try {
       const { GoogleGenerativeAI } = await import('@google/generative-ai');
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -681,10 +672,9 @@ app.post('/api/analyze-report', async (req, res) => {
   const result = await analyzeScoreReport(image, mimeType);
   if (!result) return res.status(422).json({ error: 'Could not parse score report' });
 
-  // Persist subscores to user profile so adaptive AI can use them
   if (userId && result.subscores && Object.keys(result.subscores).length > 0) {
     try {
-      db.prepare('UPDATE users SET subscores = ? WHERE id = ?').run(JSON.stringify(result.subscores), userId);
+      await query('UPDATE adhdsat.users SET subscores = $1 WHERE id = $2', [JSON.stringify(result.subscores), userId]);
     } catch {}
   }
 
@@ -692,18 +682,18 @@ app.post('/api/analyze-report', async (req, res) => {
 });
 
 // --- Reset Profile ---
-app.post('/api/users/:id/reset', (req, res) => {
+app.post('/api/users/:id/reset', async (req, res) => {
   const id = req.params.id;
   try {
-    db.prepare('DELETE FROM user_answers WHERE user_id = ?').run(id);
-    db.prepare('DELETE FROM sprints WHERE user_id = ?').run(id);
-    db.prepare('DELETE FROM review_cards WHERE user_id = ?').run(id);
-    db.prepare(`UPDATE users SET
+    await query('DELETE FROM adhdsat.user_answers WHERE user_id = $1', [id]);
+    await query('DELETE FROM adhdsat.sprints WHERE user_id = $1', [id]);
+    await query('DELETE FROM adhdsat.review_cards WHERE user_id = $1', [id]);
+    await query(`UPDATE adhdsat.users SET
       total_xp = 0, current_level = 1, current_streak = 0, longest_streak = 0,
       baseline_english = 0, baseline_math = 0, weak_areas = '[]',
       onboarding_completed = 0, study_plan = NULL, last_active_date = NULL, subscores = NULL
-    WHERE id = ?`).run(id);
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+    WHERE id = $1`, [id]);
+    const user = await row('SELECT * FROM adhdsat.users WHERE id = $1', [id]);
     user.weak_areas = JSON.parse(user.weak_areas || '[]');
     res.json(user);
   } catch (err) {
@@ -712,11 +702,11 @@ app.post('/api/users/:id/reset', (req, res) => {
 });
 
 // --- CSV Export ---
-app.get('/api/users/:id/export', (req, res) => {
+app.get('/api/users/:id/export', async (req, res) => {
   const id = req.params.id;
-  const rows = db.prepare(`
+  const rs = await rows(`
     SELECT
-      ua.created_at as date,
+      ua.created_at AS date,
       q.section,
       q.domain,
       q.difficulty,
@@ -724,15 +714,15 @@ app.get('/api/users/:id/export', (req, res) => {
       ua.time_spent_seconds,
       ua.hints_used,
       s.sprint_type
-    FROM user_answers ua
-    JOIN questions q ON ua.question_id = q.id
-    LEFT JOIN sprints s ON ua.sprint_id = s.id
-    WHERE ua.user_id = ?
+    FROM adhdsat.user_answers ua
+    JOIN adhdsat.questions q ON ua.question_id = q.id
+    LEFT JOIN adhdsat.sprints s ON ua.sprint_id = s.id
+    WHERE ua.user_id = $1
     ORDER BY ua.created_at ASC
-  `).all(id);
+  `, [id]);
 
   const header = 'date,section,domain,difficulty,correct,time_seconds,hints_used,sprint_type';
-  const lines = rows.map(r =>
+  const lines = rs.map(r =>
     [r.date, r.section, r.domain, r.difficulty, r.is_correct ? 'yes' : 'no', r.time_spent_seconds, r.hints_used, r.sprint_type || 'adaptive'].join(',')
   );
   const csv = [header, ...lines].join('\n');
@@ -743,35 +733,41 @@ app.get('/api/users/:id/export', (req, res) => {
 });
 
 // --- Activity days (for streak calendar) ---
-app.get('/api/activity-days/:userId', (req, res) => {
-  const days = db.prepare(`
-    SELECT DISTINCT date(created_at) as day
-    FROM user_answers
-    WHERE user_id = ?
-      AND created_at >= date('now', '-7 days')
+app.get('/api/activity-days/:userId', async (req, res) => {
+  const cutoff = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+  const days = await rows(`
+    SELECT DISTINCT substr(created_at, 1, 10) AS day
+    FROM adhdsat.user_answers
+    WHERE user_id = $1 AND created_at >= $2
     ORDER BY day
-  `).all(req.params.userId);
+  `, [req.params.userId, cutoff]);
   res.json(days.map(r => r.day));
 });
 
-app.get('/api/today/:userId', (req, res) => {
+app.get('/api/today/:userId', async (req, res) => {
   const today = new Date().toISOString().slice(0, 10);
-  const sprints = db.prepare(`
-    SELECT COUNT(*) as cnt FROM sprints
-    WHERE user_id = ? AND completed_at >= ? AND sprint_type != 'review'
-  `).get(req.params.userId, today + 'T00:00:00.000Z').cnt;
-  const answers = db.prepare(`
-    SELECT COUNT(*) as cnt FROM user_answers
-    WHERE user_id = ? AND date(created_at) = date('now')
-  `).get(req.params.userId).cnt;
+  const sprints = (await row(`
+    SELECT COUNT(*)::int AS cnt FROM adhdsat.sprints
+    WHERE user_id = $1 AND completed_at >= $2 AND sprint_type <> 'review'
+  `, [req.params.userId, today + 'T00:00:00.000Z'])).cnt;
+  const answers = (await row(`
+    SELECT COUNT(*)::int AS cnt FROM adhdsat.user_answers
+    WHERE user_id = $1 AND substr(created_at, 1, 10) = $2
+  `, [req.params.userId, today])).cnt;
   res.json({ sprints_today: sprints, answers_today: answers });
+});
+
+// JSON error handler: keep API responses as JSON even on unexpected failures.
+app.use((err, req, res, next) => {
+  console.error('[API Error]', err?.stack || err);
+  if (res.headersSent) return next(err);
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 // Serve frontend build in production
 const distPath = join(__dirname, '..', 'dist');
 if (existsSync(distPath)) {
   app.use(express.static(distPath));
-  // SPA fallback: all non-API routes serve index.html
   app.use((req, res, next) => {
     if (req.path.startsWith('/api')) return next();
     res.sendFile(join(distPath, 'index.html'));

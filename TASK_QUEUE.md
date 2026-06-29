@@ -19,8 +19,16 @@
 - [x] Keyboard shortcuts in Sprint (1-4 pick choice, Enter submit/advance, H hint)
 - [x] Live per-question timer (gray/gold/red color coding)
 - [x] Sprint summary screen (accuracy, XP, grade label, links)
+- [x] Postgres migration: SQLite-in-/tmp -> shared Supabase Postgres (fixes prod
+      data loss + onboarding 500). Async pg, schema-qualified, idempotent seed.
+      Verified end-to-end against live DB.
+- [x] Fixed broken 7-day stats query (wrong columns)
+- [x] Friendly no-question retry state in Sprint; real README + .env.example
 
 ## Open (Future Phases)
 - [ ] Leaderboards / friend challenges
 - [ ] Push notifications / streak reminders
 - [ ] More question bank coverage (500+ questions)
+- [ ] Port legacy dev scripts (seed.js, ingest.js, generate-questions.js) to
+      Postgres (they still use the old SQLite API)
+- [ ] Optional: move DB region or set Vercel region (DB is in Sydney)
