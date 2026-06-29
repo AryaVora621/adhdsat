@@ -13,8 +13,12 @@ Status: LIVE at https://adhdsat.vercel.app
   Best!". Verified live (chart renders, best highlighted gold).
 - Dashboard practice-test card: best/last score + Start/Retake CTA, after Review
   Errors. Makes the feature discoverable. Verified live.
-- Question bank: 551 -> 583 (two verified authored batches, 32 originals across
-  all 8 domains, official Digital SAT format). Live count confirmed 583.
+- Post-test answer review: results screen offers "Review your answers (N missed)"
+  with Missed-only / All filter. Each card shows the student's pick vs correct
+  (color-coded YOURS/ANSWER), passage, and explanation. Verified live. Turns the
+  test into a study tool.
+- Question bank: 551 -> 599 (three verified authored batches, 48 originals across
+  all 8 domains, official Digital SAT format). Live count confirmed 599.
 
 ## In progress
 - Nothing actively mid-edit. Clean working tree, all pushed to main.
