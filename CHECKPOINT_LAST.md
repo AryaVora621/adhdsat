@@ -34,12 +34,14 @@ Status: LIVE at https://adhdsat.vercel.app
   matches. Running in background toward ~51/domain (~408 new). Output staged in
   server/data/generated-staging.json. NEXT: when done, validate + merge into
   questions.json, ingest, deploy, verify count >= 1000.
-- Tiers (free vs paid): NOT STARTED. Begin after 1000 questions + polish land.
-
-## Next: free vs paid tiers (design notes for when we start)
-- Likely free: limited daily sprints, basic review. Paid: full practice tests,
-  unlimited sprints, AI insights/breakdowns, score-report import, full bank.
-- Needs: plan field on users, gating middleware, upgrade UI, (later) payments.
+- Tiers (free vs paid): DONE + verified live. Balanced model, plan-flag only (no
+  payments). users.plan column; getPlan() gates sprint daily limit (3/day),
+  timed modules, practice test, /explain, /analyze-report, AI insight sentence.
+  /upgrade screen + POST /api/users/:id/plan. Profile badge, Dashboard PRO lock.
+  Verified: free blocked at 403, 4th sprint blocked, upgrade flips to paid,
+  paid unlocks. Also fixed a Study-Now double sprint-create.
+- Questions -> 1000: gen-verify nearly done (~353/408 staged). When complete:
+  node server/merge-staging.mjs ; node --env-file=.env server/ingest.js ; deploy.
 
 ## Next actions (priority order)
 1. HUMAN: rotate the Supabase DB password (pasted in chat earlier). The one true
