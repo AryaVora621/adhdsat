@@ -210,9 +210,15 @@ export default function Landing({ onGuest }) {
         .feature-card:hover { transform: translateY(-4px); border-color: var(--primary); }
         @media (max-width: 880px) {
           .landing-grid { grid-template-columns: 1fr; gap: 36px; }
-          .landing-features { grid-template-columns: 1fr; }
+          .landing-features { grid-template-columns: repeat(2, 1fr); }
           .landing-preview { max-width: 420px; margin: 0 auto; }
-          @media (prefers-reduced-motion: no-preference) { .landing-reveal { animation: none; opacity: 1; transform: none; } }
+        }
+        @media (max-width: 560px) {
+          .landing-features { grid-template-columns: 1fr; }
+        }
+        /* Respect reduced-motion: show content immediately, skip the reveal. */
+        @media (prefers-reduced-motion: reduce) {
+          .landing-reveal { animation: none; opacity: 1; transform: none; }
         }
       `}</style>
 
