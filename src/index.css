@@ -71,6 +71,14 @@ h1, h2, h3, h4, p {
   margin: 0;
 }
 
+/* Keyboard focus ring. :focus-visible only fires for keyboard/AT users, so mouse
+   clicks stay clean. box-shadow (not outline) so it shows even on elements that
+   set outline:none, and hugs rounded corners. */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg-main), 0 0 0 4px var(--primary);
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
