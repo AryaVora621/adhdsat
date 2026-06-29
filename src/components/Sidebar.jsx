@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { Flame, Star, LayoutDashboard, Zap, User, BookOpen } from 'lucide-react';
 
 function WeekCalendar({ userId }) {
@@ -43,6 +43,17 @@ function WeekCalendar({ userId }) {
 }
 
 export default function Sidebar({ user }) {
+  const location = useLocation();
+  const [reviewCount, setReviewCount] = useState(0);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    fetch(`/api/review/count?userId=${user.id}`)
+      .then(r => r.json())
+      .then(data => setReviewCount(data?.count || 0))
+      .catch(() => {});
+  }, [user?.id, location.pathname]);
+
   const level = Math.floor(user.total_xp / 500) + 1;
   const xpForCurrentLevel = (level - 1) * 500;
   const xpForNextLevel = level * 500;
@@ -70,7 +81,15 @@ export default function Sidebar({ user }) {
       <nav style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
         <NavLink to="/" end style={navLinkStyle}><LayoutDashboard size={16} /> Dashboard</NavLink>
         <NavLink to="/sprint" style={navLinkStyle}><Zap size={16} /> Sprint</NavLink>
-        <NavLink to="/review" style={navLinkStyle}><BookOpen size={16} /> Review</NavLink>
+        <NavLink to="/review" style={navLinkStyle}>
+          <BookOpen size={16} />
+          Review
+          {reviewCount > 0 && (
+            <span style={{ marginLeft: 'auto', backgroundColor: 'var(--error)', color: '#fff', fontSize: '0.6rem', fontWeight: '700', borderRadius: '10px', padding: '1px 6px', minWidth: '16px', textAlign: 'center' }}>
+              {reviewCount > 9 ? '9+' : reviewCount}
+            </span>
+          )}
+        </NavLink>
         <NavLink to="/profile" style={navLinkStyle}><User size={16} /> Profile</NavLink>
       </nav>
 
