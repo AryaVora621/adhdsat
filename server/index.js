@@ -224,6 +224,42 @@ app.get('/api/questions/next', async (req, res) => {
   res.json({ ...question, choices: JSON.parse(question.choices || '[]'), tags: JSON.parse(question.tags || '[]') });
 });
 
+// --- Full practice test: serve a whole module of distinct, mixed-difficulty
+// questions in one call (module 1 of the digital SAT is a broad easy/medium/hard
+// mix across the section's domains). Returns the answer keys too, since the
+// practice-test client scores locally at the end of each timed module.
+app.get('/api/practice-test', async (req, res) => {
+  const { section } = req.query;
+  const count = Math.min(parseInt(req.query.count, 10) || 27, 30);
+  const domains = section === 'math' ? MATH_DOMAINS : ENG_DOMAINS;
+  const perDiff = Math.ceil(count / 3);
+  const seen = new Set();
+  const picked = [];
+  for (const diff of ['easy', 'medium', 'hard']) {
+    const qs = await rows(
+      `SELECT * FROM adhdsat.questions WHERE domain = ANY($1::text[]) AND difficulty = $2 ORDER BY random() LIMIT $3`,
+      [domains, diff, perDiff]
+    );
+    for (const q of qs) if (!seen.has(q.id)) { seen.add(q.id); picked.push(q); }
+  }
+  if (picked.length < count) {
+    const more = await rows(
+      `SELECT * FROM adhdsat.questions WHERE domain = ANY($1::text[]) AND id <> ALL($2::text[]) ORDER BY random() LIMIT $3`,
+      [domains, [...seen], count - picked.length]
+    );
+    for (const q of more) if (!seen.has(q.id)) { seen.add(q.id); picked.push(q); }
+  }
+  // Shuffle so the module isn't ordered easy -> hard.
+  for (let i = picked.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [picked[i], picked[j]] = [picked[j], picked[i]];
+  }
+  const out = picked.slice(0, count).map(q => ({
+    ...q, choices: JSON.parse(q.choices || '[]'), tags: JSON.parse(q.tags || '[]')
+  }));
+  res.json({ section: section || 'mixed', count: out.length, questions: out });
+});
+
 // --- Sprints ---
 
 app.post('/api/sprints', async (req, res) => {

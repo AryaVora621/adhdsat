@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { CheckCircle2, XCircle, ChevronRight, ChevronLeft, AlertCircle, Zap, Trophy, Calculator, BookOpen, Shuffle } from 'lucide-react';
+import { CheckCircle2, XCircle, ChevronRight, ChevronLeft, AlertCircle, Zap, Trophy, Calculator, BookOpen, Shuffle, FileText } from 'lucide-react';
 import MathText from '../components/MathText';
 
 function WrongAnswerCard({ item }) {
@@ -782,6 +782,17 @@ export default function Sprint({ user, setUser }) {
             <div style={{ flex: 1, height: '1px', backgroundColor: '#2a2a46' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <button onClick={() => navigate('/practice-test')}
+              style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', backgroundColor: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.3)', borderRadius: '14px', textAlign: 'left', cursor: 'pointer', transition: 'border-color 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(0,212,255,0.6)'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(0,212,255,0.3)'}>
+              <span style={{ color: 'var(--primary)' }}><FileText size={20} /></span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '2px' }}>Full Practice Test</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Both sections, timed, scored 400-1600</div>
+              </div>
+              <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: '600', flexShrink: 0, backgroundColor: 'rgba(0,212,255,0.1)', padding: '3px 8px', borderRadius: '8px' }}>~67 min</span>
+            </button>
             {testModes.map(m => (
               <button key={m.key} onClick={() => startSprint(m.key)}
                 style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', backgroundColor: 'rgba(255,215,64,0.04)', border: '1px solid rgba(255,215,64,0.2)', borderRadius: '14px', textAlign: 'left', cursor: 'pointer', transition: 'border-color 0.15s' }}

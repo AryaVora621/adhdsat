@@ -31,6 +31,7 @@ import Sprint from './pages/Sprint';
 import Onboarding from './pages/Onboarding';
 import Profile from './pages/Profile';
 import ReviewSprint from './pages/ReviewSprint';
+import PracticeTest from './pages/PracticeTest';
 import LevelUpToast from './components/LevelUpToast';
 import './index.css';
 
@@ -128,6 +129,7 @@ function AppInner() {
           <Route path="/sprint" element={user?.onboarding_completed ? <Sprint user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
           <Route path="/profile" element={user?.onboarding_completed ? <Profile user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
           <Route path="/review" element={user?.onboarding_completed ? <ReviewSprint user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
+          <Route path="/practice-test" element={user?.onboarding_completed ? <PracticeTest user={user} /> : <Navigate to="/onboarding" />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
