@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Zap, BookOpen, User } from 'lucide-react';
 
 export default function BottomNav({ userId }) {
   const [reviewCount, setReviewCount] = useState(0);
+  const location = useLocation();
 
   useEffect(() => {
     if (!userId) return;
@@ -11,7 +12,7 @@ export default function BottomNav({ userId }) {
       .then(r => r.json())
       .then(data => setReviewCount(data?.count || 0))
       .catch(() => {});
-  }, [userId]);
+  }, [userId, location.pathname]);
 
   const linkStyle = ({ isActive }) => ({
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
