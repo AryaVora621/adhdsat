@@ -133,6 +133,30 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
         <span style={{ fontSize: '1.1rem', fontWeight: '700', color: grade.color }}>{grade.label}</span>
       </div>
 
+      {accuracy < 55 && (
+        <div style={{
+          backgroundColor: 'rgba(0,230,118,0.08)',
+          border: '1px solid rgba(0,230,118,0.3)',
+          borderRadius: '12px',
+          padding: '16px',
+          marginBottom: '24px'
+        }}>
+          <div style={{
+            fontSize: '0.9rem',
+            color: 'var(--text-primary)',
+            lineHeight: 1.6
+          }}>
+            <strong>Learning in progress!</strong> Struggle is normal on the SAT journey.
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '10px' }}>
+              Your lowest domain: <strong>{breakdown?.domains?.length > 0 ? breakdown.domains.reduce((a, b) => a.accuracy < b.accuracy ? a : b).domain : 'Mixed'}</strong>
+            </div>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '8px' }}>
+              Improvement typically kicks in by sprint 5. Keep practicing—you're building the skills. ✓
+            </div>
+          </div>
+        </div>
+      )}
+
       {breakdown?.domains?.length > 0 && (
         <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px 20px', borderRadius: '14px', border: '1px solid #2a2a46', marginBottom: '24px', textAlign: 'left' }}>
           <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '12px' }}>Domain Breakdown</div>
