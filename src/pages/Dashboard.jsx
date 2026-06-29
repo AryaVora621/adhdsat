@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlayCircle, BookOpen, TrendingUp, TrendingDown, Minus, Target, Calendar, Zap, Calculator, AlertCircle, Shuffle, BarChart2, Flame } from 'lucide-react';
+import { PlayCircle, BookOpen, TrendingUp, TrendingDown, Minus, Target, Calendar, Zap, Calculator, AlertCircle, Shuffle, BarChart2, Flame, FileText } from 'lucide-react';
 
 const DOMAINS = [
   { name: 'Algebra', section: 'Math' },
@@ -328,6 +328,42 @@ function SprintSparkline({ sprints }) {
   );
 }
 
+function PracticeTestCard({ user, navigate }) {
+  const [history, setHistory] = useState(null);
+
+  useEffect(() => {
+    fetch(`/api/practice-test/history/${user.id}`)
+      .then(r => r.ok ? r.json() : { results: [] })
+      .then(d => setHistory(d.results || []))
+      .catch(() => setHistory([]));
+  }, [user.id]);
+
+  const taken = history && history.length > 0;
+  const best = taken ? Math.max(...history.map(h => h.total_score)) : null;
+  const last = taken ? history[0].total_score : null;
+
+  return (
+    <div onClick={() => navigate('/practice-test')}
+      style={{ backgroundImage: 'linear-gradient(135deg, rgba(0,212,255,0.08), rgba(124,77,255,0.06))', padding: '18px 24px', borderRadius: '14px', border: '1px solid rgba(0,212,255,0.25)', marginBottom: '36px', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'border-color 0.15s' }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,212,255,0.6)'; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,212,255,0.25)'; }}>
+      <FileText size={24} color="var(--primary)" />
+      <div style={{ flex: 1 }}>
+        <div style={{ fontWeight: '600', marginBottom: '2px' }}>Full Practice Test</div>
+        <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+          {taken
+            ? `Best ${best} · last ${last} · timed, scored 400-1600`
+            : 'A timed two-section SAT simulation, scored 400-1600'}
+        </div>
+      </div>
+      <button onClick={e => { e.stopPropagation(); navigate('/practice-test'); }}
+        style={{ padding: '8px 18px', fontSize: '0.85rem', backgroundColor: 'rgba(0,212,255,0.1)', color: 'var(--primary)', border: '1px solid rgba(0,212,255,0.4)', borderRadius: '8px', whiteSpace: 'nowrap' }}>
+        {taken ? 'Retake' : 'Start'}
+      </button>
+    </div>
+  );
+}
+
 export default function Dashboard({ user, isMobile }) {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(null);
@@ -446,6 +482,9 @@ export default function Dashboard({ user, isMobile }) {
           </button>
         )}
       </div>
+
+      {/* Full practice test */}
+      <PracticeTestCard user={user} navigate={navigate} />
 
       {/* Predicted score */}
       {progress?.predictedScore && (
