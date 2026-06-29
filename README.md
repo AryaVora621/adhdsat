@@ -77,9 +77,25 @@ created the schema), or run it through your migration tool of choice.
 served from `dist`. Because the database is shared Postgres (not local SQLite),
 user progress persists across cold starts and function instances.
 
+## Expanding the question bank
+
+The bank lives in `server/data/questions.json` and is seeded into Postgres on
+first boot. To add more questions:
+
+```bash
+node server/generate-questions.js   # AI-generates questions, appends to questions.json
+node server/ingest.js               # upserts questions.json into Postgres (by id)
+```
+
+`ingest.js` is idempotent: it refreshes edited questions and adds new ones
+without duplicating. (Auto-seed on boot only runs when the table is empty, so
+run `ingest.js` to push later additions to the live DB.)
+
 ## Scripts
 
 - `npm run dev` — Vite + Express (nodemon)
 - `npm run build` — production build to `dist`
 - `npm start` — run the Express server (serves `dist` if present)
 - `npm run lint` — oxlint
+- `node server/ingest.js` — sync `questions.json` into Postgres
+- `node server/generate-questions.js` — AI-generate more questions

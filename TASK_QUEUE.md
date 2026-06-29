@@ -29,6 +29,7 @@
 - [ ] Leaderboards / friend challenges
 - [ ] Push notifications / streak reminders
 - [ ] More question bank coverage (500+ questions)
-- [ ] Port legacy dev scripts (seed.js, ingest.js, generate-questions.js) to
-      Postgres (they still use the old SQLite API)
+- [x] Port legacy dev scripts: ingest.js -> Postgres upsert sync tool, deleted
+      redundant seed.js, generate-questions.js writes JSON (works as-is).
+      Bank-expansion pipeline documented in README.
 - [ ] Optional: move DB region or set Vercel region (DB is in Sydney)
