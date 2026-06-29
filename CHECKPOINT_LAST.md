@@ -17,6 +17,9 @@ Status: LIVE at https://adhdsat.vercel.app
   with Missed-only / All filter. Each card shows the student's pick vs correct
   (color-coded YOURS/ANSWER), passage, and explanation. Verified live. Turns the
   test into a study tool.
+- Practice-test mistakes -> review queue: POST /api/answers/batch records every
+  answer on completion; missed questions enter the SM-2 queue (verified: a wrong
+  answer became a due review card) and answers enrich domain stats/predicted score.
 - Question bank: 551 -> 599 (three verified authored batches, 48 originals across
   all 8 domains, official Digital SAT format). Live count confirmed 599.
 
