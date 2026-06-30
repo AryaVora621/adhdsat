@@ -1,0 +1,9 @@
+{
+  "appId": "college.tally.app",
+  "appName": "Tally",
+  "webDir": "dist",
+  "backgroundColor": "#221e1a",
+  "android": {
+    "backgroundColor": "#221e1a"
+  }
+}
