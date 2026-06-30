@@ -40,6 +40,24 @@ export const RemotionRoot: React.FC = () => {
         width={1200}
         height={630}
       />
+      {/* 9:16 crops for Reels / TikTok / Shorts. Same components; beats reflow
+          to portrait via the usePortrait() aspect-ratio check. */}
+      <Composition
+        id="ExplainerVertical"
+        component={Explainer}
+        durationInFrames={900}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="BumperVertical"
+        component={Bumper}
+        durationInFrames={180}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
     </>
   );
 };

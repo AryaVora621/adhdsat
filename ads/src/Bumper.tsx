@@ -14,10 +14,16 @@ import { Logo } from './components/Logo';
 import { Underline } from './components/Underline';
 import './fonts';
 
+const usePortrait = () => {
+  const { width, height } = useVideoConfig();
+  return height > width;
+};
+
 // Beat 1: one memorable line.
 const Beat1: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const portrait = usePortrait();
   const s = spring({ frame, fps, config: { damping: 12, mass: 0.6 } });
   const y = interpolate(s, [0, 1], [40, 0]);
   return (
@@ -28,11 +34,11 @@ const Beat1: React.FC = () => {
           opacity: s,
           fontFamily: font.display,
           fontWeight: 800,
-          fontSize: 110,
+          fontSize: portrait ? 84 : 110,
           color: fn.ink,
           textAlign: 'center',
           lineHeight: 1.05,
-          padding: '0 120px',
+          padding: portrait ? '0 70px' : '0 120px',
         }}
       >
         Studying, in
@@ -44,11 +50,14 @@ const Beat1: React.FC = () => {
 };
 
 // Beat 2: sprint card flash.
-const Beat2: React.FC = () => (
-  <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
-    <SprintCard revealFrame={18} width={760} />
-  </AbsoluteFill>
-);
+const Beat2: React.FC = () => {
+  const portrait = usePortrait();
+  return (
+    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', padding: portrait ? '0 60px' : 0 }}>
+      <SprintCard revealFrame={18} width={portrait ? 880 : 760} />
+    </AbsoluteFill>
+  );
+};
 
 // Beat 3: logo CTA.
 const Beat3: React.FC = () => {

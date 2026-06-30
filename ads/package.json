@@ -8,7 +8,8 @@
     "render:hook": "remotion render HookVertical out/hook-15s.mp4",
     "render:explainer": "remotion render Explainer out/explainer-30s.mp4",
     "render:bumper": "remotion render Bumper out/bumper-6s.mp4",
-    "render:all": "npm run render:hook && npm run render:explainer && npm run render:bumper"
+    "render:all": "npm run render:hook && npm run render:explainer && npm run render:bumper",
+    "render:vertical": "remotion render ExplainerVertical out/explainer-30s-vertical.mp4 && remotion render BumperVertical out/bumper-6s-vertical.mp4"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.484",
