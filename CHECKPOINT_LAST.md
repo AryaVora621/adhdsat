@@ -120,6 +120,15 @@ Status: LIVE at https://adhdsat.vercel.app
   gold. Build clean, deployed. Cleaned up test guest + .playwright-mcp artifacts.
 - Source audit confirms NO orphan old-palette hex (#00d4ff/cyan/purple) remain;
   the 4 surviving gradients are all on-brand terracotta/gold/teal tints.
+- v2.8-sidebar-chrome: sidebar wordmark -> Bricolage display face; streak flame
+  recolored from --error (alarm red) to --primary terracotta (on-brand, the
+  Dashboard 'at risk' flame correctly stays red as a real alert).
+- v2.9-wordmark-unify: brought the loading screen, API-error screen, and
+  onboarding header wordmarks into the same Bricolage brand treatment. The
+  ADHDSat wordmark is now identical across landing, app chrome, full-screen
+  states, and onboarding. Verified landing live (Field Notes fully cohesive).
+- Future plans saved: PLAN_MOBILE_AND_ADS.md (Android via Capacitor first, iOS
+  deferred until Xcode; formal ads via Remotion once a video capability connects).
 
 ## Next actions (priority order)
 1. HUMAN (see LAUNCH_CONFIG.md): (a) rotate Supabase DB password [security
