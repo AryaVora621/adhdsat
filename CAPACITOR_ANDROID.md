@@ -1,8 +1,24 @@
-# Android app via Capacitor — kickoff guide
+# Android app via Capacitor — guide
 
-Run these WITH Android Studio open (the native build + emulator can't be done
-headless). Everything here is verified against this project's setup: Vite build →
-`dist`, base `/`, React Router `BrowserRouter`, Express API at `/api/*`.
+STATUS (2026-06-30): **Scaffold DONE + committed (v5.0-android).** Capacitor
+installed, capacitor.config.json in place, `npx cap add android` run (native
+android/ project committed), web assets bundled, the /api fetch shim wired. What's
+left is the at-machine build below (needs your JDK/Studio + free disk space — the
+headless APK build was blocked only by a full disk, not by any project issue).
+
+Everything here is verified against this project's setup: Vite build → `dist`,
+base `/`, React Router `BrowserRouter`, Express API at `/api/*`.
+
+## Run it now (at your machine)
+```
+npm run cap:sync     # build:mobile (bakes VITE_API_BASE) + cap sync
+npm run cap:open     # opens Android Studio
+```
+In Android Studio: let Gradle sync, then Run ▶ on an emulator or device.
+Smoke-test **guest mode** first (no auth config needed). Then wire deep-link auth
+(Step 5) for Google/email sign-in.
+
+Steps 1–4 below are already done — kept for reference / reproducing from scratch.
 
 ## Why Capacitor (not React Native)
 The app is already a polished React + Vite SPA. Capacitor wraps the existing
