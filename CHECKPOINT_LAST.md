@@ -169,6 +169,20 @@ Status: LIVE at https://adhdsat.vercel.app
   in ads/public/audio/ and enable <Music/>; don't publish ads showing
   tally.college until the domain resolves.
 
+## Brand icon + disk (2026-06-30, tag v5.1)
+- New favicon.svg (user-added): two-pencil "T" (teal + terracotta, espresso tile)
+  -- on-brand Tally mark, replaces the bolt. Was committed earlier but never
+  deployed; now LIVE.
+- v5.1-icon: FIXED icon-512.png -- it had been saved as a desktop SCREENSHOT
+  (wallpaper + dock + 'Tally' label baked in), which would render as the
+  apple-touch / PWA install icon. Re-rasterized a clean 512x512 from the favicon
+  design (full-bleed tile + crossed pencils). Now matches manifest's 512x512.
+  Verified live (favicon.svg + icon-512 + title all serving on prod).
+- DISK: machine hit 100% full (blocked builds/renders/APK). User cleared 15+GB;
+  I cleared regenerable caches (gradle/remotion/npm). To regenerate an icon from
+  an SVG here there's no CLI rasterizer -- used Playwright (serve via python
+  http.server on :8899, screenshot at target viewport, no file://).
+
 ## Mobile track + polish (2026-06-30, tags v4.3)
 - v4.3-bottomnav: terracotta inset active-tab indicator on the mobile BottomNav
   (no layout shift). BottomNav already handles safe-area-inset-bottom.
