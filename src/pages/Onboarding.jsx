@@ -94,7 +94,7 @@ export default function Onboarding({ user, setUser }) {
   return (
     <div style={containerStyle}>
       <div style={{ marginBottom: '32px', textAlign: 'center' }}>
-        <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '1.6rem', letterSpacing: '-0.01em', marginBottom: '8px', fontFamily: "'Bricolage Grotesque', 'Spline Sans', system-ui, sans-serif" }}>ADHDSat</div>
+        <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '1.6rem', letterSpacing: '-0.01em', marginBottom: '8px', fontFamily: "'Bricolage Grotesque', 'Spline Sans', system-ui, sans-serif" }}>Tally</div>
         <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Adaptive SAT prep for the way your brain works</div>
       </div>
 
@@ -199,7 +199,7 @@ export default function Onboarding({ user, setUser }) {
           <div style={{ textAlign: 'center', marginBottom: '28px' }}>
             <Target size={40} color="var(--primary)" style={{ marginBottom: '12px' }} />
             <h2 style={{ fontSize: '1.6rem', marginBottom: '8px' }}>Set Your Target</h2>
-            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>ADHDSat will adapt every question to close your gap.</p>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>Tally will adapt every question to close your gap.</p>
           </div>
 
           {/* Baseline summary */}

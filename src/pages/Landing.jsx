@@ -171,7 +171,7 @@ export default function Landing({ onGuest }) {
             borderRadius: '9px 11px 8px 12px', display: 'grid', placeItems: 'center',
             boxShadow: '2px 2px 0 var(--fn-shadow)', border: '2px solid var(--fn-line)',
           }}><Zap size={16} fill="currentColor" /></span>
-          ADHDSat
+          Tally
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <FieldToggle />
@@ -292,7 +292,7 @@ export default function Landing({ onGuest }) {
         display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between',
         color: 'var(--fn-ink60)', fontSize: '0.88rem', position: 'relative', zIndex: 1,
       }}>
-        <span className="fn-display" style={{ fontWeight: 800, color: 'var(--fn-ink)', fontSize: '1.05rem' }}>ADHDSat</span>
+        <span className="fn-display" style={{ fontWeight: 800, color: 'var(--fn-ink)', fontSize: '1.05rem' }}>Tally</span>
         <span>Built for the way your brain works. © 2026</span>
       </footer>
 

@@ -1,6 +1,7 @@
-// ADHDSat service worker: network-first for HTML (always fresh, offline fallback),
+// Tally service worker: network-first for HTML (always fresh, offline fallback),
 // cache-first for hashed static assets, always-network for the API.
-const CACHE = 'adhdsat-v1';
+// Cache name bumped on the Tally rebrand so old-brand shells are purged on activate.
+const CACHE = 'tally-v2';
 
 self.addEventListener('install', (e) => {
   e.waitUntil(

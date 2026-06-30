@@ -77,7 +77,7 @@ export default function Sidebar({ user, onSignOut }) {
       padding: '24px 18px', display: 'flex', flexDirection: 'column', gap: '18px'
     }}>
       <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.01em', paddingLeft: '4px', fontFamily: "'Bricolage Grotesque', 'Spline Sans', system-ui, sans-serif" }}>
-        ADHDSat
+        Tally
       </div>
 
       {/* Nav */}

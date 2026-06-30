@@ -13,7 +13,7 @@ class ErrorBoundary extends Component {
           <Zap size={40} color="var(--primary)" />
           <h2 style={{ color: 'var(--primary)', margin: 0 }}>Something went wrong</h2>
           <p style={{ color: 'var(--text-secondary)', maxWidth: '400px', lineHeight: 1.5 }}>
-            ADHDSat hit an unexpected error. Your progress is saved.
+            Tally hit an unexpected error. Your progress is saved.
           </p>
           <button className="primary" onClick={() => { this.setState({ error: null }); window.location.href = '/'; }}
             style={{ padding: '12px 28px' }}>
@@ -189,7 +189,7 @@ function AppInner() {
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100vw', flexDirection: 'column', gap: '16px' }}>
-        <div style={{ color: 'var(--primary)', fontSize: '1.7rem', fontWeight: 800, letterSpacing: '-0.01em', fontFamily: "'Bricolage Grotesque', 'Spline Sans', system-ui, sans-serif" }}>ADHDSat</div>
+        <div style={{ color: 'var(--primary)', fontSize: '1.7rem', fontWeight: 800, letterSpacing: '-0.01em', fontFamily: "'Bricolage Grotesque', 'Spline Sans', system-ui, sans-serif" }}>Tally</div>
         <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Loading...</div>
       </div>
     );
@@ -198,7 +198,7 @@ function AppInner() {
   if (apiError) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100vw', flexDirection: 'column', gap: '16px', padding: '32px', textAlign: 'center' }}>
-        <div style={{ color: 'var(--primary)', fontSize: '1.7rem', fontWeight: 800, letterSpacing: '-0.01em', marginBottom: '8px', fontFamily: "'Bricolage Grotesque', 'Spline Sans', system-ui, sans-serif" }}>ADHDSat</div>
+        <div style={{ color: 'var(--primary)', fontSize: '1.7rem', fontWeight: 800, letterSpacing: '-0.01em', marginBottom: '8px', fontFamily: "'Bricolage Grotesque', 'Spline Sans', system-ui, sans-serif" }}>Tally</div>
         <div style={{ color: 'var(--text-secondary)', maxWidth: '360px', lineHeight: 1.6 }}>
           Could not connect to the server. Check your connection and try again.
         </div>

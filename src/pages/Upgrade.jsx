@@ -65,7 +65,7 @@ export default function Upgrade({ user, setUser }) {
         <Crown size={40} color="var(--xp-gold)" />
       </div>
       <h1 style={{ fontSize: '1.9rem', fontWeight: 800, textAlign: 'center', marginBottom: '8px' }}>
-        {isPro ? "You're on ADHDSat Pro" : 'Upgrade to ADHDSat Pro'}
+        {isPro ? "You're on Tally Pro" : 'Upgrade to Tally Pro'}
       </h1>
       <p style={{ color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.6, marginBottom: reason ? '14px' : '28px' }}>
         {isPro ? 'You have full access to every feature. Thanks for supporting the project.' : 'Unlock unlimited practice, full timed tests, and every AI feature.'}
