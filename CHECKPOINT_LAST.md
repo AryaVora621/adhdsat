@@ -130,6 +130,24 @@ Status: LIVE at https://adhdsat.vercel.app
 - Future plans saved: PLAN_MOBILE_AND_ADS.md (Android via Capacitor first, iOS
   deferred until Xcode; formal ads via Remotion once a video capability connects).
 
+## ADS TRACK — Remotion ad set (2026-06-30, tags v3.0 / v3.1)
+- Remotion installed by user -> ads track unblocked. Built isolated ads/ workspace
+  (own package.json + node_modules, gitignored; never touches the Vite bundle).
+- v3.0-ads: ADS_SCRIPTS.md (all 3 cuts scripted) + shared Field Notes scene
+  components (SprintCard w/ XP pop, Logo, hand-drawn Underline, Grain, theme
+  tokens, deterministic Google Fonts) + HookVertical (15s 1080x1920). Rendered +
+  frame-by-frame QA'd (fixed XP-sticker/label collision).
+- v3.1-ads: Explainer (30s 1920x1080: hook -> sprints -> spaced rep -> momentum
+  -> reassurance -> CTA) + Bumper (6s). Fixed white-on-gold contrast. All 3
+  registered in Root.tsx.
+- Deliverables in ~/Desktop/adhdsatads/ (hook-15s, explainer-30s, bumper-6s MP4s
+  + poster stills + scripts). User cannot receive SMS from here, so folder is the
+  delivery channel. Re-render: cd ads && npm run render:all (or render:hook etc).
+- NEXT for ads (optional polish): add a soft music bed, derive 9:16 crops of the
+  explainer/bumper, optimize font loading (load only 600/700/800 weights to cut
+  the 21-request warning + speed renders).
+- STILL PENDING (next active track): Android Capacitor scaffold (unblocked).
+
 ## Next actions (priority order)
 1. HUMAN (see LAUNCH_CONFIG.md): (a) rotate Supabase DB password [security
    blocker], (b) set Supabase Auth Site URL + redirect allowlist to
