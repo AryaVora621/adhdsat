@@ -76,7 +76,7 @@ export default function Sidebar({ user, onSignOut }) {
       width: '240px', minWidth: '240px', backgroundColor: 'var(--bg-sidebar)', borderLeft: '1px solid var(--border)',
       padding: '24px 18px', display: 'flex', flexDirection: 'column', gap: '18px'
     }}>
-      <div style={{ color: 'var(--primary)', fontWeight: 'bold', fontSize: '1.1rem', letterSpacing: '2px', paddingLeft: '4px' }}>
+      <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.01em', paddingLeft: '4px', fontFamily: "'Bricolage Grotesque', 'Spline Sans', system-ui, sans-serif" }}>
         ADHDSat
       </div>
 
@@ -120,7 +120,7 @@ export default function Sidebar({ user, onSignOut }) {
 
       {/* Streak */}
       <div style={{ backgroundColor: 'var(--bg-card)', padding: '14px 16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid var(--border)' }}>
-        <Flame size={24} color="var(--error)" fill="var(--error)" />
+        <Flame size={24} color="var(--primary)" fill="var(--primary)" />
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: '1.3rem', fontWeight: 'bold', lineHeight: 1 }}>{user.current_streak}</div>
           <div style={{ color: 'var(--text-secondary)', fontSize: '0.72rem', marginTop: '2px' }}>Day Streak</div>
