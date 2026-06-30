@@ -66,8 +66,8 @@ export default function Sidebar({ user, onSignOut }) {
     display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', borderRadius: '10px',
     textDecoration: 'none', fontSize: '0.9rem', transition: 'all 0.15s', cursor: 'pointer',
     color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
-    backgroundColor: isActive ? 'rgba(0,212,255,0.08)' : 'transparent',
-    border: isActive ? '1px solid rgba(0,212,255,0.2)' : '1px solid transparent',
+    backgroundColor: isActive ? 'rgba(232, 100, 60,0.08)' : 'transparent',
+    border: isActive ? '1px solid rgba(232, 100, 60,0.2)' : '1px solid transparent',
     fontWeight: isActive ? '500' : '400'
   });
 

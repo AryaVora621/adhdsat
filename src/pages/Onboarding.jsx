@@ -147,7 +147,7 @@ export default function Onboarding({ user, setUser }) {
             {uploadMsg && <p style={{ color: uploadMsg.includes('pre-filled') ? 'var(--success)' : 'var(--text-secondary)', fontSize: '0.82rem', marginTop: '8px', textAlign: 'center' }}>{uploadMsg}</p>}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: 'rgba(0,212,255,0.06)', borderRadius: '10px', marginBottom: '24px', border: '1px solid rgba(0,212,255,0.15)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: 'rgba(232, 100, 60,0.06)', borderRadius: '10px', marginBottom: '24px', border: '1px solid rgba(232, 100, 60,0.15)' }}>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Combined baseline</span>
             <span style={{ fontSize: '1.3rem', fontWeight: 'bold', color: 'var(--primary)' }}>{englishScore + mathScore}</span>
           </div>
@@ -172,7 +172,7 @@ export default function Onboarding({ user, setUser }) {
                     style={{
                       textAlign: 'left', padding: '11px 16px', borderRadius: '10px',
                       border: weakAreas.includes(domain) ? '2px solid var(--primary)' : '2px solid var(--border)',
-                      backgroundColor: weakAreas.includes(domain) ? 'rgba(0,212,255,0.08)' : 'transparent',
+                      backgroundColor: weakAreas.includes(domain) ? 'rgba(232, 100, 60,0.08)' : 'transparent',
                       color: weakAreas.includes(domain) ? 'var(--primary)' : 'var(--text-primary)',
                       transition: 'all 0.15s', fontSize: '0.95rem'
                     }}>
@@ -217,7 +217,7 @@ export default function Onboarding({ user, setUser }) {
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>Focus areas</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                   {weakAreas.map(a => (
-                    <span key={a} style={{ backgroundColor: 'rgba(0,212,255,0.1)', color: 'var(--primary)', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem' }}>{a}</span>
+                    <span key={a} style={{ backgroundColor: 'rgba(232, 100, 60,0.1)', color: 'var(--primary)', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem' }}>{a}</span>
                   ))}
                 </div>
               </div>

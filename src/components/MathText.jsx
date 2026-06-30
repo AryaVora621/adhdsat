@@ -164,7 +164,7 @@ function renderTable(block, key) {
         <thead>
           <tr>
             {block.header.map((c, ci) => (
-              <th key={ci} style={{ ...cellStyle, fontWeight: 700, color: 'var(--primary)', backgroundColor: 'rgba(0,212,255,0.06)' }}>
+              <th key={ci} style={{ ...cellStyle, fontWeight: 700, color: 'var(--primary)', backgroundColor: 'rgba(232, 100, 60,0.06)' }}>
                 {renderInline(c, `h-${ci}`)}
               </th>
             ))}

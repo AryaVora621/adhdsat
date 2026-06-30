@@ -357,7 +357,7 @@ export default function ReviewSprint({ user, setUser }) {
               if (c.is_correct) { bgColor = 'rgba(0,230,118,0.08)'; borderColor = 'var(--success)'; }
               else if (selectedChoice === c.label) { bgColor = 'rgba(255,82,82,0.08)'; borderColor = 'var(--error)'; }
             } else if (selectedChoice === c.label) {
-              borderColor = 'var(--primary)'; bgColor = 'rgba(0,212,255,0.07)'; textColor = 'var(--primary)';
+              borderColor = 'var(--primary)'; bgColor = 'rgba(232, 100, 60,0.07)'; textColor = 'var(--primary)';
             }
             return (
               <button key={c.label} disabled={isAnswered} onClick={() => setSelectedChoice(c.label)}
@@ -398,11 +398,11 @@ export default function ReviewSprint({ user, setUser }) {
             <div style={{ marginBottom: '14px' }}>
               {!showDeepDive ? (
                 <button onClick={handleDeepDive}
-                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderColor: 'rgba(0,212,255,0.4)', color: 'var(--primary)', fontSize: '0.9rem' }}>
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderColor: 'rgba(232, 100, 60,0.4)', color: 'var(--primary)', fontSize: '0.9rem' }}>
                   <Zap size={15} /> Deep Dive with AI
                 </button>
               ) : (
-                <div style={{ backgroundColor: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.2)', borderRadius: '12px', padding: '20px' }}>
+                <div style={{ backgroundColor: 'rgba(232, 100, 60,0.04)', border: '1px solid rgba(232, 100, 60,0.2)', borderRadius: '12px', padding: '20px' }}>
                   <h3 style={{ fontSize: '0.85rem', marginBottom: '12px', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     <Zap size={14} /> {deepDiveLoading ? 'Generating breakdown...' : 'AI Breakdown'}
                   </h3>

@@ -113,8 +113,8 @@ function QuickStartCard({ navigate, user }) {
 
   return (
     <div style={{
-      backgroundImage: 'linear-gradient(135deg, rgba(0,212,255,0.12), rgba(0,230,118,0.08))',
-      padding: '28px', borderRadius: '16px', border: '1px solid rgba(0,212,255,0.25)',
+      backgroundImage: 'linear-gradient(135deg, rgba(232, 100, 60,0.12), rgba(0,230,118,0.08))',
+      padding: '28px', borderRadius: '16px', border: '1px solid rgba(232, 100, 60,0.25)',
       textAlign: 'center', marginBottom: '28px'
     }}>
       {streakAtRisk && (
@@ -297,7 +297,7 @@ function SprintSparkline({ sprints }) {
           <line key={v} x1={PAD} x2={W - PAD} y1={y(v)} y2={y(v)} stroke="var(--border)" strokeWidth="1" strokeDasharray="4 4" />
         ))}
         {/* Area fill */}
-        <path d={areaPath} fill="rgba(0,212,255,0.05)" />
+        <path d={areaPath} fill="rgba(232, 100, 60,0.05)" />
         {/* Line */}
         <path d={linePath} fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
         {/* Points */}
@@ -338,9 +338,9 @@ function PracticeTestCard({ user, navigate }) {
 
   return (
     <div onClick={() => navigate(isPro ? '/practice-test' : '/upgrade', isPro ? undefined : { state: { reason: 'Full practice tests' } })}
-      style={{ backgroundImage: 'linear-gradient(135deg, rgba(0,212,255,0.08), rgba(255,215,64,0.05))', padding: '18px 24px', borderRadius: '14px', border: '1px solid rgba(0,212,255,0.25)', marginBottom: '36px', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'border-color 0.15s' }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,212,255,0.6)'; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,212,255,0.25)'; }}>
+      style={{ backgroundImage: 'linear-gradient(135deg, rgba(232, 100, 60,0.08), rgba(255,215,64,0.05))', padding: '18px 24px', borderRadius: '14px', border: '1px solid rgba(232, 100, 60,0.25)', marginBottom: '36px', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'border-color 0.15s' }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(232, 100, 60,0.6)'; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(232, 100, 60,0.25)'; }}>
       <FileText size={24} color="var(--primary)" />
       <div style={{ flex: 1 }}>
         <div style={{ fontWeight: '600', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -354,7 +354,7 @@ function PracticeTestCard({ user, navigate }) {
         </div>
       </div>
       <button onClick={e => { e.stopPropagation(); navigate(isPro ? '/practice-test' : '/upgrade', isPro ? undefined : { state: { reason: 'Full practice tests' } }); }}
-        style={{ padding: '8px 18px', fontSize: '0.85rem', backgroundColor: 'rgba(0,212,255,0.1)', color: 'var(--primary)', border: '1px solid rgba(0,212,255,0.4)', borderRadius: '8px', whiteSpace: 'nowrap' }}>
+        style={{ padding: '8px 18px', fontSize: '0.85rem', backgroundColor: 'rgba(232, 100, 60,0.1)', color: 'var(--primary)', border: '1px solid rgba(232, 100, 60,0.4)', borderRadius: '8px', whiteSpace: 'nowrap' }}>
         {isPro ? (taken ? 'Retake' : 'Start') : 'Unlock'}
       </button>
     </div>
@@ -412,7 +412,7 @@ export default function Dashboard({ user, isMobile }) {
 
       {/* AI Insights panel */}
       {insights && (insights.insights?.length > 0 || insights.aiInsight) && (
-        <div style={{ backgroundColor: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.18)', borderRadius: '16px', padding: '18px 24px', marginBottom: '28px' }}>
+        <div style={{ backgroundColor: 'rgba(232, 100, 60,0.04)', border: '1px solid rgba(232, 100, 60,0.18)', borderRadius: '16px', padding: '18px 24px', marginBottom: '28px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
             <Zap size={16} color="var(--primary)" />
             <span style={{ fontSize: '0.72rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Today's Focus</span>
@@ -485,7 +485,7 @@ export default function Dashboard({ user, isMobile }) {
 
       {/* Predicted score */}
       {progress?.predictedScore && (
-        <div style={{ backgroundColor: 'rgba(0,212,255,0.05)', border: '1px solid rgba(0,212,255,0.25)', borderRadius: '16px', padding: '20px 28px', marginBottom: '36px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div style={{ backgroundColor: 'rgba(232, 100, 60,0.05)', border: '1px solid rgba(232, 100, 60,0.25)', borderRadius: '16px', padding: '20px 28px', marginBottom: '36px', display: 'flex', alignItems: 'center', gap: '20px' }}>
           <TrendingUp size={28} color="var(--primary)" />
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '4px' }}>Predicted Score Range</div>

@@ -68,7 +68,7 @@ export default function AuthModal({ onClose, onGuest, title, blurb }) {
 
         {sent ? (
           <div style={{ textAlign: 'center', padding: '12px 0' }}>
-            <div style={{ display: 'inline-flex', padding: 16, borderRadius: 16, background: 'rgba(0,212,255,0.1)', marginBottom: 16 }}>
+            <div style={{ display: 'inline-flex', padding: 16, borderRadius: 16, background: 'rgba(232, 100, 60,0.1)', marginBottom: 16 }}>
               <Mail size={28} color="var(--primary)" />
             </div>
             <h2 style={{ fontSize: '1.4rem', marginBottom: 8, color: 'var(--text-primary)' }}>Check your inbox</h2>

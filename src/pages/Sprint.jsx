@@ -40,7 +40,7 @@ function Confetti() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
   const pieces = Array.from({ length: 40 }, (_, i) => ({
     id: i,
-    color: ['#00d4ff', '#00e676', '#ffd740', '#ff5252', '#e040fb'][i % 5],
+    color: ['#e8643c', '#00e676', '#ffd740', '#ff5252', '#e040fb'][i % 5],
     left: Math.random() * 100,
     delay: Math.random() * 0.6,
     duration: 1.2 + Math.random() * 0.8,
@@ -159,8 +159,8 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
 
       {isTestMode && breakdown?.domains?.length > 0 && (
         <div style={{
-          backgroundColor: 'rgba(0,212,255,0.08)',
-          border: '1px solid rgba(0,212,255,0.25)',
+          backgroundColor: 'rgba(232, 100, 60,0.08)',
+          border: '1px solid rgba(232, 100, 60,0.25)',
           borderRadius: '12px',
           padding: '16px',
           marginBottom: '24px'
@@ -702,7 +702,7 @@ export default function Sprint({ user, setUser }) {
   if (resumePrompt) {
     return (
       <div style={{ padding: 'clamp(16px, 5vw, 48px)', maxWidth: '480px', margin: '0 auto', width: '100%' }}>
-        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '32px', border: '1px solid rgba(0,212,255,0.3)', textAlign: 'center' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '32px', border: '1px solid rgba(232, 100, 60,0.3)', textAlign: 'center' }}>
           <Zap size={36} color="var(--primary)" style={{ marginBottom: '16px' }} />
           <h2 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '8px' }}>Unfinished Sprint</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px' }}>
@@ -762,7 +762,7 @@ export default function Sprint({ user, setUser }) {
           <div style={{ display: 'flex', gap: '8px' }}>
             {[5, 10, 15, 20].map(n => (
               <button key={n} onClick={() => { setSprintLength(n); sprintLengthRef.current = n; sessionStorage.setItem('preferredSprintLength', n); }}
-                style={{ padding: '8px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', border: `2px solid ${sprintLength === n ? 'var(--primary)' : 'var(--border)'}`, backgroundColor: sprintLength === n ? 'rgba(0,212,255,0.08)' : 'transparent', color: sprintLength === n ? 'var(--primary)' : 'var(--text-secondary)', transition: 'all 0.15s' }}>
+                style={{ padding: '8px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', border: `2px solid ${sprintLength === n ? 'var(--primary)' : 'var(--border)'}`, backgroundColor: sprintLength === n ? 'rgba(232, 100, 60,0.08)' : 'transparent', color: sprintLength === n ? 'var(--primary)' : 'var(--text-secondary)', transition: 'all 0.15s' }}>
                 {n}Q
               </button>
             ))}
@@ -794,15 +794,15 @@ export default function Sprint({ user, setUser }) {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <button onClick={() => navigate('/practice-test')}
-              style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', backgroundColor: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.3)', borderRadius: '14px', textAlign: 'left', cursor: 'pointer', transition: 'border-color 0.15s' }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(0,212,255,0.6)'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(0,212,255,0.3)'}>
+              style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', backgroundColor: 'rgba(232, 100, 60,0.06)', border: '1px solid rgba(232, 100, 60,0.3)', borderRadius: '14px', textAlign: 'left', cursor: 'pointer', transition: 'border-color 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(232, 100, 60,0.6)'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(232, 100, 60,0.3)'}>
               <span style={{ color: 'var(--primary)' }}><FileText size={20} /></span>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '2px' }}>Full Practice Test</div>
                 <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Both sections, timed, scored 400-1600</div>
               </div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: '600', flexShrink: 0, backgroundColor: 'rgba(0,212,255,0.1)', padding: '3px 8px', borderRadius: '8px' }}>~67 min</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: '600', flexShrink: 0, backgroundColor: 'rgba(232, 100, 60,0.1)', padding: '3px 8px', borderRadius: '8px' }}>~67 min</span>
             </button>
             {testModes.map(m => (
               <button key={m.key} onClick={() => startSprint(m.key)}
@@ -898,7 +898,7 @@ export default function Sprint({ user, setUser }) {
           {Array.from({ length: SPRINT_LENGTH }).map((_, i) => (
             <div key={i} style={{
               flex: 1, height: '5px', borderRadius: '3px',
-              backgroundColor: i < questionNum - 1 ? 'var(--primary)' : i === questionNum - 1 ? 'rgba(0,212,255,0.4)' : 'var(--border)',
+              backgroundColor: i < questionNum - 1 ? 'var(--primary)' : i === questionNum - 1 ? 'rgba(232, 100, 60,0.4)' : 'var(--border)',
               transition: 'background-color 0.3s'
             }} />
           ))}
@@ -916,7 +916,7 @@ export default function Sprint({ user, setUser }) {
       {/* Domain header */}
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', minWidth: 0 }}>
         {sprintMode !== 'adaptive' && (
-          <span style={{ fontSize: '0.7rem', padding: '3px 9px', borderRadius: '10px', backgroundColor: sprintMode === 'math' ? 'rgba(0,212,255,0.1)' : 'rgba(255,215,64,0.1)', color: sprintMode === 'math' ? 'var(--primary)' : 'var(--xp-gold)', border: `1px solid ${sprintMode === 'math' ? 'rgba(0,212,255,0.3)' : 'rgba(255,215,64,0.3)'}`, textTransform: 'uppercase', letterSpacing: '1px', flexShrink: 0 }}>
+          <span style={{ fontSize: '0.7rem', padding: '3px 9px', borderRadius: '10px', backgroundColor: sprintMode === 'math' ? 'rgba(232, 100, 60,0.1)' : 'rgba(255,215,64,0.1)', color: sprintMode === 'math' ? 'var(--primary)' : 'var(--xp-gold)', border: `1px solid ${sprintMode === 'math' ? 'rgba(232, 100, 60,0.3)' : 'rgba(255,215,64,0.3)'}`, textTransform: 'uppercase', letterSpacing: '1px', flexShrink: 0 }}>
             {sprintMode}
           </span>
         )}
@@ -976,7 +976,7 @@ export default function Sprint({ user, setUser }) {
               if (c.is_correct) { bgColor = 'rgba(0,230,118,0.08)'; borderColor = 'var(--success)'; }
               else if (selectedChoice === c.label) { bgColor = 'rgba(255,82,82,0.08)'; borderColor = 'var(--error)'; }
             } else if (selectedChoice === c.label) {
-              borderColor = 'var(--primary)'; bgColor = 'rgba(0,212,255,0.07)'; textColor = 'var(--primary)';
+              borderColor = 'var(--primary)'; bgColor = 'rgba(232, 100, 60,0.07)'; textColor = 'var(--primary)';
             }
             return (
               <button key={c.label} disabled={isAnswered} onClick={() => setSelectedChoice(c.label)}
@@ -1014,11 +1014,11 @@ export default function Sprint({ user, setUser }) {
             <div style={{ marginBottom: '14px' }}>
               {!showDeepDive ? (
                 <button onClick={handleDeepDive}
-                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderColor: 'rgba(0,212,255,0.4)', color: 'var(--primary)', fontSize: '0.9rem' }}>
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderColor: 'rgba(232, 100, 60,0.4)', color: 'var(--primary)', fontSize: '0.9rem' }}>
                   <Zap size={15} /> Deep Dive with AI
                 </button>
               ) : (
-                <div style={{ backgroundColor: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.2)', borderRadius: '12px', padding: '20px' }}>
+                <div style={{ backgroundColor: 'rgba(232, 100, 60,0.04)', border: '1px solid rgba(232, 100, 60,0.2)', borderRadius: '12px', padding: '20px' }}>
                   <h3 style={{ fontSize: '0.85rem', marginBottom: '12px', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     <Zap size={14} /> {deepDiveLoading ? 'Generating breakdown...' : 'AI Breakdown'}
                   </h3>

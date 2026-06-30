@@ -5,21 +5,26 @@
 }
 
 :root {
-  --bg-main: #0f0f1a;
-  --bg-card: #1a1a2e;
-  --bg-sidebar: #16162a;
-  --bg-elevated: #20203a;
-  --border: #2a2a46;
-  --primary: #00d4ff;
-  --primary-hover: #00b5d9;
-  --primary-contrast: #001016;
-  --success: #00e676;
-  --error: #ff5252;
-  --xp-gold: #ffd740;
-  --text-primary: #e8e8e8;
-  --text-secondary: #8888aa;
+  /* "Field Notes" palette — warm-espresso dark. Terracotta primary, teal
+     secondary (mapped to --success so correct/positive states read teal),
+     gold XP. In-app chrome stays calmer than the landing's bold ink borders;
+     the workspace is kept disciplined and readable. */
+  --bg-main: #221e1a;
+  --bg-card: #2a2622;
+  --bg-sidebar: #1c1916;
+  --bg-elevated: #332e29;
+  --border: #433d37;
+  --primary: #ff7a4d;
+  --primary-hover: #e8643c;
+  --primary-contrast: #fbf7f0;
+  --success: #46b79f;
+  --teal: #46b79f;
+  --error: #ff6b5c;
+  --xp-gold: #ffc93d;
+  --text-primary: #f4efe7;
+  --text-secondary: #b0a79c;
 
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Spline Sans', 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -36,19 +41,21 @@
    variables below adapt automatically; the landing and auth pages are fully
    variable-driven so they flip cleanly. */
 :root[data-theme='light'] {
-  --bg-main: #f7f9fc;
-  --bg-card: #ffffff;
-  --bg-sidebar: #ffffff;
-  --bg-elevated: #eef2f8;
-  --border: #dce3ec;
-  --primary: #0091b3;
-  --primary-hover: #007a98;
-  --primary-contrast: #ffffff;
-  --success: #00b257;
-  --error: #d83a3a;
-  --xp-gold: #d99e00;
-  --text-primary: #16213a;
-  --text-secondary: #5a6781;
+  /* Field Notes — warm paper/cream light mode. */
+  --bg-main: #fbf7f0;
+  --bg-card: #fffdf8;
+  --bg-sidebar: #f3ecdf;
+  --bg-elevated: #efe7d9;
+  --border: #e0d6c5;
+  --primary: #e8643c;
+  --primary-hover: #cf522d;
+  --primary-contrast: #fffdf8;
+  --success: #2e7d6f;
+  --teal: #2e7d6f;
+  --error: #d8472f;
+  --xp-gold: #b98900;
+  --text-primary: #2a2622;
+  --text-secondary: #6b6258;
 
   color-scheme: light;
 }
@@ -69,6 +76,12 @@ body {
 
 h1, h2, h3, h4, p {
   margin: 0;
+}
+
+/* Field Notes display face for headings app-wide; body stays Spline Sans. */
+h1, h2, h3 {
+  font-family: 'Bricolage Grotesque', 'Spline Sans', system-ui, sans-serif;
+  letter-spacing: -0.02em;
 }
 
 /* Keyboard focus ring. :focus-visible only fires for keyboard/AT users, so mouse

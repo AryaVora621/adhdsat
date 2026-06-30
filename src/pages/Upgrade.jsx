@@ -98,7 +98,7 @@ export default function Upgrade({ user, setUser }) {
         </div>
 
         {/* Pro */}
-        <div style={{ backgroundImage: 'linear-gradient(135deg, rgba(0,212,255,0.1), rgba(255,215,64,0.07))', borderRadius: '16px', border: '1px solid rgba(0,212,255,0.4)', padding: '24px', position: 'relative' }}>
+        <div style={{ backgroundImage: 'linear-gradient(135deg, rgba(232, 100, 60,0.1), rgba(255,215,64,0.07))', borderRadius: '16px', border: '1px solid rgba(232, 100, 60,0.4)', padding: '24px', position: 'relative' }}>
           {!isPro && (
             <div style={{ position: 'absolute', top: '-10px', right: '18px', background: 'linear-gradient(90deg, var(--primary), var(--xp-gold))', color: 'var(--primary-contrast)', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1px', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase' }}>
               Recommended

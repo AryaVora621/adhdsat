@@ -233,7 +233,7 @@ export default function Profile({ user, setUser, onSignOut }) {
             </span>
           </div>
           <button onClick={() => navigate('/upgrade')}
-            style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 600, color: user.plan === 'paid' ? 'var(--text-secondary)' : 'var(--primary)', borderColor: user.plan === 'paid' ? 'var(--border)' : 'rgba(0,212,255,0.4)' }}>
+            style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 600, color: user.plan === 'paid' ? 'var(--text-secondary)' : 'var(--primary)', borderColor: user.plan === 'paid' ? 'var(--border)' : 'rgba(232, 100, 60,0.4)' }}>
             {user.plan === 'paid' ? 'Manage' : 'Upgrade to Pro'}
           </button>
         </div>
@@ -246,7 +246,7 @@ export default function Profile({ user, setUser, onSignOut }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {scoreMsg && <span style={{ color: 'var(--success)', fontSize: '0.82rem' }}>{scoreMsg}</span>}
             <button onClick={() => user.plan === 'paid' ? fileInputRef.current?.click() : navigate('/upgrade', { state: { reason: 'Score report import' } })} disabled={uploading}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.8rem', color: uploading ? 'var(--text-secondary)' : 'var(--primary)', borderColor: 'rgba(0,212,255,0.3)' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.8rem', color: uploading ? 'var(--text-secondary)' : 'var(--primary)', borderColor: 'rgba(232, 100, 60,0.3)' }}>
               <Upload size={13} /> {uploading ? 'Analyzing...' : 'Upload Report'}{user.plan !== 'paid' ? ' (Pro)' : ''}
             </button>
             <input type="file" ref={fileInputRef} accept="image/*,.pdf" style={{ display: 'none' }} onChange={handleScoreReport} />
@@ -354,7 +354,7 @@ export default function Profile({ user, setUser, onSignOut }) {
             <button key={d} onClick={() => toggleDomain(d)}
               style={{ padding: '7px 14px', borderRadius: '20px', fontSize: '0.82rem', transition: 'all 0.15s',
                 border: weakAreas.includes(d) ? '1px solid var(--primary)' : '1px solid var(--border)',
-                backgroundColor: weakAreas.includes(d) ? 'rgba(0,212,255,0.1)' : 'transparent',
+                backgroundColor: weakAreas.includes(d) ? 'rgba(232, 100, 60,0.1)' : 'transparent',
                 color: weakAreas.includes(d) ? 'var(--primary)' : 'var(--text-secondary)' }}>
               {d}
             </button>
