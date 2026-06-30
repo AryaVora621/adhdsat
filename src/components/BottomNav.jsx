@@ -20,6 +20,8 @@ export default function BottomNav({ userId }) {
     color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
     fontSize: '0.65rem', letterSpacing: '0.5px', fontWeight: isActive ? '600' : '400',
     transition: 'color 0.15s', position: 'relative',
+    // Terracotta active-tab indicator at the top edge (inset, so no layout shift).
+    boxShadow: isActive ? 'inset 0 3px 0 0 var(--primary)' : 'none',
   });
 
   return (
