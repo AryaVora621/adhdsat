@@ -169,6 +169,19 @@ Status: LIVE at https://adhdsat.vercel.app
   in ads/public/audio/ and enable <Music/>; don't publish ads showing
   tally.college until the domain resolves.
 
+## Mobile track + polish (2026-06-30, tags v4.3)
+- v4.3-bottomnav: terracotta inset active-tab indicator on the mobile BottomNav
+  (no layout shift). BottomNav already handles safe-area-inset-bottom.
+- CAPACITOR_ANDROID.md: project-specific Android kickoff guide. Verified the wrap
+  details (Vite->dist, base '/', BrowserRouter OK on Capacitor server). KEY gotcha
+  documented: relative /api calls don't resolve in the native shell -> needs an
+  absolute API base (VITE_API_BASE) or a server.url wrapper. Held the actual
+  `cap add android` + emulator run for an at-machine session (can't test headless).
+- Rebrand audit: confirmed NO stale cold brand colors (0f0f1a etc.) remain.
+- NEXT (at-machine w/ user): run Capacitor Steps 1-4, smoke-test guest mode in the
+  Android emulator. Other open: ad music track (needs a licensed file); Stripe
+  (needs the user's account); iOS (needs Xcode).
+
 ## Next actions (priority order)
 1. HUMAN (see LAUNCH_CONFIG.md): (a) rotate Supabase DB password [security
    blocker], (b) set Supabase Auth Site URL + redirect allowlist to
