@@ -111,6 +111,15 @@ Status: LIVE at https://adhdsat.vercel.app
 - NEXT for the loop: roll Field Notes into index.css design tokens, then restyle
   in-app screens (Dashboard, Sprint, Profile, Upgrade, Onboarding, AuthModal) so
   the post-login app matches the new landing. Tag each vN.M.
+- v2.6-app-fieldnotes-tokens: Field Notes palette mapped into index.css tokens
+  (terracotta/teal/gold), 42 cyan->terracotta replacements, Spline Sans body /
+  Bricolage headings app-wide. Verified Onboarding + Dashboard live.
+- v2.7-tint-cohesion: audited in-app source for orphan colors. Purged the old
+  #00e676 spring-green correct-answer tints + #e040fb magenta confetti across
+  Sprint/ReviewSprint/PracticeTest/Profile/Dashboard -> Field Notes teal/terra/
+  gold. Build clean, deployed. Cleaned up test guest + .playwright-mcp artifacts.
+- Source audit confirms NO orphan old-palette hex (#00d4ff/cyan/purple) remain;
+  the 4 surviving gradients are all on-brand terracotta/gold/teal tints.
 
 ## Next actions (priority order)
 1. HUMAN (see LAUNCH_CONFIG.md): (a) rotate Supabase DB password [security
