@@ -92,6 +92,25 @@ Status: LIVE at https://adhdsat.vercel.app
   practice-test total + section scores climb from 0 on the results reveal.
 - v2.1-focus-a11y: global :focus-visible box-shadow ring (keyboard-only, on-brand).
   Verified the ring shows on Tab.
+- v2.2-code-splitting: React.lazy route splitting; initial JS 241KB -> 136KB gzip.
+- v2.3-route-prefetch: idle-prefetch high-traffic chunks (instant nav). Verified.
+- v2.4-homescreen-routing: FIX root URL bounced returning guests to /onboarding;
+  now / shows Landing (not onboarded) or Dashboard (onboarded); onboarding only
+  via CTA (createGuest / startOnboarding). Verified both paths live.
+
+## DESIGN PIVOT — "Field Notes" aesthetic (2026-06-30)
+- User: site looked "AI-generated". Ran a UI research agent -> diagnosis (median
+  cyan-on-black palette, mesh blobs, gradient headline, symmetric 6-card grid).
+  Offered 3 directions; user reviewed rendered mockups and chose C "Field Notes".
+- See memory design-direction-field-notes.md for the full spec. Warm paper/cream
+  + warm-espresso dark, terracotta + teal + gold, Bricolage/Spline Sans/Caveat,
+  risograph stickers (offset shadows, 2px ink borders, organic corners, tilts,
+  grain, hand-drawn underline). Workspace stays disciplined; boldness in shell.
+- v2.5-landing-fieldnotes: Landing fully rebuilt in Field Notes (scoped --fn-*
+  vars). Verified light + dark live. Added Spline Sans + Caveat to index.html.
+- NEXT for the loop: roll Field Notes into index.css design tokens, then restyle
+  in-app screens (Dashboard, Sprint, Profile, Upgrade, Onboarding, AuthModal) so
+  the post-login app matches the new landing. Tag each vN.M.
 
 ## Next actions (priority order)
 1. HUMAN (see LAUNCH_CONFIG.md): (a) rotate Supabase DB password [security
