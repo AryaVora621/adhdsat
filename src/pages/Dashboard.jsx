@@ -113,7 +113,7 @@ function QuickStartCard({ navigate, user }) {
 
   return (
     <div style={{
-      backgroundImage: 'linear-gradient(135deg, rgba(232, 100, 60,0.12), rgba(0,230,118,0.08))',
+      backgroundImage: 'linear-gradient(135deg, rgba(232, 100, 60,0.12), rgba(70,183,159,0.08))',
       padding: '28px', borderRadius: '16px', border: '1px solid rgba(232, 100, 60,0.25)',
       textAlign: 'center', marginBottom: '28px'
     }}>

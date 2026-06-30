@@ -40,7 +40,7 @@ function Confetti() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
   const pieces = Array.from({ length: 40 }, (_, i) => ({
     id: i,
-    color: ['#e8643c', '#00e676', '#ffd740', '#ff5252', '#e040fb'][i % 5],
+    color: ['#e8643c', '#46b79f', '#ffc93d', '#ff7a4d', '#2e7d6f'][i % 5],
     left: Math.random() * 100,
     delay: Math.random() * 0.6,
     duration: 1.2 + Math.random() * 0.8,
@@ -135,8 +135,8 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
 
       {accuracy < 55 && (
         <div style={{
-          backgroundColor: 'rgba(0,230,118,0.08)',
-          border: '1px solid rgba(0,230,118,0.3)',
+          backgroundColor: 'rgba(70,183,159,0.08)',
+          border: '1px solid rgba(70,183,159,0.3)',
           borderRadius: '12px',
           padding: '16px',
           marginBottom: '24px'
@@ -881,7 +881,7 @@ export default function Sprint({ user, setUser }) {
       {milestone && (
         <div style={{
           position: 'fixed', top: '24px', left: '50%', transform: 'translateX(-50%)',
-          backgroundColor: 'rgba(0,230,118,0.12)', border: '1px solid rgba(0,230,118,0.4)',
+          backgroundColor: 'rgba(70,183,159,0.12)', border: '1px solid rgba(70,183,159,0.4)',
           borderRadius: '24px', padding: '10px 22px', zIndex: 9999,
           display: 'flex', alignItems: 'center', gap: '8px',
           animation: 'milestoneIn 0.25s ease-out',
@@ -973,7 +973,7 @@ export default function Sprint({ user, setUser }) {
           question.choices.map((c, idx) => {
             let bgColor = 'var(--bg-card)', borderColor = 'var(--border)', textColor = 'var(--text-primary)';
             if (isAnswered) {
-              if (c.is_correct) { bgColor = 'rgba(0,230,118,0.08)'; borderColor = 'var(--success)'; }
+              if (c.is_correct) { bgColor = 'rgba(70,183,159,0.08)'; borderColor = 'var(--success)'; }
               else if (selectedChoice === c.label) { bgColor = 'rgba(255,82,82,0.08)'; borderColor = 'var(--error)'; }
             } else if (selectedChoice === c.label) {
               borderColor = 'var(--primary)'; bgColor = 'rgba(232, 100, 60,0.07)'; textColor = 'var(--primary)';

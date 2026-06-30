@@ -48,7 +48,7 @@ function fmtTime(s) {
 function ReviewCard({ item }) {
   const { q, selected, correct } = item;
   const correctChoice = q.choices?.find(c => c.is_correct);
-  const borderColor = correct ? 'rgba(0,230,118,0.35)' : 'rgba(255,82,82,0.35)';
+  const borderColor = correct ? 'rgba(70,183,159,0.35)' : 'rgba(255,82,82,0.35)';
   return (
     <div style={{ backgroundColor: 'var(--bg-card)', border: `1px solid ${borderColor}`, borderRadius: '12px', padding: '16px 18px', textAlign: 'left', marginBottom: '10px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', gap: '8px' }}>
@@ -71,7 +71,7 @@ function ReviewCard({ item }) {
           {q.choices?.map(c => {
             const isCorrect = c.is_correct;
             const isPicked = selected === c.label;
-            const bg = isCorrect ? 'rgba(0,230,118,0.1)' : isPicked ? 'rgba(255,82,82,0.1)' : 'transparent';
+            const bg = isCorrect ? 'rgba(70,183,159,0.1)' : isPicked ? 'rgba(255,82,82,0.1)' : 'transparent';
             const bd = isCorrect ? 'var(--success)' : isPicked ? 'var(--error)' : 'var(--border)';
             return (
               <div key={c.label} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', backgroundColor: bg, border: `1px solid ${bd}`, borderRadius: '8px', fontSize: '0.88rem' }}>

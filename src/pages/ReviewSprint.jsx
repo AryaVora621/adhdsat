@@ -354,7 +354,7 @@ export default function ReviewSprint({ user, setUser }) {
           question.choices.map(c => {
             let bgColor = 'var(--bg-card)', borderColor = 'var(--border)', textColor = 'var(--text-primary)';
             if (isAnswered) {
-              if (c.is_correct) { bgColor = 'rgba(0,230,118,0.08)'; borderColor = 'var(--success)'; }
+              if (c.is_correct) { bgColor = 'rgba(70,183,159,0.08)'; borderColor = 'var(--success)'; }
               else if (selectedChoice === c.label) { bgColor = 'rgba(255,82,82,0.08)'; borderColor = 'var(--error)'; }
             } else if (selectedChoice === c.label) {
               borderColor = 'var(--primary)'; bgColor = 'rgba(232, 100, 60,0.07)'; textColor = 'var(--primary)';

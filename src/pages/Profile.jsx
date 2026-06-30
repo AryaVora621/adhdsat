@@ -304,7 +304,7 @@ export default function Profile({ user, setUser, onSignOut }) {
             // Frame it as an amber goal to close, not a red deficit -- the product's
             // whole point is keeping ADHD learners encouraged, not alarmed.
             return (
-              <div style={{ marginTop: '12px', textAlign: 'center', padding: '10px 16px', backgroundColor: gain > 0 ? 'rgba(0,230,118,0.07)' : 'rgba(255,215,64,0.07)', borderRadius: '10px', border: `1px solid ${gain > 0 ? 'rgba(0,230,118,0.25)' : 'rgba(255,215,64,0.25)'}` }}>
+              <div style={{ marginTop: '12px', textAlign: 'center', padding: '10px 16px', backgroundColor: gain > 0 ? 'rgba(70,183,159,0.07)' : 'rgba(255,215,64,0.07)', borderRadius: '10px', border: `1px solid ${gain > 0 ? 'rgba(70,183,159,0.25)' : 'rgba(255,215,64,0.25)'}` }}>
                 <span style={{ color: gain > 0 ? 'var(--success)' : 'var(--xp-gold)', fontWeight: '700', fontSize: '0.9rem' }}>
                   {gain > 0 ? `+${gain} points above your baseline` : `${Math.abs(gain)} points to your baseline goal -- keep building accuracy!`}
                 </span>
