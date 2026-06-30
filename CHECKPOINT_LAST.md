@@ -148,6 +148,27 @@ Status: LIVE at https://adhdsat.vercel.app
   the 21-request warning + speed renders).
 - STILL PENDING (next active track): Android Capacitor scaffold (unblocked).
 
+## REBRAND — ADHDSat → Tally (2026-06-30, tags v4.0 / v4.1 / v4.2)
+- Name was a personal placeholder. Rebranded to **Tally** (counts every small
+  win; fits the Field Notes tally-mark identity; drops 'SAT' from the name, which
+  College Board trademarks). Domain **tally.college** confirmed available (whois).
+  Full plan + launch steps in REBRAND.md.
+- v4.0-rebrand: app UI + meta (index.html title/OG/Twitter, warm theme-colors;
+  wordmark+copy in Sidebar/App/Onboarding/Landing/Upgrade/Profile; manifest;
+  sw.js -> tally-v2). Kept localStorage key 'adhdsat-theme' + backend adhdsat
+  schema (internal). Deployed + verified landing shows 'Tally' live.
+- v4.1-rebrand: ads/src/brand.ts single source of truth; ad Logo + CTA URLs ->
+  Tally/tally.college; new OgImage composition -> regenerated public/og-image.png;
+  re-rendered all 3 cuts. Redeployed so new OG is live.
+- v4.2-ads: 9:16 crops (ExplainerVertical + BumperVertical, aspect-ratio-aware
+  beats, QA'd) + Music infra (Music.tsx, off by default, MUSIC.md sourcing).
+- Ad deliverables in ~/Desktop/adhdsatads/ (Tally-* : hook-15s, explainer-30s +
+  vertical, bumper-6s + vertical, og-card, scripts).
+- HUMAN before launch: register tally.college, add to Vercel, swap absolute
+  asset/canonical URLs off adhdsat.vercel.app; for music, drop a licensed track
+  in ads/public/audio/ and enable <Music/>; don't publish ads showing
+  tally.college until the domain resolves.
+
 ## Next actions (priority order)
 1. HUMAN (see LAUNCH_CONFIG.md): (a) rotate Supabase DB password [security
    blocker], (b) set Supabase Auth Site URL + redirect allowlist to
