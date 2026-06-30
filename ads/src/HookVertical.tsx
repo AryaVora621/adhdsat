@@ -12,6 +12,7 @@ import { Grain } from './components/Grain';
 import { SprintCard } from './components/SprintCard';
 import { Logo } from './components/Logo';
 import { Underline } from './components/Underline';
+import { BRAND } from './brand';
 import './fonts';
 
 const Word: React.FC<{ children: React.ReactNode; delay: number; tilt: number }> = ({
@@ -147,7 +148,7 @@ const Beat4: React.FC = () => {
         <Underline progress={drawn} width={440} />
       </div>
       <div style={{ fontFamily: font.body, fontWeight: 600, fontSize: 40, color: fn.inkSoft }}>
-        adhdsat.vercel.app
+        {BRAND.url}
       </div>
     </AbsoluteFill>
   );

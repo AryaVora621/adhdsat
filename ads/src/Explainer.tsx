@@ -12,6 +12,7 @@ import { Grain } from './components/Grain';
 import { SprintCard } from './components/SprintCard';
 import { Logo } from './components/Logo';
 import { Underline } from './components/Underline';
+import { BRAND } from './brand';
 import './fonts';
 
 // Shared: a left-side beat heading that staggers in.
@@ -266,7 +267,7 @@ const CTA: React.FC = () => {
         <Underline progress={drawn} width={520} />
       </div>
       <div style={{ fontFamily: font.body, fontWeight: 600, fontSize: 40, color: fn.inkSoft }}>
-        adhdsat.vercel.app
+        {BRAND.url}
       </div>
     </AbsoluteFill>
   );

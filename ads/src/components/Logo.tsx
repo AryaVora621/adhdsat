@@ -1,5 +1,6 @@
 import React from 'react';
 import { fn, offsetShadow, font } from '../theme';
+import { BRAND } from '../brand';
 
 // Bolt-in-tile mark + wordmark, matching the landing nav lockup.
 export const Logo: React.FC<{ scale?: number }> = ({ scale = 1 }) => (
@@ -30,7 +31,7 @@ export const Logo: React.FC<{ scale?: number }> = ({ scale = 1 }) => (
         letterSpacing: '-0.01em',
       }}
     >
-      ADHDSat
+      {BRAND.name}
     </span>
   </div>
 );
