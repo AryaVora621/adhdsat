@@ -189,7 +189,7 @@ function AppInner() {
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100vw', flexDirection: 'column', gap: '16px' }}>
-        <div style={{ color: 'var(--primary)', fontSize: '1.5rem', fontWeight: 'bold', letterSpacing: '2px' }}>ADHDSat</div>
+        <div style={{ color: 'var(--primary)', fontSize: '1.7rem', fontWeight: 800, letterSpacing: '-0.01em', fontFamily: "'Bricolage Grotesque', 'Spline Sans', system-ui, sans-serif" }}>ADHDSat</div>
         <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Loading...</div>
       </div>
     );
@@ -198,7 +198,7 @@ function AppInner() {
   if (apiError) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100vw', flexDirection: 'column', gap: '16px', padding: '32px', textAlign: 'center' }}>
-        <div style={{ color: 'var(--primary)', fontSize: '1.5rem', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '8px' }}>ADHDSat</div>
+        <div style={{ color: 'var(--primary)', fontSize: '1.7rem', fontWeight: 800, letterSpacing: '-0.01em', marginBottom: '8px', fontFamily: "'Bricolage Grotesque', 'Spline Sans', system-ui, sans-serif" }}>ADHDSat</div>
         <div style={{ color: 'var(--text-secondary)', maxWidth: '360px', lineHeight: 1.6 }}>
           Could not connect to the server. Check your connection and try again.
         </div>

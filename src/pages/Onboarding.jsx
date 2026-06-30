@@ -94,7 +94,7 @@ export default function Onboarding({ user, setUser }) {
   return (
     <div style={containerStyle}>
       <div style={{ marginBottom: '32px', textAlign: 'center' }}>
-        <div style={{ color: 'var(--primary)', fontWeight: 'bold', fontSize: '1.4rem', letterSpacing: '2px', marginBottom: '8px' }}>ADHDSat</div>
+        <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '1.6rem', letterSpacing: '-0.01em', marginBottom: '8px', fontFamily: "'Bricolage Grotesque', 'Spline Sans', system-ui, sans-serif" }}>ADHDSat</div>
         <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Adaptive SAT prep for the way your brain works</div>
       </div>
 
