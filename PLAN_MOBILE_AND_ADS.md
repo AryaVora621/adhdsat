@@ -1,8 +1,16 @@
-# Future Plans: Mobile Apps + Formal Ads
+# Next Active Work: Mobile Apps + Formal Ads
 
-Status: PLANNING (no implementation yet). Saved 2026-06-30 per user direction.
+Status: NEXT UP — begin as soon as the polish pass reaches a good stopping point.
+(User clarified 2026-06-30: these are not far-future; they are the next thing to
+build right after polishing, NOT parked indefinitely.)
 Current product: React 19 + Vite SPA, Express API on Vercel, Supabase Postgres.
-Both tracks below are gated and should NOT start coding until the gate clears.
+
+What can start immediately (no external gate):
+- Android app scaffold via Capacitor (Android Studio is installed).
+- Ads pre-production: scripts, storyboards, shot lists, clean b-roll capture.
+What is still gated (do the unblocked parts first, queue these):
+- iOS build/submit — needs Xcode installed.
+- Final ad render — needs a video-editing capability (Remotion is the lead).
 
 ---
 
@@ -97,7 +105,12 @@ animations, or need deep native modules beyond billing + notifications.
 ---
 
 ## Immediate next step
-Resume the premium-polish loop (cron, every 30m). These two tracks stay in
-PLANNING until their gates clear (Xcode for iOS; a video-editing capability for
-ads; Android can begin on request). Stripe (web payments) remains the prior
-roadmap item, also waiting on the user's Stripe account.
+The polish loop should transition into these tracks as soon as polish hits a good
+stopping point (per user: they are the next active work, not deferred). Start with
+the unblocked parts in parallel:
+1. Android: Capacitor scaffold (npm i @capacitor/core @capacitor/cli, cap init,
+   add android), get the SPA running in the emulator, then deep-link auth.
+2. Ads: draft the 15s/30s/6s scripts + storyboards now (needs no tooling), then
+   extend record-demo.mjs to capture clean captioned b-roll.
+Keep iOS (Xcode) and final ad render (video tool) queued behind their gates.
+Stripe (web payments) still waits on the user's Stripe account.
