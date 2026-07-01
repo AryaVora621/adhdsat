@@ -279,6 +279,81 @@ app.get('/api/questions/next', async (req, res) => {
   res.json({ ...question, choices: JSON.parse(question.choices || '[]'), tags: JSON.parse(question.tags || '[]') });
 });
 
+// --- Batch fetch for background prefetching ---
+app.get('/api/questions/batch', async (req, res) => {
+  const { userId, section, count = 10 } = req.query;
+  if (!userId) return res.status(400).json({ error: 'userId required' });
+
+  const allowedDomains = section === 'math' ? MATH_DOMAINS : section === 'english' ? ENG_DOMAINS : DOMAINS;
+
+  const recent = await rows(`
+    SELECT q.domain, ua.is_correct FROM adhdsat.user_answers ua
+    JOIN adhdsat.questions q ON ua.question_id = q.id
+    WHERE ua.user_id = $1 ORDER BY ua.created_at DESC LIMIT 50
+  `, [userId]);
+
+  let correctCount = 0;
+  for (const r of recent) {
+    if (r.is_correct) correctCount++;
+  }
+  const overallAccuracy = recent.length > 0 ? correctCount / recent.length : 0.5;
+
+  // Optional: save user_score to db for external visibility
+  await query('UPDATE adhdsat.users SET current_level = $1 WHERE id = $2', [Math.round(overallAccuracy * 100), userId]);
+
+  const numQuestions = parseInt(count, 10);
+  let easyCount = 0, mediumCount = 0, hardCount = 0;
+
+  if (overallAccuracy < 0.4) {
+    easyCount = Math.floor(numQuestions * 0.6);
+    mediumCount = Math.floor(numQuestions * 0.4);
+    hardCount = numQuestions - easyCount - mediumCount;
+  } else if (overallAccuracy < 0.7) {
+    easyCount = Math.floor(numQuestions * 0.2);
+    mediumCount = Math.floor(numQuestions * 0.6);
+    hardCount = numQuestions - easyCount - mediumCount;
+  } else {
+    easyCount = Math.floor(numQuestions * 0.1);
+    mediumCount = Math.floor(numQuestions * 0.3);
+    hardCount = numQuestions - easyCount - mediumCount;
+  }
+
+  const seen = (await rows('SELECT question_id FROM adhdsat.user_answers WHERE user_id = $1 ORDER BY created_at DESC LIMIT 100', [userId])).map(r => r.question_id);
+  const picked = [];
+
+  async function fetchQuestions(difficulty, needed) {
+    if (needed <= 0) return;
+    const qs = await rows(
+      `SELECT * FROM adhdsat.questions 
+       WHERE domain = ANY($1::text[]) AND difficulty = $2 AND id <> ALL($3::text[]) 
+       ORDER BY random() LIMIT $4`,
+      [allowedDomains, difficulty, seen.concat(picked.map(q => q.id)), needed]
+    );
+    picked.push(...qs);
+  }
+
+  await fetchQuestions('easy', easyCount);
+  await fetchQuestions('medium', mediumCount);
+  await fetchQuestions('hard', hardCount);
+
+  if (picked.length < numQuestions) {
+    const fallback = await rows(
+      `SELECT * FROM adhdsat.questions 
+       WHERE domain = ANY($1::text[]) AND id <> ALL($2::text[]) 
+       ORDER BY random() LIMIT $3`,
+      [allowedDomains, seen.concat(picked.map(q => q.id)), numQuestions - picked.length]
+    );
+    picked.push(...fallback);
+  }
+
+  picked.sort(() => Math.random() - 0.5);
+
+  res.json({
+    userScore: Math.round(overallAccuracy * 100),
+    questions: picked.map(q => ({ ...q, choices: JSON.parse(q.choices || '[]'), tags: JSON.parse(q.tags || '[]') }))
+  });
+});
+
 // --- Full practice test: serve a whole module of distinct, mixed-difficulty
 // questions in one call (module 1 of the digital SAT is a broad easy/medium/hard
 // mix across the section's domains). Returns the answer keys too, since the
@@ -512,7 +587,7 @@ app.get('/api/progress', async (req, res) => {
     };
     const mathAcc = await weightedAcc(MATH_DOMAINS);
     const engAcc = await weightedAcc(ENG_DOMAINS);
-    const toScore = (acc) => acc === null ? null : Math.min(800, Math.max(200, Math.round(200 + acc * 620)));
+    const toScore = (acc) => acc === null ? null : Math.min(800, Math.max(200, Math.round((200 + acc * 620) / 10) * 10));
     const mathScore = toScore(mathAcc);
     const engScore = toScore(engAcc);
     if (mathScore !== null || engScore !== null) {
@@ -818,7 +893,7 @@ app.get('/api/insights/:userId', async (req, res) => {
     try {
       const { GoogleGenerativeAI } = await import('@google/generative-ai');
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
       const prompt = `You are a concise SAT prep coach. Give a single motivating, specific insight for this student in 1-2 sentences max.
 
 Domain accuracy (last 30 Qs): ${JSON.stringify(domainAccuracy)}

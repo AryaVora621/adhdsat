@@ -5,7 +5,7 @@
  * Leave domain blank to generate for all 8 domains.
  */
 import 'dotenv/config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { execFileSync } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -43,9 +43,15 @@ function buildPrompt(domain, section, existingIds, count) {
 For English questions, include a realistic short passage (3-6 sentences) in the "passage_text" field. The passage should be academic or literary in style -- the kind found in the SAT. The question should specifically reference the passage.
 ` : `For Math questions, set "passage_text" to null.`;
 
-  return `You are an expert SAT question writer. Generate exactly ${count} high-quality SAT practice questions for the domain "${domain}" (${section} section).
+  return `You are an expert SAT question writer. Generate exactly ${count} high-quality, highly intelligent SAT practice questions for the domain "${domain}" (${section} section).
 
 ${englishPassageNote}
+
+CRITICAL INSTRUCTIONS FOR QUALITY & INTELLIGENCE:
+- **Avoid Repetitive Tropes**: Do not use generic names (Bob, Alice) or overused scenarios (buying apples, simple speed/distance).
+- **Be Highly Creative**: Frame questions using realistic scientific contexts, historical data, abstract theoretical concepts, and advanced vocabulary.
+- **Deep Complexity**: "Hard" questions must be genuinely difficult, requiring multi-step abstract reasoning, synthesizing information, or recognizing complex patterns—not just tedious arithmetic.
+- **Diverse Topics**: Span a wide range of subjects (astrophysics, economics, biology, literature, global history) across the batch.
 
 Requirements:
 - Mix of difficulties: roughly 30% easy, 40% medium, 30% hard
@@ -151,8 +157,7 @@ function sanitizeJsonString(raw) {
   return out;
 }
 
-async function generateForDomain(genAI, domain, section, prefix, existingQuestions, count) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+async function generateForDomain(domain, section, prefix, existingQuestions, count) {
   const existingIds = existingQuestions.map(q => q.id);
   const existingCount = existingQuestions.filter(q => q.domain === domain).length;
 
@@ -160,26 +165,27 @@ async function generateForDomain(genAI, domain, section, prefix, existingQuestio
 
   const prompt = buildPrompt(domain, section, existingIds, count);
 
-  let result;
+  let text = '';
   for (let attempt = 1; attempt <= 4; attempt++) {
     try {
-      result = await model.generateContent(prompt);
+      console.log(`[generate] Running agy CLI (attempt ${attempt}/4)...`);
+      text = execFileSync('agy', ['-p', prompt], { encoding: 'utf-8', maxBuffer: 1024 * 1024 * 10 });
       break;
     } catch (err) {
-      const is503 = err.message && (err.message.includes('503') || err.message.includes('overloaded') || err.message.includes('temporarily'));
-      if (is503 && attempt < 4) {
+      console.error(`[generate] agy error for ${domain}:`, err.message);
+      if (attempt < 4) {
         const delay = attempt * 8000;
-        console.log(`[generate] 503 for ${domain}, retrying in ${delay/1000}s (attempt ${attempt}/4)...`);
+        console.log(`[generate] retrying in ${delay/1000}s (attempt ${attempt}/4)...`);
         await new Promise(r => setTimeout(r, delay));
         continue;
       }
-      console.error(`[generate] Gemini error for ${domain}:`, err.message);
       return [];
     }
   }
-  if (!result) return [];
+  
+  if (!text) return [];
 
-  const text = result.response.text().trim();
+  text = text.trim();
 
   // Strip markdown code fences if present
   let jsonText = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
@@ -261,15 +267,8 @@ async function generateForDomain(genAI, domain, section, prefix, existingQuestio
 }
 
 async function main() {
-  if (!process.env.GEMINI_API_KEY) {
-    console.error('[generate] GEMINI_API_KEY not set in .env');
-    process.exit(1);
-  }
-
   const targetDomain = process.argv[2] || null;
   const count = parseInt(process.argv[3] || '20', 10);
-
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
   let existing = [];
   try {
@@ -291,7 +290,7 @@ async function main() {
 
   let allNew = [];
   for (const { name, section, prefix } of domainsToProcess) {
-    const newQs = await generateForDomain(genAI, name, section, prefix, existing, count);
+    const newQs = await generateForDomain(name, section, prefix, existing, count);
     allNew = allNew.concat(newQs);
     // Small delay between domains to avoid rate limits
     if (domainsToProcess.length > 1) {

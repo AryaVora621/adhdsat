@@ -90,12 +90,27 @@ function parseSegments(text) {
   return segments;
 }
 
+function formatMarkdownHTML(text) {
+  let out = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  
+  // Bold: **text**
+  out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  
+  // Italic: *text* (must not have spaces immediately inside the stars to avoid math multiplication)
+  out = out.replace(/\*([^\s*][^*]*[^\s*]|[^\s*])\*/g, '<em>$1</em>');
+  
+  // Underline: _text_
+  out = out.replace(/_([^\s_][^_]*[^\s_]|[^\s_])_/g, '<u>$1</u>');
+  
+  return out;
+}
+
 // Render a plain string as inline text + math nodes (the original behavior).
 function renderInline(text, keyBase) {
   return parseSegments(text).map((seg, i) =>
     seg.type === 'math'
       ? renderMathSegment(seg.content, `${keyBase}-${i}`)
-      : <span key={`${keyBase}-${i}`}>{seg.content}</span>
+      : <span key={`${keyBase}-${i}`} dangerouslySetInnerHTML={{ __html: formatMarkdownHTML(seg.content) }} />
   );
 }
 

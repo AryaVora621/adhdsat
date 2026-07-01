@@ -281,6 +281,8 @@ export default function Sprint({ user, setUser }) {
   const endSprintRef = useRef(null); // ref to force-end sprint when time expires
 
   const prefetchedQuestionRef = useRef(null);
+  const questionQueueRef = useRef([]);
+  const fetchPromiseRef = useRef(null);
 
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -411,11 +413,41 @@ export default function Sprint({ user, setUser }) {
   };
 
   const fetchQuestionFromAPI = async () => {
+    if (questionQueueRef.current.length > 0) {
+      return questionQueueRef.current.shift();
+    }
+    
+    // Prevent race conditions / double-fetching in React Strict Mode
+    if (fetchPromiseRef.current) {
+      const questions = await fetchPromiseRef.current;
+      if (questions && questions.length > 0) {
+        return questions.shift();
+      }
+    }
+
     const mode = sprintModeRef.current;
     const sectionParam = mode && mode !== 'adaptive' ? `&section=${mode}` : '';
-    const res = await fetch(`/api/questions/next?userId=${user.id}${sectionParam}`);
-    if (!res.ok) throw new Error('No questions');
-    return res.json();
+    const limit = sprintLengthRef.current || 10;
+    
+    const promise = fetch(`/api/questions/batch?userId=${user.id}${sectionParam}&count=${limit}`)
+      .then(res => {
+        if (!res.ok) throw new Error('No questions');
+        return res.json();
+      })
+      .then(data => {
+        if (!data.questions || data.questions.length === 0) throw new Error('No questions');
+        return data.questions;
+      });
+      
+    fetchPromiseRef.current = promise;
+    try {
+      const questions = await promise;
+      const first = questions.shift();
+      questionQueueRef.current = questions;
+      return first;
+    } finally {
+      fetchPromiseRef.current = null;
+    }
   };
 
   const prefetchNextQuestion = () => {

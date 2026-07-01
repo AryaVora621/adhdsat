@@ -6,7 +6,7 @@
  *
  * Usage: node --env-file=.env server/gen-verify.mjs <perDomainTarget> [chunkSize]
  */
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { execFileSync } from 'child_process';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -36,9 +36,6 @@ const SKILLS = {
   'Expression of Ideas': ['Rhetorical synthesis', 'Transitions'],
   'Standard English Conventions': ['Sentence boundaries', 'Subject-verb agreement', 'Pronoun reference', 'Punctuation', 'Verb tense'],
 };
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 function sanitize(raw) {
   let inString = false, escaped = false, out = '';
@@ -75,12 +72,14 @@ function extractObjects(text) {
 async function callModel(prompt, retries = 4) {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      const res = await model.generateContent(prompt);
-      return res.response.text().trim();
+      const text = execFileSync('agy', ['-p', prompt], { encoding: 'utf-8', maxBuffer: 1024 * 1024 * 10 });
+      return text.trim();
     } catch (err) {
-      const transient = err.message && /503|overloaded|temporarily|429|quota|rate/i.test(err.message);
-      if (transient && attempt < retries) { await new Promise(r => setTimeout(r, attempt * 8000)); continue; }
-      console.error('  model error:', err.message);
+      if (attempt < retries) {
+        await new Promise(r => setTimeout(r, attempt * 8000));
+        continue;
+      }
+      console.error('  agy error:', err.message);
       return null;
     }
   }
@@ -89,9 +88,15 @@ async function callModel(prompt, retries = 4) {
 
 function genPrompt(domain, section, count) {
   const isEng = section === 'English';
-  return `You are an expert SAT item writer. Generate exactly ${count} ORIGINAL, high-quality digital SAT practice questions for the domain "${domain}" (${section} section). Do not copy any copyrighted material.
+  return `You are an expert SAT item writer. Generate exactly ${count} ORIGINAL, high-quality, highly intelligent digital SAT practice questions for the domain "${domain}" (${section} section). Do not copy any copyrighted material.
 
 ${isEng ? 'Each question MUST include a realistic 3-6 sentence academic passage in "passage_text", and the question must reference it.' : 'Set "passage_text" to null. Every numeric/algebraic answer must be verifiably correct.'}
+
+CRITICAL INSTRUCTIONS FOR QUALITY & INTELLIGENCE:
+- Avoid repetitive tropes (no Bob/Alice, no simple coin/apple counting).
+- Use highly creative, realistic scenarios: astrophysics, economics, biology, literature, or advanced theoretical concepts.
+- "Hard" questions must require deep abstract reasoning and multi-step synthesis, not just tedious arithmetic.
+- Ensure high variance in sentence structure and question formats.
 
 Requirements:
 - Difficulty mix: ~30% easy, 40% medium, 30% hard.
@@ -147,7 +152,6 @@ async function verifyBatch(batch) {
 }
 
 async function main() {
-  if (!process.env.GEMINI_API_KEY) { console.error('GEMINI_API_KEY missing'); process.exit(1); }
   const perDomain = parseInt(process.argv[2] || '50', 10);
   const chunk = parseInt(process.argv[3] || '10', 10);
 
