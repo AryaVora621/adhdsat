@@ -40,7 +40,8 @@ function buildPrompt(domain, section, existingIds, count) {
   const isEnglish = section === 'English';
 
   const englishPassageNote = isEnglish ? `
-For English questions, include a realistic short passage (3-6 sentences) in the "passage_text" field. The passage should be academic or literary in style -- the kind found in the SAT. The question should specifically reference the passage.
+For English questions, include a realistic short passage (3-6 sentences) in the "passage_text" field. The passage should be academic or literary in style -- the kind found in the SAT. 
+CRITICAL FORMATTING: The "question_text" MUST contain a clear question prompt (e.g., "Which choice completes the text so that it conforms to the conventions of Standard English?"). Use a blank "______" in the passage or question text where the missing word/phrase goes. Do NOT use brackets like "[word]" without a question prompt.
 ` : `For Math questions, set "passage_text" to null.`;
 
   return `You are an expert SAT question writer. Generate exactly ${count} high-quality, highly intelligent SAT practice questions for the domain "${domain}" (${section} section).

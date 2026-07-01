@@ -90,7 +90,7 @@ function genPrompt(domain, section, count) {
   const isEng = section === 'English';
   return `You are an expert SAT item writer. Generate exactly ${count} ORIGINAL, high-quality, highly intelligent digital SAT practice questions for the domain "${domain}" (${section} section). Do not copy any copyrighted material.
 
-${isEng ? 'Each question MUST include a realistic 3-6 sentence academic passage in "passage_text", and the question must reference it.' : 'Set "passage_text" to null. Every numeric/algebraic answer must be verifiably correct.'}
+${isEng ? 'Each question MUST include a realistic 3-6 sentence academic passage in "passage_text".\nCRITICAL FORMATTING: The "question_text" MUST contain a clear question prompt (e.g., "Which choice completes the text...?"). Use a blank "______" for missing text. Do NOT use brackets like "[word]" without a question prompt.' : 'Set "passage_text" to null. Every numeric/algebraic answer must be verifiably correct.'}
 
 CRITICAL INSTRUCTIONS FOR QUALITY & INTELLIGENCE:
 - Avoid repetitive tropes (no Bob/Alice, no simple coin/apple counting).
