@@ -29,6 +29,7 @@ import Sidebar from './components/Sidebar';
 import BottomNav from './components/BottomNav';
 import Landing from './pages/Landing';
 import LevelUpToast from './components/LevelUpToast';
+import PomodoroWidget from './components/PomodoroWidget';
 
 // Route-split the in-app pages so newcomers only download the landing shell
 // first; the heavier authed screens load on demand. Import thunks are kept so
@@ -240,6 +241,7 @@ function AppInner() {
       {showNav && !isMobile && <Sidebar user={user} onSignOut={signOut} />}
       {showNav && isMobile && !focusRoute && <BottomNav userId={user?.id} />}
       {levelUpToast && <LevelUpToast level={levelUpToast} onDone={() => setLevelUpToast(null)} />}
+      {showNav && location.pathname !== '/practice-test' && <PomodoroWidget />}
     </div>
   );
 }
