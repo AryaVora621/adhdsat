@@ -362,11 +362,15 @@ export default function Sprint({ user, setUser }) {
     { seconds: 600, label: '10 min -- serious focus mode!' },
   ];
 
-  // Start per-question timer
-  const startTimer = () => {
+  // Start per-question timer. resetElapsed is false when resuming from pause,
+  // since timeStartRef has already been shifted forward by the pause duration
+  // and resetting it here would erase credit for time spent before the pause.
+  const startTimer = (resetElapsed = true) => {
     clearInterval(timerRef.current);
-    setElapsed(0);
-    timeStartRef.current = Date.now();
+    if (resetElapsed) {
+      setElapsed(0);
+      timeStartRef.current = Date.now();
+    }
     timerRef.current = setInterval(() => {
       const now = Date.now();
       setElapsed(Math.floor((now - timeStartRef.current) / 1000));
@@ -418,7 +422,7 @@ export default function Sprint({ user, setUser }) {
       timeStartRef.current += pauseDurationMs;
       pausedAtRef.current = null;
       setPaused(false);
-      startTimer();
+      startTimer(false);
     }
   };
 
@@ -646,6 +650,7 @@ export default function Sprint({ user, setUser }) {
   useEffect(() => { endSprintRef.current = () => finishSprint(stats); }, [finishSprint, stats]);
 
   const handleNext = useCallback(async () => {
+    if (paused) return;
     const current = stats;
     if (questionNum >= sprintLengthRef.current) {
       await finishSprint(current);
@@ -660,7 +665,7 @@ export default function Sprint({ user, setUser }) {
       setQuestionNum(n => n + 1);
       await fetchNextQuestion();
     }
-  }, [questionNum, sprintId, stats, finishSprint]);
+  }, [questionNum, sprintId, stats, finishSprint, paused]);
 
   // Keyboard shortcuts: 1-4 pick choice, Enter submits / advances
   useEffect(() => {
@@ -1165,8 +1170,8 @@ export default function Sprint({ user, setUser }) {
             </div>
           )}
 
-          <button className="primary animate-pop" onClick={handleNext}
-            style={{ width: '100%', padding: '15px', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+          <button className="primary animate-pop" onClick={handleNext} disabled={paused}
+            style={{ width: '100%', padding: '15px', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', opacity: paused ? 0.5 : 1 }}>
             {questionNum < SPRINT_LENGTH ? 'Next Question' : 'Complete Sprint'} <ChevronRight size={18} />
           </button>
           <p style={{ textAlign: 'center', marginTop: '8px', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Press Enter to continue</p>
