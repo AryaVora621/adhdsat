@@ -259,18 +259,16 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
 
 const DIFF_XP = { easy: 15, medium: 20, hard: 30 };
 
-// Isolated from Sprint's per-second timer re-renders: memoized on (question, textSize,
-// highlightMode) only, none of which change on a timer tick. This lets a highlight-mode
-// DOM mutation (applyHighlightToSelection wrapping a selection in <mark>) survive instead
-// of being wiped by React reconciling this subtree every second. It still re-renders (and
-// resets) when `question` changes to a new object on question advance.
-const QuestionContentBlock = React.memo(function QuestionContentBlock({ question, textSize, highlightMode, containerRef }) {
+// Isolated from Sprint's per-second timer re-renders AND from genuine textSize/highlightMode
+// changes: memoized on `question` ONLY. This is the subtree that actually carries the
+// dangerouslySetInnerHTML MathText content, so it's the only part that must never re-render
+// unless the question itself changes - otherwise React reconciliation wipes a DOM-mutated
+// <mark> from applyHighlightToSelection, whether that reconciliation was triggered by a timer
+// tick or by the user toggling Highlight mode off/on or cycling Text size (both of which are
+// genuine, expected prop changes on the outer wrapper, not timer noise).
+const QuestionMathContent = React.memo(function QuestionMathContent({ question }) {
   return (
-    <div
-      ref={containerRef}
-      onMouseUp={() => { if (highlightMode) applyHighlightToSelection(containerRef.current); }}
-      style={{ display: 'flex', flexDirection: window.innerWidth < 768 && question.passage_text ? 'column' : 'row', gap: '24px', marginBottom: '40px', fontSize: `${TEXT_SIZE_SCALE[textSize]}em` }}
-    >
+    <>
       {question.passage_text && (
         <div style={{ flex: 1, borderRight: window.innerWidth < 768 ? 'none' : '1px solid var(--border)', borderBottom: window.innerWidth < 768 ? '1px solid var(--border)' : 'none', paddingRight: window.innerWidth < 768 ? '0' : '32px', paddingBottom: window.innerWidth < 768 ? '16px' : '0', fontSize: '0.95em', lineHeight: 1.75, color: 'var(--text-secondary)' }}>
           <MathText>{question.passage_text}</MathText>
@@ -279,7 +277,7 @@ const QuestionContentBlock = React.memo(function QuestionContentBlock({ question
       <div style={{ flex: question.passage_text ? 1 : 'none', width: question.passage_text ? 'auto' : '100%', fontSize: '1.1em', lineHeight: 1.65, overflowX: 'auto', minWidth: 0 }}>
         <MathText>{question.question_text}</MathText>
       </div>
-    </div>
+    </>
   );
 });
 
@@ -1010,13 +1008,18 @@ export default function Sprint({ user, setUser }) {
         {!isAnswered && questionNum > 1 && <span style={{ marginLeft: 'auto' }} />}
       </div>
 
-      {/* Question content */}
-      <QuestionContentBlock
-        question={question}
-        textSize={toolbar.textSize}
-        highlightMode={toolbar.highlightMode}
-        containerRef={questionContentRef}
-      />
+      {/* Question content - outer wrapper is unmemoized (owns ref, mouseup handler, and
+          em-based font-size that cascades via CSS to the inner memo's 0.95em/1.1em), so it
+          re-renders freely on textSize/highlightMode/timer changes without ever re-invoking
+          QuestionMathContent's body (memoized on `question` alone), preserving any DOM-
+          inserted <mark> across those changes. */}
+      <div
+        ref={questionContentRef}
+        onMouseUp={() => { if (toolbar.highlightMode) applyHighlightToSelection(questionContentRef.current); }}
+        style={{ display: 'flex', flexDirection: window.innerWidth < 768 && question.passage_text ? 'column' : 'row', gap: '24px', marginBottom: '40px', fontSize: `${TEXT_SIZE_SCALE[toolbar.textSize]}em` }}
+      >
+        <QuestionMathContent question={question} />
+      </div>
 
       {/* Hints */}
       {hintsUsed > 0 && (
