@@ -6,17 +6,17 @@
 
 **Architecture:** New shared hooks/components live in `src/lib/` and `src/components/`; each of the three page files (`Sprint.jsx`, `PracticeTest.jsx`, `ReviewSprint.jsx`) mounts the shared pieces and wires them to its own local state, since the three pages do not currently share any base component. `App.jsx` mounts the Pomodoro widget once at the shell level.
 
-**Tech Stack:** React 19, react-router-dom 7, lucide-react (icons — `Highlighter`, `Strikethrough`, `Rows3`, `Type`, `EyeOff`, `Eye`, `Pause`, `Play`, `Settings2`, `Timer`, `Coffee`, `X`, `Calculator`, `BookOpen`, `RotateCcw`, `Bell` all confirmed present in the installed version), Desmos `calculator.js` API (loaded at runtime via `<script>` tag, not an npm package), plain CSS custom properties (no CSS-in-JS library — this codebase uses inline `style={{}}` objects throughout).
+**Tech Stack:** React 19, react-router-dom 7, lucide-react (icons: `Highlighter`, `Strikethrough`, `Rows3`, `Type`, `EyeOff`, `Eye`, `Pause`, `Play`, `Settings2`, `Timer`, `Coffee`, `X`, `Calculator`, `BookOpen`, `RotateCcw`, `Bell` all confirmed present in the installed version), Desmos `calculator.js` API (loaded at runtime via `<script>` tag, not an npm package), plain CSS custom properties (no CSS-in-JS library; this codebase uses inline `style={{}}` objects throughout).
 
-**Testing approach — read before starting:** This repository has **no unit test runner** (no jest/vitest, no `test` script in `package.json`; `playwright` is a devDependency used only for one-off manual/demo scripts like `server/record-demo.mjs`). Every feature in this codebase's history has been verified by running `npm run dev` and manually exercising the flow in a browser (see `CHECKPOINT_LAST.md` — "Verified live", "Verified end-to-end in browser" appear throughout). This plan follows that same convention: every task's verification step is a concrete manual browser check (exact URL, exact interaction, exact expected result) instead of an automated test. Do not introduce a test framework as a side effect of this work — that would be an unrelated infrastructure change.
+**Testing approach (read before starting):** This repository has **no unit test runner** (no jest/vitest, no `test` script in `package.json`; `playwright` is a devDependency used only for one-off manual/demo scripts like `server/record-demo.mjs`). Every feature in this codebase's history has been verified by running `npm run dev` and manually exercising the flow in a browser (see `CHECKPOINT_LAST.md`: "Verified live", "Verified end-to-end in browser" appear throughout). This plan follows that same convention: every task's verification step is a concrete manual browser check (exact URL, exact interaction, exact expected result) instead of an automated test. Do not introduce a test framework as a side effect of this work; that would be an unrelated infrastructure change.
 
 ## Global Constraints
 
 - No em dashes in any UI copy or code comments.
-- Code comments explain why, not what — only add a comment where the reasoning isn't obvious from the code itself.
+- Code comments explain why, not what; only add a comment where the reasoning isn't obvious from the code itself.
 - Match existing code style exactly: inline `style={{...}}` objects, `var(--token)` for all colors (never hardcode hex outside of rgba() tints that already exist as patterns), function components with hooks, no CSS-in-JS libraries, no TypeScript (this is a `.jsx`/`.js` codebase).
-- All new colors must reference existing CSS custom properties from `src/index.css` (`--bg-main`, `--bg-card`, `--bg-sidebar`, `--bg-elevated`, `--border`, `--primary`, `--primary-hover`, `--primary-contrast`, `--success`, `--teal`, `--error`, `--xp-gold`, `--text-primary`, `--text-secondary`) — do not add new tokens unless a task explicitly says to.
-- Persisted preferences use `localStorage` (matching `src/lib/theme.js`'s pattern), never a backend call — these are device-local UI preferences, not account data.
+- All new colors must reference existing CSS custom properties from `src/index.css` (`--bg-main`, `--bg-card`, `--bg-sidebar`, `--bg-elevated`, `--border`, `--primary`, `--primary-hover`, `--primary-contrast`, `--success`, `--teal`, `--error`, `--xp-gold`, `--text-primary`, `--text-secondary`); do not add new tokens unless a task explicitly says to.
+- Persisted preferences use `localStorage` (matching `src/lib/theme.js`'s pattern), never a backend call; these are device-local UI preferences, not account data.
 - Every new modal/overlay follows the z-index convention already in use: `100` for nav/modals that sit above page content, `9998` for full-screen decorative overlays, `9999` for toasts that must sit above everything (see `AuthModal.jsx:55`, `BottomNav.jsx:29`, `Sprint.jsx:51`, `Sprint.jsx:917`).
 - Frequent commits: one commit per task, after its manual verification step passes.
 
@@ -29,8 +29,8 @@
 - Create: `src/lib/highlightSelection.js`
 
 **Interfaces:**
-- Produces: `useTestToolbarState()` returning `{ textSize, cycleTextSize, timerHidden, toggleTimerHidden, highlightMode, toggleHighlightMode, lineReaderOn, toggleLineReader, struckChoices, toggleStrike(label), calculatorOpen, setCalculatorOpen, referenceOpen, setReferenceOpen, resetPerQuestion() }` — `struckChoices` is a `Set<string>` of choice labels (e.g. `'A'`).
-- Produces: `TEXT_SIZE_SCALE` — exported `{ S: 0.85, M: 1, L: 1.15, XL: 1.3 }` map, consumed by Task 2's page integrations to scale font sizes.
+- Produces: `useTestToolbarState()` returning `{ textSize, cycleTextSize, timerHidden, toggleTimerHidden, highlightMode, toggleHighlightMode, lineReaderOn, toggleLineReader, struckChoices, toggleStrike(label), calculatorOpen, setCalculatorOpen, referenceOpen, setReferenceOpen, resetPerQuestion() }`. `struckChoices` is a `Set<string>` of choice labels (e.g. `'A'`).
+- Produces: `TEXT_SIZE_SCALE`, exported `{ S: 0.85, M: 1, L: 1.15, XL: 1.3 }` map, consumed by Task 2's page integrations to scale font sizes.
 - Produces: `applyHighlightToSelection(containerEl)` returning `boolean` (whether a highlight was applied).
 
 - [ ] **Step 1: Create the toolbar state hook**
@@ -289,9 +289,9 @@ Inside the `Sprint` component function, add the hook call alongside the other `u
   const questionContentRef = useRef(null);
 ```
 
-Reset per-question annotation state whenever the question changes. Find the `fetchNextQuestion` function (it resets `selectedChoice`, `isAnswered`, etc. — same pattern as `ReviewSprint.jsx:55-79`) and add `toolbar.resetPerQuestion();` at its start, alongside the other per-question resets.
+Reset per-question annotation state whenever the question changes. Find the `fetchNextQuestion` function (it resets `selectedChoice`, `isAnswered`, etc., same pattern as `ReviewSprint.jsx:55-79`) and add `toolbar.resetPerQuestion();` at its start, alongside the other per-question resets.
 
-Replace the "Progress bar + timer" block (`Sprint.jsx:927-946`) — insert the toolbar directly above it, and gate the timer display on `toolbar.timerHidden`:
+Replace the "Progress bar + timer" block (`Sprint.jsx:927-946`): insert the toolbar directly above it, and gate the timer display on `toolbar.timerHidden`:
 
 ```jsx
       <TestToolbar
@@ -316,7 +316,7 @@ Replace the "Progress bar + timer" block (`Sprint.jsx:927-946`) — insert the t
           {toolbar.timerHidden ? (
             <button onClick={toolbar.toggleTimerHidden}
               style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: '10px', padding: '3px 8px', backgroundColor: 'transparent' }}>
-              Timer hidden — tap to show
+              Timer hidden, tap to show
             </button>
           ) : (
             <span style={{ color: timerColor, fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums', fontWeight: isAnswered ? 'normal' : '500' }}>
@@ -378,7 +378,7 @@ Leave the rest of that button's JSX (the `<MathText>` choice text and closing ta
 
 - [ ] **Step 4: Manual verification**
 
-Run `npm run dev`, open the app, start a regular Math sprint. Confirm: the toolbar renders above the progress bar; clicking "Highlight" then drag-selecting text in the question wraps it in a gold-tinted highlight; clicking a choice's cross-out icon dims and strikes that choice while the choice remains clickable; clicking "Text S/M/L/XL" cycles the question/passage font size; clicking the timer button replaces the readout with "Timer hidden — tap to show" and clicking it again restores the readout; advancing to the next question clears the highlight and any struck choices. Reload the page and confirm the text size and hide-timer preferences persisted.
+Run `npm run dev`, open the app, start a regular Math sprint. Confirm: the toolbar renders above the progress bar; clicking "Highlight" then drag-selecting text in the question wraps it in a gold-tinted highlight; clicking a choice's cross-out icon dims and strikes that choice while the choice remains clickable; clicking "Text S/M/L/XL" cycles the question/passage font size; clicking the timer button replaces the readout with "Timer hidden, tap to show" and clicking it again restores the readout; advancing to the next question clears the highlight and any struck choices. Reload the page and confirm the text size and hide-timer preferences persisted.
 
 - [ ] **Step 5: Commit**
 
@@ -456,7 +456,7 @@ export default function ReferenceSheet({ onClose }) {
 }
 ```
 
-Note: `MathText` (`src/components/MathText.jsx`) already parses `$...$` for KaTeX rendering elsewhere in the app — reuse it here instead of raw text so the formulas render as math. Replace the `<span style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>{`$${f.formula}$`}</span>` line with `<MathText style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>{`$${f.formula}$`}</MathText>` and add `import MathText from './MathText';` to the top of the file.
+Note: `MathText` (`src/components/MathText.jsx`) already parses `$...$` for KaTeX rendering elsewhere in the app; reuse it here instead of raw text so the formulas render as math. Replace the `<span style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>{`$${f.formula}$`}</span>` line with `<MathText style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>{`$${f.formula}$`}</MathText>` and add `import MathText from './MathText';` to the top of the file.
 
 - [ ] **Step 2: Wire it into Sprint.jsx**
 
@@ -495,7 +495,7 @@ git commit -m "feat: add static math reference sheet modal"
 - Modify: `src/pages/Sprint.jsx`
 
 **Interfaces:**
-- Produces: `loadDesmosCalculatorScript()` returning a `Promise<void>` that resolves once `window.Desmos` is available (memoized — safe to call multiple times).
+- Produces: `loadDesmosCalculatorScript()` returning a `Promise<void>` that resolves once `window.Desmos` is available (memoized, safe to call multiple times).
 - Produces: `<DesmosCalculator onClose={fn} />`.
 
 - [ ] **Step 1: Create the script loader**
@@ -605,7 +605,7 @@ Render the modal conditionally next to the `ReferenceSheet` render added in Task
 
 - [ ] **Step 4: Manual verification**
 
-Run `npm run dev`, start a Math sprint, click "Calculator". Confirm the real Desmos graphing calculator loads and is interactive (type `y=x^2` in the expression list and see the parabola plot), and closing/reopening it works without a console error. Confirm `VITE_DESMOS_API_KEY` is present in your local `.env` (it was added in an earlier session per `CHECKPOINT_LAST.md`) — if it's missing, `npm run dev` will still start but the calculator will show the "Could not load" error state, which is also an acceptable manual-verification outcome to confirm the error path works.
+Run `npm run dev`, start a Math sprint, click "Calculator". Confirm the real Desmos graphing calculator loads and is interactive (type `y=x^2` in the expression list and see the parabola plot), and closing/reopening it works without a console error. Confirm `VITE_DESMOS_API_KEY` is present in your local `.env` (it was added in an earlier session per `CHECKPOINT_LAST.md`). If it's missing, `npm run dev` will still start but the calculator will show the "Could not load" error state, which is also an acceptable manual-verification outcome to confirm the error path works.
 
 - [ ] **Step 5: Commit**
 
@@ -623,7 +623,7 @@ git commit -m "feat: add embedded Desmos calculator to the Bluebook toolbar"
 - Modify: `src/pages/ReviewSprint.jsx`
 
 **Interfaces:**
-- Consumes: `TestToolbar`, `StrikeToggle`, `ReferenceSheet`, `DesmosCalculator`, `useTestToolbarState`, `TEXT_SIZE_SCALE`, `applyHighlightToSelection` — all produced by Tasks 1-4.
+- Consumes: `TestToolbar`, `StrikeToggle`, `ReferenceSheet`, `DesmosCalculator`, `useTestToolbarState`, `TEXT_SIZE_SCALE`, `applyHighlightToSelection`, all produced by Tasks 1-4.
 
 - [ ] **Step 1: Wire the toolbar into PracticeTest.jsx**
 
@@ -813,7 +813,7 @@ Write `src/components/QuitConfirmDialog.jsx`:
 import React from 'react';
 
 // Esc-quit confirmation for regular (untimed) sprints only. Timed test-mode
-// sprints and Practice Test use Pause instead (see PauseOverlay.jsx) — real
+// sprints and Practice Test use Pause instead (see PauseOverlay.jsx); real
 // Bluebook keeps these two flows separate rather than overloading one key.
 export default function QuitConfirmDialog({ onResume, onQuitSave, onQuitDiscard }) {
   return (
@@ -915,7 +915,7 @@ Render the dialog inside the main question JSX, right after the milestone toast 
 
 - [ ] **Step 3: Manual verification**
 
-Run `npm run dev`, start a regular (non-test-mode) sprint, answer one question, press Escape. Confirm the confirm dialog opens and pressing number keys or Enter while it's open does nothing to the sprint underneath. Click "Resume" and confirm the dialog closes with the sprint state intact. Press Escape again, click "Quit & Save", confirm it navigates to the normal summary screen showing "1 attempted". Start a new sprint, press Escape, click "Quit & Discard", confirm it returns to the dashboard with no summary screen and no `activeSprint` entry in sessionStorage (check via devtools). Finally, start a timed test-mode sprint (Math Module) and press Escape — confirm nothing happens (Esc-quit is disabled in test mode).
+Run `npm run dev`, start a regular (non-test-mode) sprint, answer one question, press Escape. Confirm the confirm dialog opens and pressing number keys or Enter while it's open does nothing to the sprint underneath. Click "Resume" and confirm the dialog closes with the sprint state intact. Press Escape again, click "Quit & Save", confirm it navigates to the normal summary screen showing "1 attempted". Start a new sprint, press Escape, click "Quit & Discard", confirm it returns to the dashboard with no summary screen and no `activeSprint` entry in sessionStorage (check via devtools). Finally, start a timed test-mode sprint (Math Module) and press Escape; confirm nothing happens (Esc-quit is disabled in test mode).
 
 - [ ] **Step 4: Commit**
 
@@ -1042,7 +1042,7 @@ In the "Progress bar + timer" block modified in Task 2, add a Pause button next 
           {toolbar.timerHidden ? (
             <button onClick={toolbar.toggleTimerHidden}
               style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: '10px', padding: '3px 8px', backgroundColor: 'transparent' }}>
-              Timer hidden — tap to show
+              Timer hidden, tap to show
             </button>
           ) : (
             <span style={{ color: timerColor, fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums', fontWeight: isAnswered ? 'normal' : '500' }}>
@@ -1069,7 +1069,7 @@ Wrap the "Question content", "Hints", and "Answer choices" blocks (`Sprint.jsx:9
 
 - [ ] **Step 5: Manual verification**
 
-Run `npm run dev`, start a timed test-mode sprint (Math Module). Confirm a Pause button appears next to the timer. Click it: the question content is replaced by the Paused card, the countdown stops changing, and pressing 1-4/Enter does nothing. Wait 5 seconds, click Resume: confirm the question reappears and the countdown resumes from where it left off (not jumped forward or backward by the pause duration — check the displayed seconds before pausing vs. right after resuming, they should differ by roughly the time the question was visible, not include the paused interval). Confirm the Pause button does not appear in a regular (non-test-mode) sprint.
+Run `npm run dev`, start a timed test-mode sprint (Math Module). Confirm a Pause button appears next to the timer. Click it: the question content is replaced by the Paused card, the countdown stops changing, and pressing 1-4/Enter does nothing. Wait 5 seconds, click Resume: confirm the question reappears and the countdown resumes from where it left off (not jumped forward or backward by the pause duration; check the displayed seconds before pausing vs. right after resuming, they should differ by roughly the time the question was visible, not include the paused interval). Confirm the Pause button does not appear in a regular (non-test-mode) sprint.
 
 - [ ] **Step 6: Commit**
 
@@ -1123,7 +1123,7 @@ Modify the countdown timer effect (`PracticeTest.jsx:208-221`) to skip ticking w
   }, [phase, moduleIndex, finishModule, paused]);
 ```
 
-(Practice Test's timer is a plain tick-down on `timeLeft` state with no wall-clock derivation, unlike Sprint's — so simply not running the interval while `paused` is true is sufficient; there's no timestamp math to correct on resume.)
+(Practice Test's timer is a plain tick-down on `timeLeft` state with no wall-clock derivation, unlike Sprint's, so simply not running the interval while `paused` is true is sufficient; there's no timestamp math to correct on resume.)
 
 - [ ] **Step 3: Gate keyboard shortcuts on paused**
 
@@ -1199,7 +1199,7 @@ git commit -m "feat: add Pause to Practice Test modules"
 - Modify: `src/pages/Sprint.jsx`
 
 **Interfaces:**
-- Produces: sprint state fields `sprintByTime` (bool), `sprintTimeLimitRef`/`sprintTimeLimit` (seconds), `timeUp` (bool) — internal to Sprint.jsx, not consumed elsewhere.
+- Produces: sprint state fields `sprintByTime` (bool), `sprintTimeLimitRef`/`sprintTimeLimit` (seconds), `timeUp` (bool); internal to Sprint.jsx, not consumed elsewhere.
 
 - [ ] **Step 1: Add time-budget state**
 
@@ -1247,7 +1247,7 @@ Modify `startSprint` (`Sprint.jsx:372` onward). Change its signature and the len
     setTimeUp(false);
 ```
 
-(Leave the rest of the existing function body — the `sprintModeRef`/`setSprintMode`, `setLoading`, fetch call, etc. — unchanged below this point.)
+(Leave the rest of the existing function body: the `sprintModeRef`/`setSprintMode`, `setLoading`, fetch call, etc., unchanged below this point.)
 
 - [ ] **Step 3: Add the time-budget end-of-time check to the timer interval**
 
@@ -1285,7 +1285,7 @@ Modify `handleNext` (`Sprint.jsx:594-609`):
   }, [questionNum, sprintId, stats, finishSprint, timeUp]);
 ```
 
-(The existing halfway-milestone logic uses `Math.floor(sprintLengthRef.current / 2)`, which is `Infinity` for time-budget mode — `questionNum === Infinity` is never true, so that branch simply never fires in time-budget mode, which is correct: there's no known midpoint when the length is open-ended.)
+(The existing halfway-milestone logic uses `Math.floor(sprintLengthRef.current / 2)`, which is `Infinity` for time-budget mode; `questionNum === Infinity` is never true, so that branch simply never fires in time-budget mode, which is correct: there's no known midpoint when the length is open-ended.)
 
 - [ ] **Step 5: Add the mode-picker toggle and duration buttons**
 
@@ -1338,7 +1338,7 @@ Update the mode-button `onClick` handlers just below (`Sprint.jsx:806`, the `mod
             <button key={m.key} onClick={() => startSprint(m.key, pickByTime ? sprintTimeLimit : undefined)}
 ```
 
-(If the user picked "By Time" but hasn't selected a duration yet, `sprintTimeLimit` is `0`, which `startSprint`'s `else if (timeBudgetSeconds)` branch treats as falsy, falling through to the plain `else` branch — the same no-limit behavior as today. Default `sprintTimeLimit` to a sane value to avoid this edge case: change its initial `useState(0)` from Step 1 to `useState(600)` (10 minutes), matching the pattern of `sprintLength` already defaulting to `10` elsewhere in this file.)
+(If the user picked "By Time" but hasn't selected a duration yet, `sprintTimeLimit` is `0`, which `startSprint`'s `else if (timeBudgetSeconds)` branch treats as falsy, falling through to the plain `else` branch, the same no-limit behavior as today. Default `sprintTimeLimit` to a sane value to avoid this edge case: change its initial `useState(0)` from Step 1 to `useState(600)` (10 minutes), matching the pattern of `sprintLength` already defaulting to `10` elsewhere in this file.)
 
 - [ ] **Step 6: Add the time-budget progress bar and "time's up" notice**
 
@@ -1371,14 +1371,14 @@ Add a "time's up" inline notice right below the domain header block (after `Spri
 ```jsx
       {timeUp && (
         <div style={{ backgroundColor: 'rgba(255,201,61,0.1)', border: '1px solid rgba(255,201,61,0.35)', borderRadius: '10px', padding: '10px 16px', marginBottom: '16px', fontSize: '0.85rem', color: 'var(--xp-gold)', fontWeight: 600 }}>
-          Time's up — finishing this one, then we'll wrap up.
+          Time's up, finishing this one, then we'll wrap up.
         </div>
       )}
 ```
 
 - [ ] **Step 7: Manual verification**
 
-Run `npm run dev`, open the sprint mode picker, click "By Time", pick "5m", start a Math sprint. Confirm the progress bar renders as a single continuous fill (not question segments) that grows over time and changes color as it approaches the limit. Answer questions until roughly 5 minutes pass (or temporarily lower the `[5, 10, 15, 20, 30]` array to `[1]` and pick 1 minute to test faster, reverting afterward): confirm the "Time's up — finishing this one" notice appears without cutting off the current question, and after clicking Next, the sprint finishes and shows the normal summary screen rather than fetching another question. Confirm the "By Questions" mode still behaves exactly as before (segmented bar, stops after N questions, no time-based end).
+Run `npm run dev`, open the sprint mode picker, click "By Time", pick "5m", start a Math sprint. Confirm the progress bar renders as a single continuous fill (not question segments) that grows over time and changes color as it approaches the limit. Answer questions until roughly 5 minutes pass (or temporarily lower the `[5, 10, 15, 20, 30]` array to `[1]` and pick 1 minute to test faster, reverting afterward): confirm the "Time's up, finishing this one" notice appears without cutting off the current question, and after clicking Next, the sprint finishes and shows the normal summary screen rather than fetching another question. Confirm the "By Questions" mode still behaves exactly as before (segmented bar, stops after N questions, no time-based end).
 
 - [ ] **Step 8: Commit**
 
@@ -1395,7 +1395,7 @@ git commit -m "feat: add time-budget sprint mode alongside question-count mode"
 - Create: `src/lib/usePomodoro.js`
 
 **Interfaces:**
-- Produces: `usePomodoro()` returning `{ phase, secondsLeft, running, workMinutes, breakMinutes, start, pause, reset, setWorkMinutes(n), setBreakMinutes(n), applyPreset(work, brk) }` — `phase` is `'work'` or `'break'`.
+- Produces: `usePomodoro()` returning `{ phase, secondsLeft, running, workMinutes, breakMinutes, start, pause, reset, setWorkMinutes(n), setBreakMinutes(n), applyPreset(work, brk) }`. `phase` is `'work'` or `'break'`.
 
 - [ ] **Step 1: Create the hook**
 
@@ -1556,7 +1556,7 @@ export default function PomodoroWidget() {
   useEffect(() => {
     if (prevPhaseRef.current !== pomo.phase) {
       beep();
-      setToast(pomo.phase === 'break' ? 'Work session done — take a break' : 'Break over — back to work');
+      setToast(pomo.phase === 'break' ? 'Work session done, take a break' : 'Break over, back to work');
       setTimeout(() => setToast(null), 4000);
     }
     prevPhaseRef.current = pomo.phase;
@@ -1642,7 +1642,7 @@ Render it right after the `{levelUpToast && ...}` block (`App.jsx:242`), gated o
 
 - [ ] **Step 3: Manual verification**
 
-Run `npm run dev`. Confirm the widget floats bottom-right on the Dashboard, on a regular Sprint, and on `/review`, but is absent on `/practice-test`. Click Start: confirm the countdown ticks down every second. Open Settings, pick "15 / 5": confirm the countdown resets to 15:00 and the phase shows "work". Click Settings again, set custom work minutes to 1, confirm after clicking Start it flips to "break" after 60 seconds, a toast appears ("Work session done — take a break"), and you hear a short beep (browsers require a prior user gesture for audio — clicking Start satisfies that). Reload the page and confirm your last work/break minute settings persisted (the running countdown itself does not need to persist).
+Run `npm run dev`. Confirm the widget floats bottom-right on the Dashboard, on a regular Sprint, and on `/review`, but is absent on `/practice-test`. Click Start: confirm the countdown ticks down every second. Open Settings, pick "15 / 5": confirm the countdown resets to 15:00 and the phase shows "work". Click Settings again, set custom work minutes to 1, confirm after clicking Start it flips to "break" after 60 seconds, a toast appears ("Work session done, take a break"), and you hear a short beep (browsers require a prior user gesture for audio; clicking Start satisfies that). Reload the page and confirm your last work/break minute settings persisted (the running countdown itself does not need to persist).
 
 - [ ] **Step 4: Commit**
 
@@ -1656,12 +1656,12 @@ git commit -m "feat: add global Pomodoro widget"
 ## Self-Review
 
 **Spec coverage:**
-- Toolbar (highlight, strikethrough, line reader, text size, hide timer, calculator, reference sheet), shared across Sprint/PracticeTest/ReviewSprint, math-only calc+reference — Tasks 1-5. ✓
-- Esc-quit for regular sprints (Resume/Quit & Save/Quit & Discard) — Task 6. ✓
-- Pause for timed test-mode Sprint and Practice Test (freeze + cover, no Esc binding) — Tasks 7-9. ✓
-- Time-budget sprint mode (toggle, durations, continuous progress bar, graceful end-of-time) — Task 10. ✓
-- Global Pomodoro widget (presets, custom minutes, hidden only on Practice Test, phase-complete toast + beep) — Tasks 11-12. ✓
-- `ReviewSprint.jsx` explicitly excluded from Esc-quit/Pause (spec's out-of-scope note) — no task adds either there. ✓
+- Toolbar (highlight, strikethrough, line reader, text size, hide timer, calculator, reference sheet), shared across Sprint/PracticeTest/ReviewSprint, math-only calc+reference (Tasks 1-5). ✓
+- Esc-quit for regular sprints (Resume/Quit & Save/Quit & Discard) (Task 6). ✓
+- Pause for timed test-mode Sprint and Practice Test (freeze + cover, no Esc binding) (Tasks 7-9). ✓
+- Time-budget sprint mode (toggle, durations, continuous progress bar, graceful end-of-time) (Task 10). ✓
+- Global Pomodoro widget (presets, custom minutes, hidden only on Practice Test, phase-complete toast + beep) (Tasks 11-12). ✓
+- `ReviewSprint.jsx` explicitly excluded from Esc-quit/Pause (spec's out-of-scope note); no task adds either there. ✓
 
 **Placeholder scan:** No TBD/TODO/"add error handling"-style steps; every step has complete code or a fully specified manual verification script.
 
