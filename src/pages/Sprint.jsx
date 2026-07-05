@@ -4,6 +4,7 @@ import { CheckCircle2, XCircle, ChevronRight, ChevronLeft, AlertCircle, Zap, Tro
 import MathText from '../components/MathText';
 import TestToolbar from '../components/TestToolbar';
 import StrikeToggle from '../components/StrikeToggle';
+import ReferenceSheet from '../components/ReferenceSheet';
 import { useTestToolbarState, TEXT_SIZE_SCALE } from '../lib/useTestToolbarState';
 import { applyHighlightToSelection } from '../lib/highlightSelection';
 
@@ -957,8 +958,10 @@ export default function Sprint({ user, setUser }) {
         toolbar={toolbar}
         mathOnly={sprintMode === 'math' || sprintMode === 'test-math'}
         onOpenCalculator={() => {}}
-        onOpenReference={() => {}}
+        onOpenReference={() => toolbar.setReferenceOpen(true)}
       />
+
+      {toolbar.referenceOpen && <ReferenceSheet onClose={() => toolbar.setReferenceOpen(false)} />}
 
       {/* Progress bar + timer */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
