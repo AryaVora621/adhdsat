@@ -642,7 +642,11 @@ export default function Sprint({ user, setUser }) {
         sessionStorage.setItem('activeSprint', JSON.stringify({
           sprintId, mode: sprintModeRef.current,
           questionNum: questionNum + 1, stats: nextStats,
+          // sprintLength is Infinity in time-budget mode, which JSON.stringify
+          // silently turns into null; sprintTimeLimit (always finite) is saved
+          // alongside it so resume can tell which mode to restore.
           sprintLength: sprintLengthRef.current,
+          sprintTimeLimit: sprintTimeLimitRef.current,
           wrongAnswers: currentWrong.slice(-20)
         }));
       } catch { /* storage full, skip */ }
@@ -833,7 +837,7 @@ export default function Sprint({ user, setUser }) {
           <Zap size={36} color="var(--primary)" style={{ marginBottom: '16px' }} />
           <h2 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '8px' }}>Unfinished Sprint</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px' }}>
-            You were on Q{resumePrompt.questionNum} of {resumePrompt.sprintLength || 10} ({resumePrompt.stats?.correct || 0} correct so far).<br />
+            You were on Q{resumePrompt.questionNum}{resumePrompt.sprintTimeLimit ? ` (${Math.round(resumePrompt.sprintTimeLimit / 60)}m budget)` : ` of ${resumePrompt.sprintLength || 10}`} ({resumePrompt.stats?.correct || 0} correct so far).<br />
             Want to pick up where you left off?
           </p>
           <button className="primary" style={{ width: '100%', padding: '14px', fontSize: '1rem', marginBottom: '10px' }}
@@ -845,8 +849,22 @@ export default function Sprint({ user, setUser }) {
               setQuestionNum(s.questionNum);
               setStats(s.stats || { attempted: 0, correct: 0, xp: 0 });
               if (s.wrongAnswers?.length) setWrongAnswers(s.wrongAnswers);
-              sprintLengthRef.current = s.sprintLength || 10;
-              setSprintLength(s.sprintLength || 10);
+              // A time-budget sprint serializes sprintLength as Infinity, which
+              // JSON turns into null; sprintTimeLimit (always finite) is saved
+              // alongside it, so its presence is what tells time-budget mode
+              // apart from a by-count sprint on resume.
+              if (s.sprintTimeLimit > 0) {
+                sprintTimeLimitRef.current = s.sprintTimeLimit;
+                setSprintTimeLimit(s.sprintTimeLimit);
+                sprintLengthRef.current = Infinity;
+                setSprintLength(Infinity);
+                setTimeUp(false);
+              } else {
+                sprintLengthRef.current = s.sprintLength || 10;
+                setSprintLength(s.sprintLength || 10);
+                sprintTimeLimitRef.current = 0;
+                setSprintTimeLimit(0);
+              }
               sprintStartRef.current = Date.now();
               setResumePrompt(null);
               fetchNextQuestion();
