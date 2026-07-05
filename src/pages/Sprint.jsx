@@ -545,6 +545,7 @@ export default function Sprint({ user, setUser }) {
     const choice = choiceOverride ?? selectedChoice;
     if (!choice) return;
     if (isAnswered) return;
+    if (paused) return;
 
     stopTimer();
     const timeSpent = Math.round((Date.now() - timeStartRef.current) / 1000);
@@ -625,7 +626,7 @@ export default function Sprint({ user, setUser }) {
     } catch {
 
     }
-  }, [selectedChoice, question, isAnswered, hintsUsed, sprintId, stats, questionNum, user.id]);
+  }, [selectedChoice, question, isAnswered, hintsUsed, sprintId, stats, questionNum, user.id, paused]);
 
   const finishSprint = useCallback(async (currentStats) => {
     const current = currentStats || stats;
@@ -1185,8 +1186,8 @@ export default function Sprint({ user, setUser }) {
             </button>
           )}
           <button className="primary" onClick={() => handleAnswerSubmit()}
-            disabled={!selectedChoice}
-            style={{ flex: 2, padding: '13px', fontSize: '1rem' }}>
+            disabled={!selectedChoice || paused}
+            style={{ flex: 2, padding: '13px', fontSize: '1rem', opacity: paused ? 0.5 : 1 }}>
             Check Answer
           </button>
         </div>
