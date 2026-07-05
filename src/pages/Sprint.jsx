@@ -5,6 +5,7 @@ import MathText from '../components/MathText';
 import TestToolbar from '../components/TestToolbar';
 import StrikeToggle from '../components/StrikeToggle';
 import ReferenceSheet from '../components/ReferenceSheet';
+import DesmosCalculator from '../components/DesmosCalculator';
 import { useTestToolbarState, TEXT_SIZE_SCALE } from '../lib/useTestToolbarState';
 import { applyHighlightToSelection } from '../lib/highlightSelection';
 
@@ -957,11 +958,12 @@ export default function Sprint({ user, setUser }) {
       <TestToolbar
         toolbar={toolbar}
         mathOnly={sprintMode === 'math' || sprintMode === 'test-math'}
-        onOpenCalculator={() => {}}
+        onOpenCalculator={() => toolbar.setCalculatorOpen(true)}
         onOpenReference={() => toolbar.setReferenceOpen(true)}
       />
 
       {toolbar.referenceOpen && <ReferenceSheet onClose={() => toolbar.setReferenceOpen(false)} />}
+      {toolbar.calculatorOpen && <DesmosCalculator onClose={() => toolbar.setCalculatorOpen(false)} />}
 
       {/* Progress bar + timer */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
