@@ -7,6 +7,7 @@ import StrikeToggle from '../components/StrikeToggle';
 import ReferenceSheet from '../components/ReferenceSheet';
 import DesmosCalculator from '../components/DesmosCalculator';
 import QuitConfirmDialog from '../components/QuitConfirmDialog';
+import PauseOverlay from '../components/PauseOverlay';
 import { useTestToolbarState, TEXT_SIZE_SCALE } from '../lib/useTestToolbarState';
 import { applyHighlightToSelection } from '../lib/highlightSelection';
 
@@ -304,6 +305,8 @@ export default function Sprint({ user, setUser }) {
   const sprintLengthRef = useRef(savedLen);
   const [resumePrompt, setResumePrompt] = useState(null);
   const [showQuitConfirm, setShowQuitConfirm] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const pausedAtRef = useRef(null);
   const [isTestMode, setIsTestMode] = useState(false);
   const isTestModeRef = useRef(false);
   const [testTimeLimit, setTestTimeLimit] = useState(0); // seconds, 0 = no limit
@@ -400,6 +403,24 @@ export default function Sprint({ user, setUser }) {
   const stopTimer = () => clearInterval(timerRef.current);
 
   useEffect(() => () => clearInterval(timerRef.current), []);
+
+  // Freezes the countdown by stopping the interval and shifting both timer
+  // origins forward by the paused duration on resume, so elapsed/remaining
+  // time reflects only time the question was actually visible.
+  const togglePause = () => {
+    if (!paused) {
+      clearInterval(timerRef.current);
+      pausedAtRef.current = Date.now();
+      setPaused(true);
+    } else {
+      const pauseDurationMs = Date.now() - pausedAtRef.current;
+      sprintStartRef.current += pauseDurationMs;
+      timeStartRef.current += pauseDurationMs;
+      pausedAtRef.current = null;
+      setPaused(false);
+      startTimer();
+    }
+  };
 
   const startSprint = async (mode) => {
     // Test modes: full-section timed simulation
@@ -652,6 +673,7 @@ export default function Sprint({ user, setUser }) {
         return;
       }
       if (showQuitConfirm) return;
+      if (paused) return;
 
       if (!isAnswered) {
         if (['1','2','3','4'].includes(e.key) && !question.is_grid_in) {
@@ -676,7 +698,7 @@ export default function Sprint({ user, setUser }) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [question, isAnswered, loading, showSummary, selectedChoice, hintsUsed, handleAnswerSubmit, handleNext, isTestMode, showQuitConfirm]);
+  }, [question, isAnswered, loading, showSummary, selectedChoice, hintsUsed, handleAnswerSubmit, handleNext, isTestMode, showQuitConfirm, paused]);
 
   // Summary screen: Enter navigates to dashboard
   useEffect(() => {
@@ -993,6 +1015,12 @@ export default function Sprint({ user, setUser }) {
           ))}
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', minWidth: '100px', justifyContent: 'flex-end' }}>
+          {isTestMode && (
+            <button onClick={togglePause} title={paused ? 'Resume' : 'Pause'}
+              style={{ padding: '4px 8px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'transparent', color: 'var(--text-secondary)' }}>
+              {paused ? 'Resume' : 'Pause'}
+            </button>
+          )}
           {toolbar.timerHidden ? (
             <button onClick={toolbar.toggleTimerHidden}
               style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: '10px', padding: '3px 8px', backgroundColor: 'transparent' }}>
@@ -1029,6 +1057,10 @@ export default function Sprint({ user, setUser }) {
         {!isAnswered && questionNum > 1 && <span style={{ marginLeft: 'auto' }} />}
       </div>
 
+      {paused ? (
+        <PauseOverlay onResume={togglePause} />
+      ) : (
+        <>
       {/* Question content - outer wrapper is unmemoized (owns ref, mouseup handler, and
           em-based font-size that cascades via CSS to the inner memo's 0.95em/1.1em), so it
           re-renders freely on textSize/highlightMode/timer changes without ever re-invoking
@@ -1093,6 +1125,8 @@ export default function Sprint({ user, setUser }) {
           })
         )}
       </div>
+        </>
+      )}
 
       {/* Post-answer panel */}
       {isAnswered ? (
