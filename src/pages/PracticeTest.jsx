@@ -3,6 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Clock, ChevronRight, FileText, Coffee, Trophy, AlertCircle, RotateCcw, BookOpen, Crown } from 'lucide-react';
 import MathText from '../components/MathText';
 import { useCountUp } from '../lib/useCountUp';
+import TestToolbar from '../components/TestToolbar';
+import StrikeToggle from '../components/StrikeToggle';
+import ReferenceSheet from '../components/ReferenceSheet';
+import DesmosCalculator from '../components/DesmosCalculator';
+import { useTestToolbarState, TEXT_SIZE_SCALE } from '../lib/useTestToolbarState';
+import { applyHighlightToSelection } from '../lib/highlightSelection';
 
 // Animated number for the score reveal. Mounts with the results screen, so the
 // count-up plays exactly when the score appears.
@@ -94,6 +100,25 @@ function ReviewCard({ item }) {
   );
 }
 
+// Isolated from PracticeTest's per-second countdown-timer re-renders AND from genuine
+// textSize/highlightMode changes: memoized on `question` ONLY. See Sprint.jsx's
+// QuestionMathContent for the full rationale -- the same two-layer split is required here
+// because PracticeTest also runs a setInterval-driven timer while a question is open.
+const QuestionMathContent = React.memo(function QuestionMathContent({ question }) {
+  return (
+    <>
+      {question.passage_text && (
+        <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px', borderRadius: '12px', marginBottom: '16px', lineHeight: 1.6, fontSize: '0.95em' }}>
+          <MathText>{question.passage_text}</MathText>
+        </div>
+      )}
+      <div style={{ fontSize: '1.1em', lineHeight: 1.5, marginBottom: '24px' }}>
+        <MathText>{question.question_text}</MathText>
+      </div>
+    </>
+  );
+});
+
 export default function PracticeTest({ user }) {
   const navigate = useNavigate();
   const [phase, setPhase] = useState('intro'); // intro | module | break | results | error
@@ -115,6 +140,8 @@ export default function PracticeTest({ user }) {
   const answersRef = useRef({});
   answersRef.current = answers;
   const savedRef = useRef(false);
+  const toolbar = useTestToolbarState();
+  const questionContentRef = useRef(null);
 
   const loadHistory = useCallback(() => {
     fetch(`/api/practice-test/history/${user.id}`)
@@ -171,6 +198,7 @@ export default function PracticeTest({ user }) {
       setQuestions(data.questions);
       setQIndex(0);
       setSelected(null);
+      toolbar.resetPerQuestion();
       setTimeLeft(mod.seconds);
       setModuleIndex(idx);
       setPhase('module');
@@ -227,6 +255,7 @@ export default function PracticeTest({ user }) {
     if (qIndex < questions.length - 1) {
       setQIndex(i => i + 1);
       setSelected(null);
+      toolbar.resetPerQuestion();
     } else {
       finishModule();
     }
@@ -435,16 +464,24 @@ export default function PracticeTest({ user }) {
         ))}
       </div>
 
+      <TestToolbar
+        toolbar={toolbar}
+        mathOnly={mod.section === 'math'}
+        onOpenCalculator={() => toolbar.setCalculatorOpen(true)}
+        onOpenReference={() => toolbar.setReferenceOpen(true)}
+      />
+      {toolbar.referenceOpen && <ReferenceSheet onClose={() => toolbar.setReferenceOpen(false)} />}
+      {toolbar.calculatorOpen && <DesmosCalculator onClose={() => toolbar.setCalculatorOpen(false)} />}
+
       <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>
         {q.domain} &middot; {q.difficulty}
       </div>
-      {q.passage_text && (
-        <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px', borderRadius: '12px', marginBottom: '16px', lineHeight: 1.6, fontSize: '0.95rem' }}>
-          <MathText>{q.passage_text}</MathText>
-        </div>
-      )}
-      <div style={{ fontSize: '1.1rem', lineHeight: 1.5, marginBottom: '24px' }}>
-        <MathText>{q.question_text}</MathText>
+      <div
+        ref={questionContentRef}
+        onMouseUp={() => { if (toolbar.highlightMode) applyHighlightToSelection(questionContentRef.current); }}
+        style={{ fontSize: `${TEXT_SIZE_SCALE[toolbar.textSize]}em` }}
+      >
+        <QuestionMathContent question={q} />
       </div>
 
       {/* Answers */}
@@ -456,12 +493,16 @@ export default function PracticeTest({ user }) {
         ) : (
           q.choices.map(c => {
             const active = selected === c.label;
+            const struck = toolbar.struckChoices.has(c.label);
             return (
-              <button key={c.label} onClick={() => setSelected(c.label)}
-                style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 18px', backgroundColor: active ? 'rgba(232, 100, 60,0.07)' : 'var(--bg-card)', border: `2px solid ${active ? 'var(--primary)' : 'var(--border)'}`, borderRadius: '12px', textAlign: 'left', fontSize: '1rem', color: active ? 'var(--primary)' : 'var(--text-primary)' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: active ? 'var(--primary)' : 'var(--border)', color: active ? 'var(--primary-contrast)' : 'var(--text-secondary)', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '0.85rem' }}>{c.label}</div>
-                <MathText style={{ flex: 1 }}>{c.text}</MathText>
-              </button>
+              <div key={c.label} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <StrikeToggle struck={struck} onToggle={() => toolbar.toggleStrike(c.label)} />
+                <button onClick={() => setSelected(c.label)}
+                  style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 18px', backgroundColor: active ? 'rgba(232, 100, 60,0.07)' : 'var(--bg-card)', border: `2px solid ${active ? 'var(--primary)' : 'var(--border)'}`, borderRadius: '12px', textAlign: 'left', fontSize: '1rem', color: active ? 'var(--primary)' : 'var(--text-primary)', opacity: struck ? 0.45 : 1, textDecoration: struck ? 'line-through' : 'none' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: active ? 'var(--primary)' : 'var(--border)', color: active ? 'var(--primary-contrast)' : 'var(--text-secondary)', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '0.85rem' }}>{c.label}</div>
+                  <MathText style={{ flex: 1 }}>{c.text}</MathText>
+                </button>
+              </div>
             );
           })
         )}
