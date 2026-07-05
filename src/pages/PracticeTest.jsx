@@ -462,9 +462,16 @@ export default function PracticeTest({ user }) {
             style={{ padding: '4px 8px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'transparent', color: 'var(--text-secondary)', fontSize: '0.78rem' }}>
             {paused ? 'Resume' : 'Pause'}
           </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: timerColor, fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
-            <Clock size={15} /> {fmtTime(timeLeft)}
-          </div>
+          {toolbar.timerHidden ? (
+            <button onClick={toolbar.toggleTimerHidden}
+              style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: '10px', padding: '3px 8px', backgroundColor: 'transparent' }}>
+              Timer hidden, tap to show
+            </button>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: timerColor, fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
+              <Clock size={15} /> {fmtTime(timeLeft)}
+            </div>
+          )}
         </div>
       </div>
       {/* Progress bar */}

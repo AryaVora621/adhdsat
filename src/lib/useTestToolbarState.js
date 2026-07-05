@@ -19,7 +19,6 @@ export function useTestToolbarState() {
     () => localStorage.getItem(TIMER_HIDDEN_KEY) === 'true'
   );
   const [highlightMode, setHighlightMode] = useState(false);
-  const [lineReaderOn, setLineReaderOn] = useState(false);
   const [struckChoices, setStruckChoices] = useState(() => new Set());
   const [calculatorOpen, setCalculatorOpen] = useState(false);
   const [referenceOpen, setReferenceOpen] = useState(false);
@@ -33,7 +32,6 @@ export function useTestToolbarState() {
 
   const toggleTimerHidden = useCallback(() => setTimerHiddenState((h) => !h), []);
   const toggleHighlightMode = useCallback(() => setHighlightMode((h) => !h), []);
-  const toggleLineReader = useCallback(() => setLineReaderOn((v) => !v), []);
 
   const toggleStrike = useCallback((label) => {
     setStruckChoices((prev) => {
@@ -52,7 +50,6 @@ export function useTestToolbarState() {
     textSize, cycleTextSize,
     timerHidden, toggleTimerHidden,
     highlightMode, toggleHighlightMode,
-    lineReaderOn, toggleLineReader,
     struckChoices, toggleStrike,
     calculatorOpen, setCalculatorOpen,
     referenceOpen, setReferenceOpen,

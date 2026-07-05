@@ -11,6 +11,25 @@ import { applyHighlightToSelection } from '../lib/highlightSelection';
 
 const REVIEW_LENGTH = 5;
 
+// Memoized on `question` only, same as Sprint.jsx/PracticeTest.jsx -- this is the
+// subtree carrying MathText's dangerouslySetInnerHTML, so it must not re-render on
+// unrelated state changes (selecting a choice, cycling text size) or React
+// reconciliation wipes a DOM-mutated <mark> from applyHighlightToSelection.
+const QuestionMathContent = React.memo(function QuestionMathContent({ question }) {
+  return (
+    <>
+      {question.passage_text && (
+        <div style={{ flex: 1, borderRight: window.innerWidth < 768 ? 'none' : '1px solid var(--border)', borderBottom: window.innerWidth < 768 ? '1px solid var(--border)' : 'none', paddingRight: window.innerWidth < 768 ? '0' : '32px', paddingBottom: window.innerWidth < 768 ? '16px' : '0', fontSize: '0.95em', lineHeight: 1.75, color: 'var(--text-secondary)' }}>
+          <MathText>{question.passage_text}</MathText>
+        </div>
+      )}
+      <div style={{ flex: question.passage_text ? 1 : 'none', width: question.passage_text ? 'auto' : '100%', fontSize: '1.1em', lineHeight: 1.65, overflowX: 'auto', minWidth: 0 }}>
+        <MathText>{question.question_text}</MathText>
+      </div>
+    </>
+  );
+});
+
 export default function ReviewSprint({ user, setUser }) {
   const [sprintId, setSprintId] = useState(null);
   const [question, setQuestion] = useState(null);
@@ -340,14 +359,7 @@ export default function ReviewSprint({ user, setUser }) {
         onMouseUp={() => { if (toolbar.highlightMode) applyHighlightToSelection(questionContentRef.current); }}
         style={{ display: 'flex', flexDirection: window.innerWidth < 768 && question.passage_text ? 'column' : 'row', gap: '24px', marginBottom: '40px', fontSize: `${TEXT_SIZE_SCALE[toolbar.textSize]}em` }}
       >
-        {question.passage_text && (
-          <div style={{ flex: 1, borderRight: window.innerWidth < 768 ? 'none' : '1px solid var(--border)', borderBottom: window.innerWidth < 768 ? '1px solid var(--border)' : 'none', paddingRight: window.innerWidth < 768 ? '0' : '32px', paddingBottom: window.innerWidth < 768 ? '16px' : '0', fontSize: '0.95em', lineHeight: 1.75, color: 'var(--text-secondary)' }}>
-            <MathText>{question.passage_text}</MathText>
-          </div>
-        )}
-        <div style={{ flex: question.passage_text ? 1 : 'none', width: question.passage_text ? 'auto' : '100%', fontSize: '1.1em', lineHeight: 1.65, overflowX: 'auto', minWidth: 0 }}>
-          <MathText>{question.question_text}</MathText>
-        </div>
+        <QuestionMathContent question={question} />
       </div>
 
       {/* Hints */}

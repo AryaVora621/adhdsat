@@ -1,5 +1,5 @@
 import React from 'react';
-import { Highlighter, Rows3, Type, Eye, EyeOff, Calculator, BookOpen } from 'lucide-react';
+import { Highlighter, Type, Eye, EyeOff, Calculator, BookOpen } from 'lucide-react';
 
 const btnBase = {
   display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px',
@@ -24,13 +24,6 @@ export default function TestToolbar({ toolbar, mathOnly, onOpenCalculator, onOpe
         title="Highlight: select text in the passage or question"
       >
         <Highlighter size={15} /> Highlight
-      </button>
-      <button
-        onClick={toolbar.toggleLineReader}
-        style={{ ...btnBase, ...(toolbar.lineReaderOn ? btnActive : {}) }}
-        title="Line reader: a ruler that follows your cursor"
-      >
-        <Rows3 size={15} /> Line Reader
       </button>
       <button onClick={toolbar.cycleTextSize} style={btnBase} title="Cycle text size">
         <Type size={15} /> Text {toolbar.textSize}
