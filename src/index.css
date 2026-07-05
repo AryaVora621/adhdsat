@@ -160,3 +160,10 @@ button.primary:hover {
   .stat-3col { font-size: 1.2rem !important; }
   h1 { font-size: 1.5rem !important; }
 }
+
+mark.tally-highlight {
+  background-color: color-mix(in srgb, var(--xp-gold) 35%, transparent);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
