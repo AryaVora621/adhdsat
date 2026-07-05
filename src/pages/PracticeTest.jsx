@@ -9,6 +9,7 @@ import ReferenceSheet from '../components/ReferenceSheet';
 import DesmosCalculator from '../components/DesmosCalculator';
 import { useTestToolbarState, TEXT_SIZE_SCALE } from '../lib/useTestToolbarState';
 import { applyHighlightToSelection } from '../lib/highlightSelection';
+import PauseOverlay from '../components/PauseOverlay';
 
 // Animated number for the score reveal. Mounts with the results screen, so the
 // count-up plays exactly when the score appears.
@@ -135,6 +136,7 @@ export default function PracticeTest({ user }) {
   const [reviewItems, setReviewItems] = useState([]); // every answered question, for post-test review
   const [showReview, setShowReview] = useState(false);
   const [reviewFilter, setReviewFilter] = useState('missed'); // missed | all
+  const [paused, setPaused] = useState(false);
 
   const timerRef = useRef(null);
   const answersRef = useRef({});
@@ -232,9 +234,11 @@ export default function PracticeTest({ user }) {
     }
   }, [moduleIndex, questions]);
 
-  // Countdown timer for the active module.
+  // Countdown timer for the active module. Practice Test's timer is a plain
+  // tick-down on `timeLeft` with no wall-clock derivation, so simply skipping
+  // the interval while paused is sufficient -- no timestamp math to correct on resume.
   useEffect(() => {
-    if (phase !== 'module') return;
+    if (phase !== 'module' || paused) return;
     timerRef.current = setInterval(() => {
       setTimeLeft(t => {
         if (t <= 1) {
@@ -246,7 +250,7 @@ export default function PracticeTest({ user }) {
       });
     }, 1000);
     return () => clearInterval(timerRef.current);
-  }, [phase, moduleIndex, finishModule]);
+  }, [phase, moduleIndex, finishModule, paused]);
 
   const recordAndAdvance = () => {
     const q = questions[qIndex];
@@ -263,7 +267,7 @@ export default function PracticeTest({ user }) {
 
   // Keyboard: 1-4 to pick a choice, Enter to advance.
   useEffect(() => {
-    if (phase !== 'module') return;
+    if (phase !== 'module' || paused) return;
     const q = questions[qIndex];
     const onKey = (e) => {
       if (!q) return;
@@ -453,8 +457,14 @@ export default function PracticeTest({ user }) {
         <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>
           {mod.label} &middot; Question {qIndex + 1} of {questions.length}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: timerColor, fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
-          <Clock size={15} /> {fmtTime(timeLeft)}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button onClick={() => setPaused(p => !p)} title={paused ? 'Resume' : 'Pause'}
+            style={{ padding: '4px 8px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'transparent', color: 'var(--text-secondary)', fontSize: '0.78rem' }}>
+            {paused ? 'Resume' : 'Pause'}
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: timerColor, fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
+            <Clock size={15} /> {fmtTime(timeLeft)}
+          </div>
         </div>
       </div>
       {/* Progress bar */}
@@ -464,57 +474,63 @@ export default function PracticeTest({ user }) {
         ))}
       </div>
 
-      <TestToolbar
-        toolbar={toolbar}
-        mathOnly={mod.section === 'math'}
-        onOpenCalculator={() => toolbar.setCalculatorOpen(true)}
-        onOpenReference={() => toolbar.setReferenceOpen(true)}
-      />
-      {toolbar.referenceOpen && <ReferenceSheet onClose={() => toolbar.setReferenceOpen(false)} />}
-      {toolbar.calculatorOpen && <DesmosCalculator onClose={() => toolbar.setCalculatorOpen(false)} />}
+      {paused ? (
+        <PauseOverlay onResume={() => setPaused(false)} />
+      ) : (
+        <>
+          <TestToolbar
+            toolbar={toolbar}
+            mathOnly={mod.section === 'math'}
+            onOpenCalculator={() => toolbar.setCalculatorOpen(true)}
+            onOpenReference={() => toolbar.setReferenceOpen(true)}
+          />
+          {toolbar.referenceOpen && <ReferenceSheet onClose={() => toolbar.setReferenceOpen(false)} />}
+          {toolbar.calculatorOpen && <DesmosCalculator onClose={() => toolbar.setCalculatorOpen(false)} />}
 
-      <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>
-        {q.domain} &middot; {q.difficulty}
-      </div>
-      <div
-        ref={questionContentRef}
-        onMouseUp={() => { if (toolbar.highlightMode) applyHighlightToSelection(questionContentRef.current); }}
-        style={{ fontSize: `${TEXT_SIZE_SCALE[toolbar.textSize]}em` }}
-      >
-        <QuestionMathContent question={q} />
-      </div>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+            {q.domain} &middot; {q.difficulty}
+          </div>
+          <div
+            ref={questionContentRef}
+            onMouseUp={() => { if (toolbar.highlightMode) applyHighlightToSelection(questionContentRef.current); }}
+            style={{ fontSize: `${TEXT_SIZE_SCALE[toolbar.textSize]}em` }}
+          >
+            <QuestionMathContent question={q} />
+          </div>
 
-      {/* Answers */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
-        {q.is_grid_in ? (
-          <input type="number" value={selected || ''} onChange={e => setSelected(e.target.value)} autoFocus
-            placeholder="Enter your answer"
-            style={{ padding: '16px', fontSize: '1.2rem', borderRadius: '10px', border: '2px solid var(--border)', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)', maxWidth: '260px', outline: 'none' }} />
-        ) : (
-          q.choices.map(c => {
-            const active = selected === c.label;
-            const struck = toolbar.struckChoices.has(c.label);
-            return (
-              <div key={c.label} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <StrikeToggle struck={struck} onToggle={() => toolbar.toggleStrike(c.label)} />
-                <button onClick={() => setSelected(c.label)}
-                  style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 18px', backgroundColor: active ? 'rgba(232, 100, 60,0.07)' : 'var(--bg-card)', border: `2px solid ${active ? 'var(--primary)' : 'var(--border)'}`, borderRadius: '12px', textAlign: 'left', fontSize: '1rem', color: active ? 'var(--primary)' : 'var(--text-primary)', opacity: struck ? 0.45 : 1, textDecoration: struck ? 'line-through' : 'none' }}>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: active ? 'var(--primary)' : 'var(--border)', color: active ? 'var(--primary-contrast)' : 'var(--text-secondary)', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '0.85rem' }}>{c.label}</div>
-                  <MathText style={{ flex: 1 }}>{c.text}</MathText>
-                </button>
-              </div>
-            );
-          })
-        )}
-      </div>
+          {/* Answers */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
+            {q.is_grid_in ? (
+              <input type="number" value={selected || ''} onChange={e => setSelected(e.target.value)} autoFocus
+                placeholder="Enter your answer"
+                style={{ padding: '16px', fontSize: '1.2rem', borderRadius: '10px', border: '2px solid var(--border)', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)', maxWidth: '260px', outline: 'none' }} />
+            ) : (
+              q.choices.map(c => {
+                const active = selected === c.label;
+                const struck = toolbar.struckChoices.has(c.label);
+                return (
+                  <div key={c.label} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <StrikeToggle struck={struck} onToggle={() => toolbar.toggleStrike(c.label)} />
+                    <button onClick={() => setSelected(c.label)}
+                      style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 18px', backgroundColor: active ? 'rgba(232, 100, 60,0.07)' : 'var(--bg-card)', border: `2px solid ${active ? 'var(--primary)' : 'var(--border)'}`, borderRadius: '12px', textAlign: 'left', fontSize: '1rem', color: active ? 'var(--primary)' : 'var(--text-primary)', opacity: struck ? 0.45 : 1, textDecoration: struck ? 'line-through' : 'none' }}>
+                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: active ? 'var(--primary)' : 'var(--border)', color: active ? 'var(--primary-contrast)' : 'var(--text-secondary)', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '0.85rem' }}>{c.label}</div>
+                      <MathText style={{ flex: 1 }}>{c.text}</MathText>
+                    </button>
+                  </div>
+                );
+              })
+            )}
+          </div>
 
-      <button className="primary" onClick={recordAndAdvance}
-        style={{ width: '100%', padding: '15px', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-        {qIndex < questions.length - 1 ? 'Next' : 'Finish Section'} <ChevronRight size={18} />
-      </button>
-      <p style={{ textAlign: 'center', marginTop: '8px', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
-        {q.is_grid_in ? 'Type your answer · Enter to continue' : '1-4 to select · Enter to continue'} · You can leave a question blank
-      </p>
+          <button className="primary" onClick={recordAndAdvance}
+            style={{ width: '100%', padding: '15px', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+            {qIndex < questions.length - 1 ? 'Next' : 'Finish Section'} <ChevronRight size={18} />
+          </button>
+          <p style={{ textAlign: 'center', marginTop: '8px', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+            {q.is_grid_in ? 'Type your answer · Enter to continue' : '1-4 to select · Enter to continue'} · You can leave a question blank
+          </p>
+        </>
+      )}
     </div>
   );
 }
