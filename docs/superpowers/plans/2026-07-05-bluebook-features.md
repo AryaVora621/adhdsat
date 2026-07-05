@@ -660,26 +660,40 @@ In the MODULE render block (`PracticeTest.jsx:420-478`), insert the toolbar and 
       {toolbar.calculatorOpen && <DesmosCalculator onClose={() => toolbar.setCalculatorOpen(false)} />}
 ```
 
-Apply the highlight container and text-size scaling to the passage/question block (`PracticeTest.jsx:441-448`):
+**Important — reuse the memoization fix from Task 2.** `PracticeTest.jsx` runs its own per-second countdown (`PracticeTest.jsx:208-221`, `setInterval` ticking `timeLeft`), which re-renders the whole component every second exactly like `Sprint.jsx` did. Task 2 discovered that this wipes any highlight `<mark>` (a raw DOM mutation React doesn't know about) within about a second, because the passage/question block re-renders and reconciles the manually-inserted node away. Task 2 fixed this in `Sprint.jsx` by extracting the passage/question block into a `React.memo`-wrapped component keyed only on props that don't change every tick. Apply the same pattern here.
+
+Add a memoized component above the `PracticeTest` function (after the `ReviewCard` function, before `export default function PracticeTest`):
 
 ```jsx
-      {q.passage_text && (
-        <div
-          ref={questionContentRef}
-          onMouseUp={() => { if (toolbar.highlightMode) applyHighlightToSelection(questionContentRef.current); }}
-          style={{ backgroundColor: 'var(--bg-card)', padding: '16px', borderRadius: '12px', marginBottom: '16px', lineHeight: 1.6, fontSize: `${0.95 * TEXT_SIZE_SCALE[toolbar.textSize]}rem` }}
-        >
-          <MathText>{q.passage_text}</MathText>
+const QuestionContentBlock = React.memo(function QuestionContentBlock({ question, textSize, highlightMode, containerRef }) {
+  return (
+    <>
+      {question.passage_text && (
+        <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px', borderRadius: '12px', marginBottom: '16px', lineHeight: 1.6, fontSize: `${0.95 * TEXT_SIZE_SCALE[textSize]}rem` }}>
+          <MathText>{question.passage_text}</MathText>
         </div>
       )}
       <div
-        ref={q.passage_text ? undefined : questionContentRef}
-        onMouseUp={q.passage_text ? undefined : () => { if (toolbar.highlightMode) applyHighlightToSelection(questionContentRef.current); }}
-        style={{ fontSize: `${1.1 * TEXT_SIZE_SCALE[toolbar.textSize]}rem`, lineHeight: 1.5, marginBottom: '24px' }}
+        ref={containerRef}
+        onMouseUp={() => { if (highlightMode) applyHighlightToSelection(containerRef.current); }}
+        style={{ fontSize: `${1.1 * TEXT_SIZE_SCALE[textSize]}rem`, lineHeight: 1.5, marginBottom: '24px' }}
       >
-        <MathText>{q.question_text}</MathText>
+        <MathText>{question.question_text}</MathText>
       </div>
+    </>
+  );
+});
 ```
+
+(Unlike `Sprint.jsx`, which wraps both passage and question in one bordered container, `PracticeTest.jsx`'s existing layout renders the passage in its own card and the question separately — this keeps that same two-block layout, just moved inside the memo boundary. The ref and mouseup handler are placed on the question block here since that's always present; the passage block, when present, doesn't need its own highlight container for this to work correctly, matching the existing single-container behavior from before this change.)
+
+Replace the passage/question rendering (`PracticeTest.jsx:441-448`) with a single call to it:
+
+```jsx
+      <QuestionContentBlock question={q} textSize={toolbar.textSize} highlightMode={toolbar.highlightMode} containerRef={questionContentRef} />
+```
+
+Because `q` (aliased from `questions[qIndex]`), `toolbar.textSize`, and `toolbar.highlightMode` only change when the question actually advances or the user changes a toolbar setting (never on the per-second timer tick, which only touches `timeLeft`), `React.memo`'s shallow prop comparison skips re-rendering this subtree on every tick, letting the highlight `<mark>` survive. It still correctly re-renders (and resets) when `q` changes to the next question.
 
 Add the `StrikeToggle` to each choice in the answer-rendering block (`PracticeTest.jsx:456-467`):
 
