@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { CheckCircle2, XCircle, ChevronRight, ChevronLeft, AlertCircle, Zap, Trophy, Calculator, BookOpen, Shuffle, FileText } from 'lucide-react';
 import MathText from '../components/MathText';
+import TestToolbar from '../components/TestToolbar';
+import StrikeToggle from '../components/StrikeToggle';
+import { useTestToolbarState, TEXT_SIZE_SCALE } from '../lib/useTestToolbarState';
+import { applyHighlightToSelection } from '../lib/highlightSelection';
 
 function WrongAnswerCard({ item }) {
   const [expanded, setExpanded] = useState(false);
@@ -298,6 +302,8 @@ export default function Sprint({ user, setUser }) {
   const sprintStartRef = useRef(null);
   const milestoneShownRef = useRef(new Set());
   const [milestone, setMilestone] = useState(null);
+  const toolbar = useTestToolbarState();
+  const questionContentRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -457,6 +463,7 @@ export default function Sprint({ user, setUser }) {
   };
 
   const fetchNextQuestion = async () => {
+    toolbar.resetPerQuestion();
     setSelectedChoice(null);
     setIsAnswered(false);
     setHintsUsed(0);
@@ -924,6 +931,13 @@ export default function Sprint({ user, setUser }) {
         </div>
       )}
 
+      <TestToolbar
+        toolbar={toolbar}
+        mathOnly={sprintMode === 'math' || sprintMode === 'test-math'}
+        onOpenCalculator={() => {}}
+        onOpenReference={() => {}}
+      />
+
       {/* Progress bar + timer */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
         <div style={{ display: 'flex', gap: '4px', flex: 1 }}>
@@ -936,9 +950,16 @@ export default function Sprint({ user, setUser }) {
           ))}
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', minWidth: '100px', justifyContent: 'flex-end' }}>
-          <span style={{ color: timerColor, fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums', fontWeight: isAnswered ? 'normal' : '500' }}>
-            {timerStr}
-          </span>
+          {toolbar.timerHidden ? (
+            <button onClick={toolbar.toggleTimerHidden}
+              style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: '10px', padding: '3px 8px', backgroundColor: 'transparent' }}>
+              Timer hidden, tap to show
+            </button>
+          ) : (
+            <span style={{ color: timerColor, fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums', fontWeight: isAnswered ? 'normal' : '500' }}>
+              {timerStr}
+            </span>
+          )}
           <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
             Q{questionNum}/{SPRINT_LENGTH}
           </div>
@@ -966,13 +987,17 @@ export default function Sprint({ user, setUser }) {
       </div>
 
       {/* Question content */}
-      <div style={{ display: 'flex', flexDirection: window.innerWidth < 768 && question.passage_text ? 'column' : 'row', gap: '24px', marginBottom: '40px' }}>
+      <div
+        ref={questionContentRef}
+        onMouseUp={() => { if (toolbar.highlightMode) applyHighlightToSelection(questionContentRef.current); }}
+        style={{ display: 'flex', flexDirection: window.innerWidth < 768 && question.passage_text ? 'column' : 'row', gap: '24px', marginBottom: '40px', fontSize: `${TEXT_SIZE_SCALE[toolbar.textSize]}em` }}
+      >
         {question.passage_text && (
-          <div style={{ flex: 1, borderRight: window.innerWidth < 768 ? 'none' : '1px solid var(--border)', borderBottom: window.innerWidth < 768 ? '1px solid var(--border)' : 'none', paddingRight: window.innerWidth < 768 ? '0' : '32px', paddingBottom: window.innerWidth < 768 ? '16px' : '0', fontSize: '0.95rem', lineHeight: 1.75, color: 'var(--text-secondary)' }}>
+          <div style={{ flex: 1, borderRight: window.innerWidth < 768 ? 'none' : '1px solid var(--border)', borderBottom: window.innerWidth < 768 ? '1px solid var(--border)' : 'none', paddingRight: window.innerWidth < 768 ? '0' : '32px', paddingBottom: window.innerWidth < 768 ? '16px' : '0', fontSize: '0.95em', lineHeight: 1.75, color: 'var(--text-secondary)' }}>
             <MathText>{question.passage_text}</MathText>
           </div>
         )}
-        <div style={{ flex: question.passage_text ? 1 : 'none', width: question.passage_text ? 'auto' : '100%', fontSize: '1.1rem', lineHeight: 1.65, overflowX: 'auto', minWidth: 0 }}>
+        <div style={{ flex: question.passage_text ? 1 : 'none', width: question.passage_text ? 'auto' : '100%', fontSize: '1.1em', lineHeight: 1.65, overflowX: 'auto', minWidth: 0 }}>
           <MathText>{question.question_text}</MathText>
         </div>
       </div>
@@ -1010,16 +1035,20 @@ export default function Sprint({ user, setUser }) {
             } else if (selectedChoice === c.label) {
               borderColor = 'var(--primary)'; bgColor = 'rgba(232, 100, 60,0.07)'; textColor = 'var(--primary)';
             }
+            const struck = toolbar.struckChoices.has(c.label);
             return (
-              <button key={c.label} disabled={isAnswered} onClick={() => setSelectedChoice(c.label)}
-                style={{ display: 'flex', alignItems: 'center', padding: '14px 18px', backgroundColor: bgColor, border: `2px solid ${borderColor}`, textAlign: 'left', fontSize: '1rem', gap: '14px', borderRadius: '12px', transition: 'all 0.15s', color: textColor, animation: isAnswered && c.is_correct ? 'correctPop 0.4s ease' : undefined }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: selectedChoice === c.label && !isAnswered ? 'var(--primary)' : 'var(--border)', color: selectedChoice === c.label && !isAnswered ? 'var(--primary-contrast)' : 'var(--text-secondary)', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '0.85rem' }}>
-                  {c.label}
-                </div>
-                <MathText style={{ flex: 1, color: 'var(--text-primary)' }}>{c.text}</MathText>
-                {isAnswered && c.is_correct && <CheckCircle2 size={18} color="var(--success)" />}
-                {isAnswered && selectedChoice === c.label && !c.is_correct && <XCircle size={18} color="var(--error)" />}
-              </button>
+              <div key={c.label} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <StrikeToggle struck={struck} onToggle={() => toolbar.toggleStrike(c.label)} />
+                <button disabled={isAnswered} onClick={() => setSelectedChoice(c.label)}
+                  style={{ flex: 1, display: 'flex', alignItems: 'center', padding: '14px 18px', backgroundColor: bgColor, border: `2px solid ${borderColor}`, textAlign: 'left', fontSize: '1em', gap: '14px', borderRadius: '12px', transition: 'all 0.15s', color: textColor, opacity: struck ? 0.45 : 1, textDecoration: struck ? 'line-through' : 'none', animation: isAnswered && c.is_correct ? 'correctPop 0.4s ease' : undefined }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: selectedChoice === c.label && !isAnswered ? 'var(--primary)' : 'var(--border)', color: selectedChoice === c.label && !isAnswered ? 'var(--primary-contrast)' : 'var(--text-secondary)', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '0.85rem' }}>
+                    {c.label}
+                  </div>
+                  <MathText style={{ flex: 1, color: 'var(--text-primary)' }}>{c.text}</MathText>
+                  {isAnswered && c.is_correct && <CheckCircle2 size={18} color="var(--success)" />}
+                  {isAnswered && selectedChoice === c.label && !c.is_correct && <XCircle size={18} color="var(--error)" />}
+                </button>
+              </div>
             );
           })
         )}
