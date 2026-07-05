@@ -121,7 +121,7 @@ function SummaryScreen({ finalStats, sprintId, accuracy, grade, SPRINT_LENGTH, n
         </div>
       )}
       <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>
-        {SPRINT_LENGTH} questions{testTimeUsed ? ` · ${Math.floor(testTimeUsed / 60)}:${String(testTimeUsed % 60).padStart(2, '0')} used` : ' finished'}
+        {Number.isFinite(SPRINT_LENGTH) ? SPRINT_LENGTH : finalStats.attempted} questions{testTimeUsed ? ` · ${Math.floor(testTimeUsed / 60)}:${String(testTimeUsed % 60).padStart(2, '0')} used` : ' finished'}
       </p>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '20px' }}>
@@ -303,6 +303,10 @@ export default function Sprint({ user, setUser }) {
   const savedLen = parseInt(sessionStorage.getItem('preferredSprintLength') || '10', 10);
   const [sprintLength, setSprintLength] = useState(savedLen);
   const sprintLengthRef = useRef(savedLen);
+  const [pickByTime, setPickByTime] = useState(false);
+  const sprintTimeLimitRef = useRef(0);
+  const [sprintTimeLimit, setSprintTimeLimit] = useState(600);
+  const [timeUp, setTimeUp] = useState(false);
   const [resumePrompt, setResumePrompt] = useState(null);
   const [showQuitConfirm, setShowQuitConfirm] = useState(false);
   const [paused, setPaused] = useState(false);
@@ -390,6 +394,12 @@ export default function Sprint({ user, setUser }) {
             return;
           }
         }
+        if (!isTestModeRef.current && sprintTimeLimitRef.current > 0) {
+          const remaining = sprintTimeLimitRef.current - sprintElapsed;
+          if (remaining <= 0) {
+            setTimeUp(true);
+          }
+        }
         if (!isTestModeRef.current) {
           for (const m of MILESTONES) {
             if (sprintElapsed >= m.seconds && !milestoneShownRef.current.has(m.seconds)) {
@@ -426,7 +436,7 @@ export default function Sprint({ user, setUser }) {
     }
   };
 
-  const startSprint = async (mode) => {
+  const startSprint = async (mode, timeBudgetSeconds) => {
     // Test modes: full-section timed simulation
     const testModeMap = { 'test-math': { section: 'math', seconds: 35 * 60, questions: 22 }, 'test-english': { section: 'english', seconds: 32 * 60, questions: 27 } };
     const testConfig = testModeMap[mode];
@@ -439,10 +449,22 @@ export default function Sprint({ user, setUser }) {
       setSprintLength(testConfig.questions);
       testTimeLimitRef.current = testConfig.seconds;
       setTestTimeLimit(testConfig.seconds);
+      sprintTimeLimitRef.current = 0;
+      setSprintTimeLimit(0);
+    } else if (timeBudgetSeconds) {
+      sprintTimeLimitRef.current = timeBudgetSeconds;
+      setSprintTimeLimit(timeBudgetSeconds);
+      testTimeLimitRef.current = 0;
+      setTestTimeLimit(0);
+      sprintLengthRef.current = Infinity;
+      setSprintLength(Infinity);
     } else {
       testTimeLimitRef.current = 0;
       setTestTimeLimit(0);
+      sprintTimeLimitRef.current = 0;
+      setSprintTimeLimit(0);
     }
+    setTimeUp(false);
     sprintModeRef.current = effectiveMode;
     setSprintMode(effectiveMode);
     setLoading(true);
@@ -484,7 +506,10 @@ export default function Sprint({ user, setUser }) {
 
     const mode = sprintModeRef.current;
     const sectionParam = mode && mode !== 'adaptive' ? `&section=${mode}` : '';
-    const limit = sprintLengthRef.current || 10;
+    // sprintLengthRef is Infinity in time-budget mode (no known question count);
+    // batch a fixed, finite amount and let this function's own queue-then-refetch
+    // logic request more batches as needed for however long the sprint runs.
+    const limit = Number.isFinite(sprintLengthRef.current) ? (sprintLengthRef.current || 10) : 10;
     
     const promise = fetch(`/api/questions/batch?userId=${user.id}${sectionParam}&count=${limit}`)
       .then(res => {
@@ -653,10 +678,13 @@ export default function Sprint({ user, setUser }) {
   const handleNext = useCallback(async () => {
     if (paused) return;
     const current = stats;
-    if (questionNum >= sprintLengthRef.current) {
+    const timeBudgetDone = sprintTimeLimitRef.current > 0 && timeUp;
+    if (questionNum >= sprintLengthRef.current || timeBudgetDone) {
       await finishSprint(current);
     } else {
-      // Fire halfway milestone when crossing the midpoint
+      // Fire halfway milestone when crossing the midpoint (never true in
+      // time-budget mode, since sprintLengthRef is Infinity there and there's
+      // no known midpoint when the sprint length is open-ended)
       const half = Math.floor(sprintLengthRef.current / 2);
       if (questionNum === half && !milestoneShownRef.current.has('half')) {
         milestoneShownRef.current.add('half');
@@ -666,7 +694,7 @@ export default function Sprint({ user, setUser }) {
       setQuestionNum(n => n + 1);
       await fetchNextQuestion();
     }
-  }, [questionNum, sprintId, stats, finishSprint, paused]);
+  }, [questionNum, sprintId, stats, finishSprint, paused, timeUp]);
 
   // Keyboard shortcuts: 1-4 pick choice, Enter submits / advances
   useEffect(() => {
@@ -857,20 +885,46 @@ export default function Sprint({ user, setUser }) {
 
         {/* Length selector */}
         <div style={{ marginBottom: '28px' }}>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px' }}>Sprint Length</div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {[5, 10, 15, 20].map(n => (
-              <button key={n} onClick={() => { setSprintLength(n); sprintLengthRef.current = n; sessionStorage.setItem('preferredSprintLength', n); }}
-                style={{ padding: '8px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', border: `2px solid ${sprintLength === n ? 'var(--primary)' : 'var(--border)'}`, backgroundColor: sprintLength === n ? 'rgba(232, 100, 60,0.08)' : 'transparent', color: sprintLength === n ? 'var(--primary)' : 'var(--text-secondary)', transition: 'all 0.15s' }}>
-                {n}Q
-              </button>
-            ))}
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+            <button onClick={() => setPickByTime(false)}
+              style={{ padding: '6px 14px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600, border: `1px solid ${!pickByTime ? 'var(--primary)' : 'var(--border)'}`, backgroundColor: !pickByTime ? 'rgba(232, 100, 60,0.08)' : 'transparent', color: !pickByTime ? 'var(--primary)' : 'var(--text-secondary)' }}>
+              By Questions
+            </button>
+            <button onClick={() => setPickByTime(true)}
+              style={{ padding: '6px 14px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600, border: `1px solid ${pickByTime ? 'var(--primary)' : 'var(--border)'}`, backgroundColor: pickByTime ? 'rgba(232, 100, 60,0.08)' : 'transparent', color: pickByTime ? 'var(--primary)' : 'var(--text-secondary)' }}>
+              By Time
+            </button>
           </div>
+          {pickByTime ? (
+            <>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px' }}>Time Budget</div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {[5, 10, 15, 20, 30].map(min => (
+                  <button key={min} onClick={() => { sprintTimeLimitRef.current = min * 60; setSprintTimeLimit(min * 60); }}
+                    style={{ padding: '8px 16px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', border: `2px solid ${sprintTimeLimit === min * 60 ? 'var(--primary)' : 'var(--border)'}`, backgroundColor: sprintTimeLimit === min * 60 ? 'rgba(232, 100, 60,0.08)' : 'transparent', color: sprintTimeLimit === min * 60 ? 'var(--primary)' : 'var(--text-secondary)' }}>
+                    {min}m
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px' }}>Sprint Length</div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {[5, 10, 15, 20].map(n => (
+                  <button key={n} onClick={() => { setSprintLength(n); sprintLengthRef.current = n; sessionStorage.setItem('preferredSprintLength', n); }}
+                    style={{ padding: '8px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', border: `2px solid ${sprintLength === n ? 'var(--primary)' : 'var(--border)'}`, backgroundColor: sprintLength === n ? 'rgba(232, 100, 60,0.08)' : 'transparent', color: sprintLength === n ? 'var(--primary)' : 'var(--text-secondary)', transition: 'all 0.15s' }}>
+                    {n}Q
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {modes.map(m => (
-            <button key={m.key} onClick={() => startSprint(m.key)}
+            <button key={m.key} onClick={() => startSprint(m.key, pickByTime ? sprintTimeLimit : undefined)}
               style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '20px 24px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', textAlign: 'left', cursor: 'pointer', transition: 'border-color 0.15s' }}
               onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
               onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
@@ -879,7 +933,7 @@ export default function Sprint({ user, setUser }) {
                 <div style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '3px' }}>{m.label}</div>
                 <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{m.sub}</div>
               </div>
-              <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: 'var(--text-secondary)', flexShrink: 0 }}>{sprintLength} questions</span>
+              <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: 'var(--text-secondary)', flexShrink: 0 }}>{pickByTime ? `${sprintTimeLimit / 60}m` : `${sprintLength} questions`}</span>
             </button>
           ))}
         </div>
@@ -1012,13 +1066,23 @@ export default function Sprint({ user, setUser }) {
       {/* Progress bar + timer */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
         <div style={{ display: 'flex', gap: '4px', flex: 1 }}>
-          {Array.from({ length: SPRINT_LENGTH }).map((_, i) => (
-            <div key={i} style={{
-              flex: 1, height: '5px', borderRadius: '3px',
-              backgroundColor: i < questionNum - 1 ? 'var(--primary)' : i === questionNum - 1 ? 'rgba(232, 100, 60,0.4)' : 'var(--border)',
-              transition: 'background-color 0.3s'
-            }} />
-          ))}
+          {sprintTimeLimitRef.current > 0 ? (
+            <div style={{ flex: 1, height: '5px', borderRadius: '3px', backgroundColor: 'var(--border)', overflow: 'hidden' }}>
+              <div style={{
+                height: '100%', borderRadius: '3px', transition: 'width 1s linear, background-color 0.3s',
+                width: `${Math.min(100, (sprintElapsedSec / sprintTimeLimitRef.current) * 100)}%`,
+                backgroundColor: timeUp ? 'var(--error)' : sprintElapsedSec / sprintTimeLimitRef.current > 0.8 ? 'var(--xp-gold)' : 'var(--primary)',
+              }} />
+            </div>
+          ) : (
+            Array.from({ length: SPRINT_LENGTH }).map((_, i) => (
+              <div key={i} style={{
+                flex: 1, height: '5px', borderRadius: '3px',
+                backgroundColor: i < questionNum - 1 ? 'var(--primary)' : i === questionNum - 1 ? 'rgba(232, 100, 60,0.4)' : 'var(--border)',
+                transition: 'background-color 0.3s'
+              }} />
+            ))
+          )}
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', minWidth: '100px', justifyContent: 'flex-end' }}>
           {isTestMode && (
@@ -1038,7 +1102,7 @@ export default function Sprint({ user, setUser }) {
             </span>
           )}
           <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
-            Q{questionNum}/{SPRINT_LENGTH}
+            {sprintTimeLimitRef.current > 0 ? `Q${questionNum}` : `Q${questionNum}/${SPRINT_LENGTH}`}
           </div>
         </div>
       </div>
@@ -1062,6 +1126,12 @@ export default function Sprint({ user, setUser }) {
         )}
         {!isAnswered && questionNum > 1 && <span style={{ marginLeft: 'auto' }} />}
       </div>
+
+      {timeUp && (
+        <div style={{ backgroundColor: 'rgba(255,201,61,0.1)', border: '1px solid rgba(255,201,61,0.35)', borderRadius: '10px', padding: '10px 16px', marginBottom: '16px', fontSize: '0.85rem', color: 'var(--xp-gold)', fontWeight: 600 }}>
+          Time's up, finishing this one, then we'll wrap up.
+        </div>
+      )}
 
       {paused ? (
         <PauseOverlay onResume={togglePause} />
@@ -1173,7 +1243,7 @@ export default function Sprint({ user, setUser }) {
 
           <button className="primary animate-pop" onClick={handleNext} disabled={paused}
             style={{ width: '100%', padding: '15px', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', opacity: paused ? 0.5 : 1 }}>
-            {questionNum < SPRINT_LENGTH ? 'Next Question' : 'Complete Sprint'} <ChevronRight size={18} />
+            {questionNum < SPRINT_LENGTH && !(sprintTimeLimitRef.current > 0 && timeUp) ? 'Next Question' : 'Complete Sprint'} <ChevronRight size={18} />
           </button>
           <p style={{ textAlign: 'center', marginTop: '8px', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Press Enter to continue</p>
         </div>
