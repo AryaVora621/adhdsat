@@ -6,6 +6,7 @@ import TestToolbar from '../components/TestToolbar';
 import StrikeToggle from '../components/StrikeToggle';
 import ReferenceSheet from '../components/ReferenceSheet';
 import DesmosCalculator from '../components/DesmosCalculator';
+import QuitConfirmDialog from '../components/QuitConfirmDialog';
 import { useTestToolbarState, TEXT_SIZE_SCALE } from '../lib/useTestToolbarState';
 import { applyHighlightToSelection } from '../lib/highlightSelection';
 
@@ -302,6 +303,7 @@ export default function Sprint({ user, setUser }) {
   const [sprintLength, setSprintLength] = useState(savedLen);
   const sprintLengthRef = useRef(savedLen);
   const [resumePrompt, setResumePrompt] = useState(null);
+  const [showQuitConfirm, setShowQuitConfirm] = useState(false);
   const [isTestMode, setIsTestMode] = useState(false);
   const isTestModeRef = useRef(false);
   const [testTimeLimit, setTestTimeLimit] = useState(0); // seconds, 0 = no limit
@@ -645,6 +647,12 @@ export default function Sprint({ user, setUser }) {
       if (!question || loading || showSummary) return;
       if (e.target.tagName === 'INPUT') return;
 
+      if (e.key === 'Escape' && !isTestMode) {
+        setShowQuitConfirm((v) => !v);
+        return;
+      }
+      if (showQuitConfirm) return;
+
       if (!isAnswered) {
         if (['1','2','3','4'].includes(e.key) && !question.is_grid_in) {
           const labels = ['A','B','C','D'];
@@ -668,7 +676,7 @@ export default function Sprint({ user, setUser }) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [question, isAnswered, loading, showSummary, selectedChoice, hintsUsed, handleAnswerSubmit, handleNext]);
+  }, [question, isAnswered, loading, showSummary, selectedChoice, hintsUsed, handleAnswerSubmit, handleNext, isTestMode, showQuitConfirm]);
 
   // Summary screen: Enter navigates to dashboard
   useEffect(() => {
@@ -964,6 +972,14 @@ export default function Sprint({ user, setUser }) {
 
       {toolbar.referenceOpen && <ReferenceSheet onClose={() => toolbar.setReferenceOpen(false)} />}
       {toolbar.calculatorOpen && <DesmosCalculator onClose={() => toolbar.setCalculatorOpen(false)} />}
+
+      {showQuitConfirm && (
+        <QuitConfirmDialog
+          onResume={() => setShowQuitConfirm(false)}
+          onQuitSave={() => { setShowQuitConfirm(false); finishSprint(stats); }}
+          onQuitDiscard={() => { setShowQuitConfirm(false); sessionStorage.removeItem('activeSprint'); navigate('/'); }}
+        />
+      )}
 
       {/* Progress bar + timer */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
