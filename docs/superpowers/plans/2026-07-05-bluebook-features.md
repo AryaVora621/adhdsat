@@ -660,24 +660,20 @@ In the MODULE render block (`PracticeTest.jsx:420-478`), insert the toolbar and 
       {toolbar.calculatorOpen && <DesmosCalculator onClose={() => toolbar.setCalculatorOpen(false)} />}
 ```
 
-**Important — reuse the memoization fix from Task 2.** `PracticeTest.jsx` runs its own per-second countdown (`PracticeTest.jsx:208-221`, `setInterval` ticking `timeLeft`), which re-renders the whole component every second exactly like `Sprint.jsx` did. Task 2 discovered that this wipes any highlight `<mark>` (a raw DOM mutation React doesn't know about) within about a second, because the passage/question block re-renders and reconciles the manually-inserted node away. Task 2 fixed this in `Sprint.jsx` by extracting the passage/question block into a `React.memo`-wrapped component keyed only on props that don't change every tick. Apply the same pattern here.
+**Important — reuse the two-layer memoization fix from Task 2.** `PracticeTest.jsx` runs its own per-second countdown (`PracticeTest.jsx:208-221`, `setInterval` ticking `timeLeft`), which re-renders the whole component every second exactly like `Sprint.jsx` did. Task 2 discovered two layered bugs from this: (1) the timer tick alone wipes any highlight `<mark>` (a raw DOM mutation React doesn't know about) within about a second, because the passage/question block re-renders and reconciles the manually-inserted node away; (2) a naive single-layer `React.memo` keyed on `(question, textSize, highlightMode)` fixes the timer-tick case but still wipes the mark whenever the user toggles Highlight off/on or cycles text size, since those are then the memoized component's own props and a real change to either still re-renders the `MathText` subtree. Task 2's final fix splits this into two layers: an outer, unmemoized wrapper that owns the ref, the mouseup handler, and the `em`-based font-size (which cascades to children via plain CSS inheritance, no re-render needed), and an inner `React.memo` layer keyed ONLY on `question` that renders the actual `MathText` calls. Apply that same two-layer pattern here, not the single-layer version.
 
-Add a memoized component above the `PracticeTest` function (after the `ReviewCard` function, before `export default function PracticeTest`):
+Add the inner memoized component above the `PracticeTest` function (after the `ReviewCard` function, before `export default function PracticeTest`):
 
 ```jsx
-const QuestionContentBlock = React.memo(function QuestionContentBlock({ question, textSize, highlightMode, containerRef }) {
+const QuestionMathContent = React.memo(function QuestionMathContent({ question }) {
   return (
     <>
       {question.passage_text && (
-        <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px', borderRadius: '12px', marginBottom: '16px', lineHeight: 1.6, fontSize: `${0.95 * TEXT_SIZE_SCALE[textSize]}rem` }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px', borderRadius: '12px', marginBottom: '16px', lineHeight: 1.6, fontSize: '0.95em' }}>
           <MathText>{question.passage_text}</MathText>
         </div>
       )}
-      <div
-        ref={containerRef}
-        onMouseUp={() => { if (highlightMode) applyHighlightToSelection(containerRef.current); }}
-        style={{ fontSize: `${1.1 * TEXT_SIZE_SCALE[textSize]}rem`, lineHeight: 1.5, marginBottom: '24px' }}
-      >
+      <div style={{ fontSize: '1.1em', lineHeight: 1.5, marginBottom: '24px' }}>
         <MathText>{question.question_text}</MathText>
       </div>
     </>
@@ -685,13 +681,21 @@ const QuestionContentBlock = React.memo(function QuestionContentBlock({ question
 });
 ```
 
-(Unlike `Sprint.jsx`, which wraps both passage and question in one bordered container, `PracticeTest.jsx`'s existing layout renders the passage in its own card and the question separately — this keeps that same two-block layout, just moved inside the memo boundary. The ref and mouseup handler are placed on the question block here since that's always present; the passage block, when present, doesn't need its own highlight container for this to work correctly, matching the existing single-container behavior from before this change.)
+Because its only prop is `question`, this component never re-renders (and never touches the DOM-inserted `<mark>`) when `textSize` or `highlightMode` change, only when the question itself changes to a new object — correctly resetting per question while surviving every other kind of re-render.
 
-Replace the passage/question rendering (`PracticeTest.jsx:441-448`) with a single call to it:
+Replace the passage/question rendering (`PracticeTest.jsx:441-448`) with an outer wrapper that owns the ref, mouseup handler, and font-size, wrapping the inner memoized component:
 
 ```jsx
-      <QuestionContentBlock question={q} textSize={toolbar.textSize} highlightMode={toolbar.highlightMode} containerRef={questionContentRef} />
+      <div
+        ref={questionContentRef}
+        onMouseUp={() => { if (toolbar.highlightMode) applyHighlightToSelection(questionContentRef.current); }}
+        style={{ fontSize: `${TEXT_SIZE_SCALE[toolbar.textSize]}em` }}
+      >
+        <QuestionMathContent question={q} />
+      </div>
 ```
+
+This outer `div` is NOT memoized and can freely re-render on every timer tick, every Highlight toggle, and every text-size cycle (it's cheap: no `dangerouslySetInnerHTML` at this level). Its `fontSize` in `em` cascades to `QuestionMathContent`'s `0.95em`/`1.1em` children via ordinary CSS inheritance, so text size still visibly updates even though `QuestionMathContent` itself never re-renders for that change.
 
 Because `q` (aliased from `questions[qIndex]`), `toolbar.textSize`, and `toolbar.highlightMode` only change when the question actually advances or the user changes a toolbar setting (never on the per-second timer tick, which only touches `timeLeft`), `React.memo`'s shallow prop comparison skips re-rendering this subtree on every tick, letting the highlight `<mark>` survive. It still correctly re-renders (and resets) when `q` changes to the next question.
 
