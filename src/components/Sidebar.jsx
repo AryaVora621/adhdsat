@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Flame, Star, LayoutDashboard, Zap, User, BookOpen, Moon, Sun, LogOut } from 'lucide-react';
+import { Flame, Star, LayoutDashboard, Zap, User, BookOpen, Moon, Sun, LogOut, Target, Layers } from 'lucide-react';
 import { useTheme } from '../lib/theme';
 
 function WeekCalendar({ userId }) {
@@ -84,6 +84,8 @@ export default function Sidebar({ user, onSignOut }) {
       <nav style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
         <NavLink to="/" end style={navLinkStyle}><LayoutDashboard size={16} /> Dashboard</NavLink>
         <NavLink to="/sprint" style={navLinkStyle}><Zap size={16} /> Sprint</NavLink>
+        <NavLink to="/my-focus" style={navLinkStyle}><Target size={16} /> My Focus</NavLink>
+        <NavLink to="/my-drills" style={navLinkStyle}><Layers size={16} /> My Drills</NavLink>
         <NavLink to="/review" style={navLinkStyle}>
           <BookOpen size={16} />
           Review

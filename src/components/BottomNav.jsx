@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Zap, BookOpen, User } from 'lucide-react';
+import { LayoutDashboard, Zap, BookOpen, User, Target, Layers } from 'lucide-react';
 
 export default function BottomNav({ userId }) {
   const [reviewCount, setReviewCount] = useState(0);
@@ -33,6 +33,8 @@ export default function BottomNav({ userId }) {
     }}>
       <NavLink to="/" end style={linkStyle}><LayoutDashboard size={20} />Home</NavLink>
       <NavLink to="/sprint" style={linkStyle}><Zap size={20} />Sprint</NavLink>
+      <NavLink to="/my-focus" style={linkStyle}><Target size={16} />Focus</NavLink>
+      <NavLink to="/my-drills" style={linkStyle}><Layers size={16} />Drills</NavLink>
       <NavLink to="/review" style={linkStyle}>
         <div style={{ position: 'relative' }}>
           <BookOpen size={20} />

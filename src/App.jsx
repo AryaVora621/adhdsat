@@ -217,6 +217,24 @@ function AppInner() {
   }
 
   // Brand-new visitor (no session, no stored guest): show the marketing landing.
+  // Local dev: auto-create a dev user so My Focus / My Drills work without login.
+  useEffect(() => {
+    if (!user && !loading && localStorage.getItem('userId') == null && window.location.hostname === 'localhost') {
+      const devId = 'local-dev-' + 'aryavora';
+      localStorage.setItem('userId', devId);
+      fetch('/api/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: devId, display_name: 'Arya (local)' }) })
+        .then(r => r.json())
+        .then(data => {
+          // auto-complete onboarding for local dev so routes are accessible
+          if (!data.onboarding_completed) {
+            fetch('/api/onboarding', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: devId, baseline_english: 690, baseline_math: 690, weak_areas: ['Standard English Conventions','Problem Solving & Data Analysis','Information & Ideas'] }) })
+              .then(() => fetch('/api/users/' + devId).then(r=>r.json()).then(setUserWithLevelCheck));
+            fetch('/api/study-weights/' + devId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ version:1, buckets:{sec:30,math_weak:30,info:15,exp:10,math_maint:10,craft:5}, sec_sub:{boundaries:40,sva:35,modifiers:15,sec_mixed:10}, math_weak_sub:{percentages:25,ratios:20,transforms:20,stats:15,regression:10,scaling:10} }) }).catch(()=>{});
+          } else setUserWithLevelCheck(data);
+        }).catch(()=>{});
+    }
+  }, [user, loading]);
+
   if (!user) {
     return <Landing onGuest={startOnboarding} />;
   }
