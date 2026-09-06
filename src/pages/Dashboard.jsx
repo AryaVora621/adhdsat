@@ -480,6 +480,26 @@ export default function Dashboard({ user, isMobile }) {
         )}
       </div>
 
+      {/* My Focus + My Drills (temporarily open to all) */}
+      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:'12px', marginBottom:'14px'}}>
+        <div onClick={()=> navigate('/my-focus')} style={{ backgroundImage:'linear-gradient(135deg, rgba(232,100,60,0.12), rgba(70,183,159,0.08))', padding:'18px 20px', borderRadius:'14px', border:'1px solid rgba(232,100,60,0.25)', display:'flex', alignItems:'center', gap:'14px', cursor:'pointer'}}>
+          <Zap size={22} color='var(--primary)'/>
+          <div style={{ flex:1}}>
+            <div style={{ fontWeight:700, fontSize:'0.95rem'}}>My Focus</div>
+            <div style={{ fontSize:'0.78rem', color:'var(--text-secondary)'}}>Weighted 30/30/15/10/10/5 · your split</div>
+          </div>
+          <span style={{ fontSize:'0.72rem', color:'var(--primary)', fontWeight:600, backgroundColor:'rgba(232,100,60,0.1)', padding:'4px 10px', borderRadius:'20px'}}>Start →</span>
+        </div>
+        <div onClick={()=> navigate('/my-drills')} style={{ backgroundColor:'var(--bg-card)', padding:'18px 20px', borderRadius:'14px', border:'1px solid var(--border)', display:'flex', alignItems:'center', gap:'14px', cursor:'pointer'}}>
+          <BarChart2 size={22} color='var(--primary)'/>
+          <div style={{ flex:1}}>
+            <div style={{ fontWeight:700, fontSize:'0.95rem'}}>My Drills</div>
+            <div style={{ fontSize:'0.78rem', color:'var(--text-secondary)'}}>6 targeted drills + today/week pies</div>
+          </div>
+          <span style={{ fontSize:'0.72rem', color:'var(--text-secondary)', fontWeight:600, backgroundColor:'var(--bg-main)', padding:'4px 10px', borderRadius:'20px', border:'1px solid var(--border)'}}>Open →</span>
+        </div>
+      </div>
+
       {/* Full practice test */}
       <PracticeTestCard user={user} navigate={navigate} />
 

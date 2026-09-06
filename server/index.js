@@ -6,6 +6,7 @@ import { dirname, join } from 'path';
 import { existsSync } from 'fs';
 import { query, rows, row, ensureSeed } from './db.js';
 import { getAdaptiveCriteria, streamExplanation, analyzeScoreReport } from './gemini.js';
+import { bucketFor, subBucketFor, drawBucket, drawSubBucket, DEFAULT_WEIGHTS, domainsForBucket, MY_BUCKETS, SEC_SUB, MATH_WEAK_SUB } from './lib/weightMatcher.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -117,7 +118,7 @@ app.post('/api/users/claim', async (req, res) => {
 });
 
 app.put('/api/users/:id', async (req, res) => {
-  const { display_name, weak_areas, baseline_english, baseline_math } = req.body;
+  const { display_name, weak_areas, baseline_english, baseline_math, study_weights } = req.body;
   try {
     const fields = [];
     const vals = [];
@@ -126,6 +127,7 @@ app.put('/api/users/:id', async (req, res) => {
     if (weak_areas !== undefined) { fields.push(`weak_areas = $${++p}`); vals.push(JSON.stringify(weak_areas)); }
     if (baseline_english !== undefined) { fields.push(`baseline_english = $${++p}`); vals.push(baseline_english); }
     if (baseline_math !== undefined) { fields.push(`baseline_math = $${++p}`); vals.push(baseline_math); }
+    if (study_weights !== undefined) { fields.push(`study_weights = $${++p}`); vals.push(typeof study_weights === 'string' ? study_weights : JSON.stringify(study_weights)); }
     if (!fields.length) return res.status(400).json({ error: 'No fields to update' });
     vals.push(req.params.id);
     await query(`UPDATE adhdsat.users SET ${fields.join(', ')} WHERE id = $${++p}`, vals);
@@ -136,6 +138,23 @@ app.put('/api/users/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Study weights: per-user weighted practice (used by My Focus / My Drills, temporarily open to all)
+app.get('/api/study-weights/:userId', async (req, res) => {
+  const user = await row('SELECT study_weights FROM adhdsat.users WHERE id = $1', [req.params.userId]);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  res.json(user.study_weights ? JSON.parse(user.study_weights) : DEFAULT_WEIGHTS);
+});
+app.put('/api/study-weights/:userId', async (req, res) => {
+  const weights = req.body;
+  if (!weights || !weights.buckets) return res.status(400).json({ error: 'weights with buckets required' });
+  await query('UPDATE adhdsat.users SET study_weights = $1 WHERE id = $2', [JSON.stringify(weights), req.params.userId]);
+  res.json(weights);
+});
+app.get('/api/study-weights', async (req, res) => {
+  // Default split for open-access mode (no userId)
+  res.json(DEFAULT_WEIGHTS);
 });
 
 app.post('/api/users/:id/xp', async (req, res) => {
@@ -283,6 +302,8 @@ app.get('/api/questions/next', async (req, res) => {
 app.get('/api/questions/batch', async (req, res) => {
   const { userId, section, count = 10 } = req.query;
   if (!userId) return res.status(400).json({ error: 'userId required' });
+  const useWeighted = req.query.myFocus === '1' || req.query.weighted === '1' || req.query.bucket;
+  const requestedBucket = req.query.bucket || null; // e.g., sec, math_weak, info...
 
   const allowedDomains = section === 'math' ? MATH_DOMAINS : section === 'english' ? ENG_DOMAINS : DOMAINS;
 
@@ -321,20 +342,71 @@ app.get('/api/questions/batch', async (req, res) => {
   const seen = (await rows('SELECT question_id FROM adhdsat.user_answers WHERE user_id = $1 ORDER BY created_at DESC LIMIT 100', [userId])).map(r => r.question_id);
   const picked = [];
 
-  async function fetchQuestions(difficulty, needed) {
-    if (needed <= 0) return;
-    const qs = await rows(
-      `SELECT * FROM adhdsat.questions 
-       WHERE domain = ANY($1::text[]) AND difficulty = $2 AND id <> ALL($3::text[]) 
-       ORDER BY random() LIMIT $4`,
-      [allowedDomains, difficulty, seen.concat(picked.map(q => q.id)), needed]
-    );
-    picked.push(...qs);
-  }
+  // Weighted mode for My Focus / My Drills: draw buckets per your split, with sub-bucket filtering
+  if (useWeighted) {
+    let weights = DEFAULT_WEIGHTS;
+    try {
+      const uw = await row('SELECT study_weights FROM adhdsat.users WHERE id = $1', [userId]);
+      if (uw && uw.study_weights) weights = JSON.parse(uw.study_weights);
+    } catch {}
+    // Fallback to default if not set
+    const pickDifficulty = () => {
+      const r = Math.random();
+      if (overallAccuracy < 0.4) return r < 0.6 ? 'easy' : 'medium';
+      if (overallAccuracy < 0.7) { if (r < 0.2) return 'easy'; if (r < 0.8) return 'medium'; return 'hard'; }
+      if (r < 0.1) return 'easy'; if (r < 0.4) return 'medium'; return 'hard';
+    };
+    // Helper: fetch one weighted question, retrying sub-bucket match
+    async function fetchOneWeighted() {
+      // Single bucket drill mode: force that bucket
+      const bucketKey = requestedBucket && MY_BUCKETS.some(b => b.key === requestedBucket) ? requestedBucket : drawBucket(weights.buckets);
+      const subKey = drawSubBucket(bucketKey, weights);
+      const diff = pickDifficulty();
+      const bucketDomains = domainsForBucket(bucketKey);
+      // Try to honor sub-bucket via skill/tags, but accept any if thin (regression has 5 total)
+      const attempts = 3;
+      for (let a = 0; a < attempts; a++) {
+        const candidates = await rows(
+          `SELECT * FROM adhdsat.questions
+           WHERE domain = ANY($1::text[]) AND difficulty = $2 AND id <> ALL($3::text[])
+           ORDER BY random() LIMIT 8`,
+          [bucketDomains.length ? bucketDomains : allowedDomains, diff, seen.concat(picked.map(q => q.id))]
+        );
+        if (!candidates.length) continue;
+        // Prefer one that matches sub-bucket
+        let match = null;
+        const tbl = bucketKey === 'sec' ? SEC_SUB : bucketKey === 'math_weak' ? MATH_WEAK_SUB : null;
+        if (tbl && subKey) {
+          const want = tbl.find(s => s.key === subKey);
+          if (want) match = candidates.find(c => { try { return want.test({ domain: c.domain, skill: c.skill, tags: c.tags }); } catch { return false; } });
+        }
+        const chosen = match || candidates[Math.floor(Math.random() * candidates.length)];
+        if (chosen) return chosen;
+      }
+      // Fallback: any domain question
+      const fallback = await rows(`SELECT * FROM adhdsat.questions WHERE domain = ANY($1::text[]) AND id <> ALL($2::text[]) ORDER BY random() LIMIT 1`, [allowedDomains, seen.concat(picked.map(q => q.id))]);
+      return fallback[0] || null;
+    }
+    for (let i = 0; i < numQuestions; i++) {
+      const one = await fetchOneWeighted();
+      if (one) picked.push(one);
+    }
+  } else {
+    async function fetchQuestions(difficulty, needed) {
+      if (needed <= 0) return;
+      const qs = await rows(
+        `SELECT * FROM adhdsat.questions 
+         WHERE domain = ANY($1::text[]) AND difficulty = $2 AND id <> ALL($3::text[]) 
+         ORDER BY random() LIMIT $4`,
+        [allowedDomains, difficulty, seen.concat(picked.map(q => q.id)), needed]
+      );
+      picked.push(...qs);
+    }
 
-  await fetchQuestions('easy', easyCount);
-  await fetchQuestions('medium', mediumCount);
-  await fetchQuestions('hard', hardCount);
+    await fetchQuestions('easy', easyCount);
+    await fetchQuestions('medium', mediumCount);
+    await fetchQuestions('hard', hardCount);
+  }
 
   if (picked.length < numQuestions) {
     const fallback = await rows(
@@ -1035,6 +1107,62 @@ app.get('/api/today/:userId', async (req, res) => {
     WHERE user_id = $1 AND substr(created_at, 1, 10) = $2
   `, [req.params.userId, today])).cnt;
   res.json({ sprints_today: sprints, answers_today: answers });
+});
+
+// My Focus / My Drills stats: bucket breakdown with both answer-time + sprint-time
+app.get('/api/my-stats/:userId', async (req, res) => {
+  const userId = req.params.userId;
+  const days = Math.min(parseInt(req.query.days || '1', 10), 30);
+  const cutoff = new Date(Date.now() - days * 86400000).toISOString();
+  const answerRows = await rows(`
+    SELECT q.domain, q.skill, q.tags, q.difficulty, ua.time_spent_seconds, ua.created_at
+    FROM adhdsat.user_answers ua
+    JOIN adhdsat.questions q ON ua.question_id = q.id
+    WHERE ua.user_id = $1 AND ua.created_at >= $2
+  `, [userId, cutoff]);
+  const sprintRows = await rows(`
+    SELECT started_at, completed_at FROM adhdsat.sprints
+    WHERE user_id = $1 AND started_at >= $2 AND completed_at IS NOT NULL
+  `, [userId, cutoff]);
+  let sprintSeconds = 0;
+  for (const s of sprintRows) {
+    const a = new Date(s.started_at).getTime();
+    const b = new Date(s.completed_at).getTime();
+    if (Number.isFinite(a) && Number.isFinite(b) && b > a) sprintSeconds += Math.round((b - a) / 1000);
+  }
+  const buckets = {};
+  const subBuckets = { sec: {}, math_weak: {} };
+  let answerSeconds = 0;
+  for (const r of answerRows) {
+    const q = { domain: r.domain, skill: r.skill, tags: r.tags };
+    const b = bucketFor(q);
+    const sb = subBucketFor(q, b);
+    const t = Number(r.time_spent_seconds) || 0;
+    answerSeconds += t;
+    buckets[b] = (buckets[b] || 0) + 1;
+    if (sb) {
+      if (!subBuckets[b]) subBuckets[b] = {};
+      subBuckets[b][sb] = (subBuckets[b][sb] || 0) + 1;
+    }
+  }
+  const totalAnswers = answerRows.length;
+  const byBucket = MY_BUCKETS.map(b => ({
+    key: b.key, label: b.label, color: b.color,
+    count: buckets[b.key] || 0,
+    pct: totalAnswers ? Math.round((buckets[b.key] || 0) / totalAnswers * 100) : 0,
+  }));
+  const secSubs = SEC_SUB.map(s => ({
+    key: s.key, label: s.key === 'boundaries' ? 'Boundaries / punctuation' : s.key === 'sva' ? 'SVA + verb forms' : s.key === 'modifiers' ? 'Modifiers / pronouns' : 'Mixed',
+    count: (subBuckets.sec && subBuckets.sec[s.key]) || 0,
+  }));
+  const mathSubs = MATH_WEAK_SUB.map(s => ({
+    key: s.key, label: s.test ? s.key : s.key,
+    count: (subBuckets.math_weak && subBuckets.math_weak[s.key]) || 0,
+  }));
+  res.json({
+    days, totalAnswers, answerSeconds, sprintSeconds, totalSeconds: answerSeconds + sprintSeconds,
+    byBucket, secSubs, mathSubs,
+  });
 });
 
 // JSON error handler: keep API responses as JSON even on unexpected failures.

@@ -42,6 +42,8 @@ const load = {
   ReviewSprint: () => import('./pages/ReviewSprint'),
   PracticeTest: () => import('./pages/PracticeTest'),
   Upgrade: () => import('./pages/Upgrade'),
+  MyFocus: () => import('./pages/MyFocus'),
+  MyDrills: () => import('./pages/MyDrills'),
 };
 const Dashboard = lazy(load.Dashboard);
 const Sprint = lazy(load.Sprint);
@@ -50,6 +52,8 @@ const Profile = lazy(load.Profile);
 const ReviewSprint = lazy(load.ReviewSprint);
 const PracticeTest = lazy(load.PracticeTest);
 const Upgrade = lazy(load.Upgrade);
+const MyFocus = lazy(load.MyFocus);
+const MyDrills = lazy(load.MyDrills);
 import './index.css';
 
 const useIsMobile = () => {
@@ -76,7 +80,7 @@ function AppInner() {
 
   // Task routes are focus modes: hide the mobile bottom nav so the question has
   // the full screen (and the primary action buttons never sit under the nav).
-  const focusRoute = ['/sprint', '/review', '/practice-test'].includes(location.pathname);
+  const focusRoute = ['/sprint', '/review', '/practice-test', '/my-focus'].includes(location.pathname);
 
   const setUserWithLevelCheck = (newUser) => {
     setUser(prev => {
@@ -183,6 +187,8 @@ function AppInner() {
       load.ReviewSprint();
       load.PracticeTest();
       load.Profile();
+      load.MyFocus();
+      load.MyDrills();
     });
     return () => (window.cancelIdleCallback || clearTimeout)(handle);
   }, [user?.onboarding_completed]);
@@ -230,6 +236,8 @@ function AppInner() {
             <Route path="/onboarding" element={<Onboarding user={user} setUser={setUserWithLevelCheck} />} />
             <Route path="/" element={user?.onboarding_completed ? <Dashboard user={user} isMobile={isMobile} /> : <Landing onGuest={startOnboarding} />} />
             <Route path="/sprint" element={user?.onboarding_completed ? <Sprint user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
+            <Route path="/my-focus" element={user?.onboarding_completed ? <MyFocus user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
+            <Route path="/my-drills" element={user?.onboarding_completed ? <MyDrills user={user} /> : <Navigate to="/onboarding" />} />
             <Route path="/profile" element={user?.onboarding_completed ? <Profile user={user} setUser={setUserWithLevelCheck} onSignOut={signOut} /> : <Navigate to="/onboarding" />} />
             <Route path="/review" element={user?.onboarding_completed ? <ReviewSprint user={user} setUser={setUserWithLevelCheck} /> : <Navigate to="/onboarding" />} />
             <Route path="/practice-test" element={user?.onboarding_completed ? <PracticeTest user={user} /> : <Navigate to="/onboarding" />} />
